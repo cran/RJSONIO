@@ -1,0 +1,44 @@
+<changelog xmlns:r="http://www.r-project.org"
+	   xmlns:omg="http://www.omegahat.org"
+           xmlns:env="http://www.shell.org">
+<omg:pkg>RJSONIO</omg:pkg>
+
+<version num="0.3-1">
+Convert factors to character vectors in <r:func>toJSON</r:func> and then serialize.
+</version>
+
+<version num="0.2-4">
+<change>
+Handles UTF-8 content  as input. We convert the text to raw and then integer
+values.
+</change>
+</version>
+
+<version num="0.2-3">
+<change>
+(Minor) Change to the C code to make it compile on Windows.
+</change>
+</version>
+
+<version num="0.2-2">
+<change>
+named atomic/primitive vectors serialized as associative arrays rather
+than simple arrays.
+</change>
+</version>
+
+<version num="0.2-1">
+<change>
+names on R objects from associative arrays from JSON were in reverse order.
+</change>
+</version>
+
+<version num="0.2-0">
+<change>
+Scalar, by default, values are represented in JSON as scalars and not
+arrays of length 1.  One can control this via the
+<r:arg>container</r:arg> parameter in <r:func>toJSON</r:func>.
+</change>
+</version>
+
+</changelog>

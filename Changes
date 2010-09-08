@@ -1,0 +1,41 @@
+
+RJSONIO
+
+Version 0.3-0
+
+   * Added facility to basicJSONHandler() to avoid simplifying lists into vectors.
+     Thanks to Kevin Coombes for bring the issue to my attention.
+
+Version 0.2-4
+
+  *  Handles UTF-8 content  as input. We convert the text to raw and then integer
+values.
+
+
+
+Version 0.2-3
+
+  *  (Minor) Change to the C code to make it compile on Windows.
+
+
+
+Version 0.2-2
+
+  *  named atomic/primitive vectors serialized as associative arrays rather
+than simple arrays.
+
+
+
+Version 0.2-1
+
+  *  names on R objects from associative arrays from JSON were in reverse order.
+
+
+
+Version 0.2-0
+
+  *  Scalar, by default, values are represented in JSON as scalars and not
+arrays of length 1.  One can control this via the
+container parameter in toJSON().
+
+
