@@ -3,6 +3,31 @@
            xmlns:env="http://www.shell.org">
 <omg:pkg>RJSONIO</omg:pkg>
 
+<version num="0.4-0">
+<change>
+<r:func>fromJSON</r:func> now uses libjson for the native parsing
+and a C routine to transform the resulting tree into R.
+This leads to a considerable speedup in parsing documents,
+approximately a factor of 200 over the customizable, event
+driven mechanism in earlier versions and still available 
+in this package via the <r:func>basicJSONHandler</r:func>
+function and <r:func>fromJSON</r:func>.
+</change>
+</version>
+
+<version num="0.3-4">
+<change>
+Refinement of handling large integers that do not fit into a 4 byte int.
+Tested on Windows.
+</change>
+</version>
+
+<version num="0.3-3">
+<change>
+Handle large integers that do not fit into a 4 byte int. Return as numeric values.
+</change>
+</version>
+
 <version num="0.3-1">
 Convert factors to character vectors in <r:func>toJSON</r:func> and then serialize.
 </version>

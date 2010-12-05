@@ -1,8 +1,13 @@
 \name{fromJSON}
 \alias{fromJSON}
-\alias{fromJSON,character-method}
-\alias{fromJSON,connection-method}
-\alias{fromJSON,AsIs-method}
+\alias{fromJSON,character,ANY-method}
+\alias{fromJSON,connection,ANY-method}
+\alias{fromJSON,AsIs,ANY-method}
+\alias{fromJSON,AsIs,JSONParserHandler-method}
+\alias{fromJSON,AsIs,NULL-method}
+\alias{fromJSON,AsIs,function-method}
+\alias{fromJSON,AsIs,NativeSymbolInfo-method}
+
 \title{Convert JSON content to R objects}
 \description{
   This function and its methods read content in JSON format
@@ -14,7 +19,7 @@
   character,  and named lists).
 }
 \usage{
-fromJSON(content, handler = basicJSONHandler(default.size),
+fromJSON(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE,
            asText = isContent(content), data = NULL, ...)
 }
@@ -26,6 +31,9 @@ fromJSON(content, handler = basicJSONHandler(default.size),
    }
    \item{handler}{an R object that is responsible for processing
      each individual token/element within the JSON content.
+     By default, this is \code{NULL} and we use the fast libjson parsing approach.
+     Unless you want to customize the processing of the nodes in the tree, use
+     \code{NULL}.
      This can be an R function, a list of functions with class
      \code{"JSONParserHandler"} having  \code{update} and \code{value}
      elements, or the address of a native (C) routine.

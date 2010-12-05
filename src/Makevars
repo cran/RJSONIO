@@ -1,0 +1,5 @@
+LIBJSON_DIR=libjson
+PKG_CPPFLAGS=-I$(LIBJSON_DIR)  -I$(LIBJSON_DIR)/Source
+
+
+

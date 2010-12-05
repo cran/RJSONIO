@@ -3,6 +3,11 @@ setOldClass(c("textConnection", "connection"))
 setOldClass(c("file", "connection"))
 setOldClass(c("pipe", "connection"))
 setOldClass("AsIs")
+setOldClass("Filename")
+setOldClass("FileContent")
+setOldClass("JSONParserHandler")
+setOldClass("NativeSymbolInfo")
+setOldClass("NativeSymbol")
 
 isContent = 
 function(content)
@@ -11,46 +16,85 @@ function(content)
 }
 
 setGeneric("fromJSON",
-            function(content, handler = basicJSONHandler(default.size), default.size = 100, depth = 150L,
+            function(content, handler = NULL, default.size = 100, depth = 150L,
                       allowComments = TRUE,  asText = isContent(content),
                        data = NULL, ...)
                   standardGeneric("fromJSON"))
 
+setMethod("fromJSON", c("AsIs", handler = "NULL"),
+function(content,  handler = NULL, default.size = 100, depth = 150L,
+	 allowComments = TRUE,  asText = isContent(content),
+            data = NULL, ...)
+{
+  .Call("R_fromJSON", content, NULL)
+})
+
 setMethod("fromJSON", "AsIs",
-function(content, handler = basicJSONHandler(default.size), default.size = 100,
+function(content, handler = NULL, default.size = 100,
          depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxChar = c(0L, nchar(content)), ...)  
 {
    fromJSON(as.character(content), handler, default.size, depth, allowComments, asText = TRUE, data, maxChar)  
 })
 
-setMethod("fromJSON", "character",
-function(content, handler = basicJSONHandler(default.size),
+
+
+setMethod("fromJSON", c("character"),
+function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxChar = c(0L, nchar(content)), ...)  
 {
-  if(!asText)
-    content = suppressWarnings(paste(readLines(content), collapse = "\n"))
-
-  content = substring(content, maxChar[1], maxChar[2])
-  
-  handlerFun = inherits(handler, "JSONParserHandler")
-  if(handlerFun) {
-    fun = handler$update
+  if(!asText) {
+    content = I(suppressWarnings(paste(readLines(content), collapse = "\n")))
+    maxChar = c(0L, nchar(content))
   } else
-    fun = handler
+    content = I(content)
 
-  if(inherits(handler, "NativeSymbolInfo"))
-    handler = handler$address
+  fromJSON(content, handler, default.size, depth, allowComments, asText = FALSE, data, maxChar, ...)
+})
+
+  
+setMethod("fromJSON", c("AsIs", "JSONParserHandler"),
+function(content, handler = NULL,
+          default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
+            data = NULL, maxChar = c(0L, nchar(content)), ...)  
+{
+  fromJSON(content, handler$update, depth = depth, allowComments = allowComments, maxChar = maxChar)
+  handler$value()
+})
+
+setMethod("fromJSON", c("AsIs", "function"),
+function(content, handler = NULL,
+          default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
+            data = NULL, maxChar = c(0L, nchar(content)), ...)  
+{
+  oldFromJSON(content, handler, depth = depth, allowComments = allowComments, maxChar = maxChar)
+})
+
+setMethod("fromJSON", c("AsIs", "NativeSymbolInfo"),
+function(content, handler = NULL,
+          default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
+            data = NULL, maxChar = c(0L, nchar(content)), ...)  
+{
+  oldFromJSON(content, handler$address, depth = depth, allowComments = allowComments, data = data, maxChar = maxChar)
+})
+
+oldFromJSON = 
+function(content, handler = NULL,
+          default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
+            data = NULL, maxChar = c(0L, nchar(content)), ...)  
+{
 
   if(inherits(handler, "NativeSymbol")) {
      data = list(handler, data)
      fun = NULL
-   }
+  } else
+     fun = handler
 
    # Would like to allow the caller specify maxChar and not override it here.
    # But the conversion to raw might yield a vector longer than the number of 
    # characters in x.
+  content = substring(content, maxChar[1], maxChar[2])
   cntnt = as.integer(charToRaw(content))
   maxChar = c(0L, length(cntnt))
     
@@ -59,18 +103,25 @@ function(content, handler = basicJSONHandler(default.size),
 
   if(inherits(handler, "NativeSymbol"))
     data[[2]]
-  else if(handlerFun) {
-    handler$value()
-  } else
+  else
     ans
+}
+
+setMethod("fromJSON", "connection",
+function(content, handler = NULL, default.size = 100,
+         depth = 150L, allowComments = TRUE, asText = isContent(content),
+            data = NULL, maxNumLines = -1L, ...)  
+{
+  txt = paste(readLines(content, maxNumLines), collapse = "")
+  fromJSON(I(txt), handler, default.size, depth, allowComments, asText = TRUE, data = data, maxNumLines = maxNumLines, ...)
 })
 
 
-
+if(FALSE) 
 setMethod("fromJSON", "connection",
     # This will be changed so that the code that passes content to the JSON parser
     # calls   readLines(, n = numLines) on the connection
-function(content, handler = basicJSONHandler(default.size), default.size = 100,
+function(content, handler = NULL, default.size = 100,
          depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxNumLines = -1L, ...)  
 {
@@ -130,6 +181,7 @@ basicJSONHandler =
   #
 function(default.size = 100, simplify = FALSE)  # currently ignored.
 {
+
    stack = NULL
    cur = NULL
    numKeys = 0

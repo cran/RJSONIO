@@ -4,6 +4,10 @@ export(toJSON)
 exportMethods(toJSON)
 
 export(fromJSON)
+exportMethods(fromJSON)
 exportPattern("^JSON_T")
 export(asJSVars)
+
+export(basicJSONHandler)
+
 

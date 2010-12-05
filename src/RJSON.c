@@ -117,8 +117,6 @@ R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *pa
     const char *input;
     int *ivals = NULL;
     unsigned int count = 0, len;
-    ConversionResult status;
-
 
     int next_char;
 
@@ -269,8 +267,8 @@ convertJSONValueToR(int type, const struct JSON_value_struct *value, cetype_t en
     SEXP ans = R_NilValue;
     switch(type) {
 
-      case JSON_T_INTEGER:
-          ans = ScalarInteger(value->vu.integer_value);
+      case JSON_T_INTEGER: 
+          ans = ScalarInteger((int) ((long) value->vu.integer_value));
 	break;
       case JSON_T_FLOAT:
           ans = ScalarReal(value->vu.float_value);
@@ -303,6 +301,13 @@ R_json_testNativeCallback(void* ctx, int type, const struct JSON_value_struct* v
     fprintf(stderr, "%d (ctx = %p, value = %p)\n", type, ctx, value);
     return(1);
 }
+
+int
+R_json_degenerateNativeCallback(void* ctx, int type, const struct JSON_value_struct* value)
+{
+    return(1);
+}
+
 
 /*
   A callback that handles integers (and only integers) 

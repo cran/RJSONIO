@@ -62,6 +62,7 @@ SOFTWARE.
 #include "JSON_parser.h"
 #include "ConvertUTF.h"
 
+
 #if _MSC_VER >= 1400 /* Visual Studio 2005 and up */
 #	pragma warning(disable:4996) // unsecure sscanf
 #endif
@@ -455,6 +456,7 @@ static void grow_parse_buffer(JSON_parser jc)
 
 static int parse_parse_buffer(JSON_parser jc)
 {
+int ok;
     if (jc->callback) {
         JSON_value value, *arg = NULL;
         
@@ -477,10 +479,17 @@ static int parse_parse_buffer(JSON_parser jc)
                         sscanf(jc->parse_buffer, DoubleScanFormat, &value.vu.float_value);
                     }
                     break;
-                case JSON_T_INTEGER:
+                case JSON_T_INTEGER: {
+                    double tmp;
                     arg = &value;
-                    sscanf(jc->parse_buffer, JSON_PARSER_INTEGER_SSCANF_TOKEN, &value.vu.integer_value);
+                    ok = sscanf(jc->parse_buffer, "%lf", &tmp);
+	            if(tmp > MAX_INT || tmp < - MAX_INT) {
+                       jc->type = JSON_T_FLOAT;
+	               value.vu.float_value = tmp;
+	            } else
+	               value.vu.integer_value = tmp;
                     break;
+                }
                 case JSON_T_STRING:
                     arg = &value;
                     value.vu.str.value = jc->parse_buffer;
