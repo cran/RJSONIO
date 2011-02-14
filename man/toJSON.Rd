@@ -14,14 +14,30 @@
 \alias{toJSON,list-method}
 \alias{toJSON,NULL-method}
 \alias{toJSON,factor-method}
+\alias{toJSON,AsIs-method}
+
+\alias{emptyNamedList}
 
 \title{Convert an R object to a string in Javascript Object Notation}
 \description{
   This function and its methods convert an R object into a string
-   that represents the object in Javascript Object Notation (JSON).
+  that represents the object in Javascript Object Notation (JSON).
+
+  The different methods try to map R's vectors to JSON arrays and
+  associative arrays. There is ambiguity here as an R vector of length 1
+  can be a JSON scalar or an array with one element. When there are
+  names on the R vector, the descision is clearer.
+  We have introduced the \code{emptyNamedList} variable to identify
+  an empty list that has an empty names character vector and so
+  maps to an associative array in JSON, albeit an empty one.
+
+  Objects of class \code{AsIs} in R, i.e. that are enclosed in a call to
+  \code{I()}  are treated  as containers even if they are of length 1.
+  This allows callers to indicate the desired representation of an R "scalar"
+  as an array of length 1 in JSON
 }
 \usage{
-toJSON(x, container = length(x) > 1 || length(names(x)) > 0, ...)
+toJSON(x, container = length(x) > 1 || length(names(x)) > 0, collapse = "\n", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +48,8 @@ toJSON(x, container = length(x) > 1 || length(names(x)) > 0, ...)
   \item{container}{a logical value indicating whether to treat the
     object as a vector/container or a scalar and so represent it as an
     array or primitive in JavaScript.}
+  \item{collapse}{a string that is used as the separator when combining the individual lines of the 
+    generated JSON content}
 }
 
 \value{
@@ -70,6 +88,21 @@ toJSON(x, container = length(x) > 1 || length(names(x)) > 0, ...)
  setClass("TEMP1", representation(one = "integer", two = "TEMP"))
 
  new("TEMP1", one = 1:10, two = new("TEMP", a = 4L, xyz = c(TRUE, FALSE)))
+
+
+ toJSON(list())
+ toJSON(emptyNamedList)
+ toJSON(I(list("hi")))
+ toJSON(I("hi"))
+
+
+ x = list(list(),
+          emptyNamedList,
+          I(list("hi")),
+          "hi",
+          I("hi"))
+ toJSON(x)
+
 }
 
 \keyword{IO}

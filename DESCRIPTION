@@ -1,5 +1,5 @@
 Package: RJSONIO
-Version: 0.4-1
+Version: 0.5-0
 Title: Serialize R objects to JSON, JavaScript Object Notation
 Description: This is a package that allows conversion to and from data
         in Javascript object notation (JSON) format. This allows R
@@ -22,6 +22,6 @@ License: BSD
 Depends: methods
 Author: Duncan Temple Lang
 Maintainer: Duncan Temple Lang <duncan@r-project.org>
-Packaged: 2010-12-05 14:43:29 UTC; duncan
+Packaged: 2011-02-14 21:17:47 UTC; duncan
 Repository: CRAN
-Date/Publication: 2010-12-06 15:07:09
+Date/Publication: 2011-02-22 08:40:55

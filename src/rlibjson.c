@@ -1,20 +1,22 @@
 #include <libjson.h>
 #include <Rdefines.h>
 
-SEXP processJSONNode(JSONNODE *node);
+SEXP processJSONNode(JSONNODE *node, int parentType);
 
 SEXP
 R_fromJSON(SEXP r_str)
 {
     const char * str = CHAR(STRING_ELT(r_str, 0));
     JSONNODE *node;
+    SEXP ans;
     node = json_parse(str);
-
-    return(processJSONNode(node));
+    ans = processJSONNode(node, -1);
+    json_delete(node);
+    return(ans);
 }
 
 SEXP 
-processJSONNode(JSONNODE *n)
+processJSONNode(JSONNODE *n, int parentType)
 {
     if (n == NULL){
         PROBLEM "invalid JSON input"
@@ -25,6 +27,7 @@ processJSONNode(JSONNODE *n)
     int len = 0, ctr = 0;
     int nprotect = 0;
     len = json_size(n);
+    char startType = 255;
     
 
 
@@ -36,14 +39,17 @@ processJSONNode(JSONNODE *n)
 
 	i = json_at(n, ctr);
 
-	json_char *node_name = json_name(i);
-
         if (i == NULL){
             PROBLEM "Invalid JSON Node"
 		ERROR;
         }
+
+	json_char *node_name = json_name(i);
 	
 	char type = json_type(i);
+	if(startType == 255)
+	    startType = type;
+
 	SEXP el;
 	switch(type) {
    	   case JSON_NULL:
@@ -51,7 +57,7 @@ processJSONNode(JSONNODE *n)
 	       break;
    	   case JSON_ARRAY:
   	   case JSON_NODE:
-	       el = processJSONNode(i);
+	       el = processJSONNode(i, type);
 	       break;
  	   case JSON_NUMBER:
 	       el = ScalarReal(json_as_float(i));
@@ -61,7 +67,13 @@ processJSONNode(JSONNODE *n)
 	       el = ScalarLogical(json_as_bool(i));
 	       break;
  	   case JSON_STRING:
-	       el = ScalarString(mkChar(json_as_string(i)));
+	   {
+//XXX Garbage collection
+	       char *tmp = json_as_string(i);
+                   // do we need to strdup here?
+	       el = ScalarString(mkChar(tmp));
+	       json_free(tmp);
+	   }
 	       break;
 	}
 	SET_VECTOR_ELT(ans, ctr, el);
@@ -71,16 +83,31 @@ processJSONNode(JSONNODE *n)
 	        PROTECT(names = NEW_CHARACTER(len)); nprotect++;
 	    }
 	    SET_STRING_ELT(names, ctr, mkChar(node_name));
-	    json_free(node_name);
 	}
+	json_free(node_name);
 	ctr++;
     }
-    if(homogeneous == len) {
-	SEXP tmp;
-        PROTECT(tmp = NEW_NUMERIC(len)); nprotect++;
-	for(ctr = 0; ctr < len; ctr++)
-	    REAL(tmp)[ctr] = REAL(VECTOR_ELT(ans, ctr))[0];
-	ans = tmp;
+
+    /* If we have an empty object, we try to make it into a form equivalent to emptyNamedList
+       if it is a {} or an AsIs object if an empty array. */
+    if(len == 0 && (parentType == -1 || parentType == JSON_ARRAY || parentType == JSON_NODE)) {
+        if(parentType == -1) 
+            parentType = startType;
+
+        if(parentType == JSON_NODE)
+	   SET_NAMES(ans, NEW_CHARACTER(0));
+        else  {
+           SET_CLASS(ans, ScalarString(mkChar("AsIs")));
+	}
+
+    } else {
+         if(homogeneous == len) {
+      	SEXP tmp;
+             PROTECT(tmp = NEW_NUMERIC(len)); nprotect++;
+      	for(ctr = 0; ctr < len; ctr++)
+      	    REAL(tmp)[ctr] = REAL(VECTOR_ELT(ans, ctr))[0];
+      	ans = tmp;
+         }
     }
        
 

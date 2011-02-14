@@ -205,7 +205,10 @@ function(default.size = 100, simplify = FALSE)  # currently ignored.
       } else if(type == JSON_T_ARRAY_END || type == JSON_T_OBJECT_END) {
          tmp = trimCur()
 
-         obj = if(type == JSON_T_ARRAY_END && simplify) condense(tmp) else tmp
+         obj = if(type == JSON_T_ARRAY_END && simplify)
+                 condense(tmp)
+               else
+                 tmp
          if(type == JSON_T_OBJECT_END) {
             i = seq(along = obj)
             names(obj) = rev(curKey[i]) # rev(curKey[i])
@@ -249,8 +252,9 @@ function(default.size = 100, simplify = FALSE)  # currently ignored.
      function(simplify = TRUE) {
        if(simplify && length(cur) == 1)
           cur[[1]]
-       else
+       else {
           cur
+       }
      }
 
    structure(list(update = update,

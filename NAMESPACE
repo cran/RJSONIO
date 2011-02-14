@@ -3,6 +3,8 @@ useDynLib(RJSONIO)
 export(toJSON)
 exportMethods(toJSON)
 
+export(emptyNamedList)
+
 export(fromJSON)
 exportMethods(fromJSON)
 exportPattern("^JSON_T")

@@ -1,6 +1,24 @@
 
 RJSONIO
 
+Version 0.5-0
+
+  *  Enhancements to disambiguate serializing empty lists from as empty arrays or associative 
+     arrays.  See also emptyNamedList to map to {}. 
+
+  *  Method for identifying an R scalar that should be mapped to a JSON array via the 
+     AsIs class and I() function.
+
+  *  toJSON() honors these also ensuring transformation from JSON to R to JSON
+     preserves the same structure.
+
+     Both changes thanks to suggestions by Keith Bonawitz.
+
+Version 0.4-2
+
+  *  Fixed significant memory leaks found by Keith Bonawitz
+
+
 Version 0.4-1
 
   *  Tidied up C++ code from libjsonio to avoid a warning about no
