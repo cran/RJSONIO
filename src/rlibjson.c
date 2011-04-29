@@ -1,4 +1,4 @@
-#include <libjson.h>
+#include <libjson/libjson.h>
 #include <Rdefines.h>
 
 SEXP processJSONNode(JSONNODE *node, int parentType);
@@ -10,7 +10,7 @@ R_fromJSON(SEXP r_str)
     JSONNODE *node;
     SEXP ans;
     node = json_parse(str);
-    ans = processJSONNode(node, -1);
+    ans = processJSONNode(node, json_type(node));
     json_delete(node);
     return(ans);
 }
@@ -27,7 +27,7 @@ processJSONNode(JSONNODE *n, int parentType)
     int len = 0, ctr = 0;
     int nprotect = 0;
     len = json_size(n);
-    char startType = 255;
+    char startType = parentType; // was 127
     
 
 
@@ -47,7 +47,7 @@ processJSONNode(JSONNODE *n, int parentType)
 	json_char *node_name = json_name(i);
 	
 	char type = json_type(i);
-	if(startType == 255)
+	if(startType == 127)
 	    startType = type;
 
 	SEXP el;
@@ -75,21 +75,27 @@ processJSONNode(JSONNODE *n, int parentType)
 	       json_free(tmp);
 	   }
 	       break;
+	default:
+	    PROBLEM "shouldn't be here"
+		WARN;
+	    el = R_NilValue;
+	    break;
 	}
 	SET_VECTOR_ELT(ans, ctr, el);
 
-	if(node_name && node_name[0]) {
+	if(parentType == JSON_NODE || (node_name && node_name[0])) {
 	    if(names == NULL) {
 	        PROTECT(names = NEW_CHARACTER(len)); nprotect++;
 	    }
-	    SET_STRING_ELT(names, ctr, mkChar(node_name));
+	    if(node_name && node_name[0])
+		SET_STRING_ELT(names, ctr, mkChar(node_name));
 	}
 	json_free(node_name);
 	ctr++;
     }
 
     /* If we have an empty object, we try to make it into a form equivalent to emptyNamedList
-       if it is a {} or an AsIs object if an empty array. */
+       if it is a {},  or as an AsIs object in R if an empty array. */
     if(len == 0 && (parentType == -1 || parentType == JSON_ARRAY || parentType == JSON_NODE)) {
         if(parentType == -1) 
             parentType = startType;
@@ -97,7 +103,7 @@ processJSONNode(JSONNODE *n, int parentType)
         if(parentType == JSON_NODE)
 	   SET_NAMES(ans, NEW_CHARACTER(0));
         else  {
-           SET_CLASS(ans, ScalarString(mkChar("AsIs")));
+	   SET_CLASS(ans, ScalarString(mkChar("AsIs")));
 	}
 
     } else {
@@ -116,4 +122,16 @@ processJSONNode(JSONNODE *n, int parentType)
 	
     UNPROTECT(nprotect);
     return(ans);
+}
+
+
+SEXP
+R_libjson_version()
+{
+    char buf[20];
+    sprintf(buf, "%d.%d-%d", (int) __LIBJSON_MAJOR__,
+    	                     (int) __LIBJSON_MINOR__,
+	                     (int) __LIBJSON_PATCH__);
+
+    return(ScalarString(mkChar(buf)));
 }

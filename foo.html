@@ -12,27 +12,6 @@
 <h2>Version 0.6-0</h2>
 <dl>
 <dt><li>
-Round-tripping from JSON to R and back behaves a lot more consistently.
-Thanks to Kevin Coombes for the examples/tests.
-Next, we will add functionality to customize serialization of <b xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.org" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org"><a href="library/base/html/NA.html">NA</a></b>.
-</li></dt>
-<dd></dd>
-<dt><li>
-Change to the default value of <i xmlns:rs="http://www.omegahat.org/RS" xmlns:s="http://cm.bell-labs.com/stat/S4">container</i> of <a href="http://www.omegahat.org/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> so that 
-this is  <i xmlns:rs="http://www.omegahat.org/RS" xmlns:s="http://cm.bell-labs.com/stat/S4"><code>TRUE</code></i> when at the top-level or initial call to <a href="http://www.omegahat.org/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a>.
-</li></dt>
-<dd></dd>
-<dt><li>
-We now know the type of the top-most node so can correctly handle empty 
-associative arrays, etc.
-</li></dt>
-<dd></dd>
-</dl>
-<hr width="50%">
-
-<h2>Version 0.6-0</h2>
-<dl>
-<dt><li>
  Updated the libjson source code in the package to libjson 7.0.1.
      This removes a bug in parsing numbers of the form 3.14E4. Found
      by Jeroen Ooms.

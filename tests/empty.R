@@ -6,3 +6,4 @@ str1 = toJSON(v)
 
 stopifnot( any( duplicated( gsub("[[:space:]]", "", c(str, str1)))))
 
+

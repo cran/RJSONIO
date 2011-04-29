@@ -8,6 +8,14 @@
     #include <climits>  //to check int value
 #endif
 
+#ifdef JSON_LESS_MEMORY
+    #ifdef __GNUC__
+	   #pragma pack(push, 1)
+    #elif _MSC_VER
+	   #pragma pack(push, internalJSONNode_pack, 1)
+    #endif
+#endif
+
 /*
     This class is the work horse of libjson, it handles all of the
     functinality of JSONNode.  This object is reference counted for
@@ -20,7 +28,7 @@
 class JSONNode;  //forward declaration
 
 #ifndef JSON_LIBRARY
-    #define DECL_SET_INTEGER(type) void Set(type); void Set(unsigned type);
+    #define DECL_SET_INTEGER(type) void Set(type) json_nothrow json_write_priority; void Set(unsigned type) json_nothrow json_write_priority;
 #endif
 
 #ifdef JSON_MUTEX_CALLBACKS
@@ -29,7 +37,7 @@ class JSONNode;  //forward declaration
     #define initializeMutex(x)
 #endif
 
-#ifdef JSON_PREPARSE
+#if defined(JSON_PREPARSE) || !defined(JSON_READ_PRIORITY) 
     #define SetFetched(b) (void)0
     #define Fetch() (void)0
     #define initializeFetch(x)
@@ -56,70 +64,86 @@ class JSONNode;  //forward declaration
     #define decinternalAllocCount() (void)0
 #endif
 
-#ifdef JSON_VALIDATE
-    #define initializeValid(x) ,isValid(x)
+#ifdef JSON_LESS_MEMORY
+    #define CHILDREN _value.Children
+    #define DELETE_CHILDREN()\
+	   if (isContainer()){\
+		  jsonChildren::deleteChildren(CHILDREN);\
+	   }
+    #define CHILDREN_TO_NULL() (void)0
+    #define initializeChildren(x)
 #else
-    #define initializeValid(x)
+    #define CHILDREN Children
+    #define DELETE_CHILDREN()\
+	   if (CHILDREN != 0) jsonChildren::deleteChildren(CHILDREN);
+    #define CHILDREN_TO_NULL() CHILDREN = 0
+    #define makeNotContainer() (void)0
+    #define makeContainer() if (!CHILDREN) CHILDREN = jsonChildren::newChildren()
+    #define initializeChildren(x) ,CHILDREN(x)
 #endif
 
 class internalJSONNode {
 public:
-    internalJSONNode(char mytype = JSON_NULL);
-    internalJSONNode(const json_string & unparsed);
-    internalJSONNode(const json_string & name_t, const json_string & value_t);
-    internalJSONNode(const internalJSONNode & orig);  
-    internalJSONNode & operator = (const internalJSONNode &);
-    ~internalJSONNode(void);
+    internalJSONNode(char mytype = JSON_NULL) json_nothrow json_hot;
+    #ifdef JSON_READ_PRIORITY
+	   internalJSONNode(const json_string & unparsed) json_nothrow json_hot;
+	   internalJSONNode(const json_string & name_t, const json_string & value_t) json_nothrow json_read_priority;
+    #endif
+    internalJSONNode(const internalJSONNode & orig) json_nothrow json_hot;  
+    internalJSONNode & operator = (const internalJSONNode &) json_nothrow json_hot;
+    ~internalJSONNode(void) json_nothrow json_hot;
     
-    static internalJSONNode * newInternal(char mytype = JSON_NULL);
-    static internalJSONNode * newInternal(const json_string & unparsed);
-    static internalJSONNode * newInternal(const json_string & name_t, const json_string & value_t);
-    static internalJSONNode * newInternal(const internalJSONNode & orig);  //not copyable, only by this class
-    static void deleteInternal(internalJSONNode * ptr);
+    static internalJSONNode * newInternal(char mytype = JSON_NULL) json_hot;
+    #ifdef JSON_READ_PRIORITY
+	   static internalJSONNode * newInternal(const json_string & unparsed) json_hot;
+	   static internalJSONNode * newInternal(const json_string & name_t, const json_string & value_t) json_hot;
+    #endif
+    static internalJSONNode * newInternal(const internalJSONNode & orig) json_hot;  //not copyable, only by this class
+    static void deleteInternal(internalJSONNode * ptr) json_nothrow json_hot;
 
-    json_index_t size(void) const;
-    bool empty(void) const;
-    unsigned char type(void) const;
+    json_index_t size(void) const json_nothrow json_read_priority;
+    bool empty(void) const json_nothrow;
+    unsigned char type(void) const json_nothrow json_read_priority;
     
-    json_string name(void) const;
-    void setname(const json_string & newname);
+    json_string name(void) const json_nothrow json_read_priority;
+    void setname(const json_string & newname) json_nothrow json_write_priority;
     #ifdef JSON_COMMENTS
-	   void setcomment(const json_string & comment);
-	   json_string getcomment(void) const;
+	   void setcomment(const json_string & comment) json_nothrow;
+	   json_string getcomment(void) const json_nothrow;
     #endif
-    json_string as_string(void) const;
-    long as_int(void) const;
-    json_number as_float(void) const;
-    bool as_bool(void) const;
+    json_string as_string(void) const json_nothrow json_read_priority;
+    long as_int(void) const json_nothrow json_read_priority;
+    json_number as_float(void) const json_nothrow json_read_priority;
+    bool as_bool(void) const json_nothrow json_read_priority;
  
-    #ifndef JSON_PREPARSE
-	   void preparse(void);
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
+	   void preparse(void) json_nothrow;
     #endif
     
     #ifdef JSON_LIBRARY
-	   void push_back(JSONNode * node);
+	   void push_back(JSONNode * node) json_nothrow;
     #else
-	   void push_back(const JSONNode & node);
+	   void push_back(const JSONNode & node) json_nothrow;
     #endif
-    void reserve(json_index_t siz);
-    void push_front(const JSONNode & node);
-    JSONNode * pop_back(json_index_t pos);
-    JSONNode * pop_back(const json_string & name_t);
+    void reserve(json_index_t siz) json_nothrow;
+    void push_front(const JSONNode & node) json_nothrow;
+    JSONNode * pop_back(json_index_t pos) json_nothrow;
+    JSONNode * pop_back(const json_string & name_t) json_nothrow;
     #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-	   JSONNode * pop_back_nocase(const json_string & name_t);
+	   JSONNode * pop_back_nocase(const json_string & name_t) json_nothrow;
     #endif
     
-    JSONNode * at(json_index_t pos);
+    JSONNode * at(json_index_t pos) json_nothrow;
     //These return ** because pop_back needs them
-    JSONNode ** at(const json_string & name_t);
+    JSONNode ** at(const json_string & name_t) json_nothrow;
     #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-	   JSONNode ** at_nocase(const json_string & name_t);
+	   JSONNode ** at_nocase(const json_string & name_t) json_nothrow;
     #endif
     
-    void Set(const json_string & val);
+    void Set(const json_string & val) json_nothrow json_write_priority;
     #ifdef JSON_LIBRARY
-	   void Set(json_number val);
-	   void Set(long val);
+	   void Set(json_number val) json_nothrow json_write_priority;
+	   void Set(long val) json_nothrow json_write_priority;
     #else
 	   DECL_SET_INTEGER(char)
 	   DECL_SET_INTEGER(short)
@@ -129,110 +153,152 @@ public:
 		  DECL_SET_INTEGER(long long)
 	   #endif
 	   
-	   void Set(float val);
-	   void Set(double val);
+	   void Set(float val) json_nothrow json_write_priority;
+	   void Set(double val) json_nothrow json_write_priority;
     #endif
-    void Set(bool val);
+    void Set(bool val) json_nothrow;
   
-    bool IsEqualTo(const json_string & val)const ;
-    bool IsEqualTo(bool val) const;
-    bool IsEqualTo(const internalJSONNode * val) const;  
+    bool IsEqualTo(const json_string & val) const json_nothrow;
+    bool IsEqualTo(bool val) const json_nothrow;
+    bool IsEqualTo(const internalJSONNode * val) const json_nothrow;  
     
     template<typename T>
-    bool IsEqualToNum(T val) const;
+    bool IsEqualToNum(T val) const json_nothrow;
 
-    internalJSONNode * incRef(void);
+    internalJSONNode * incRef(void) json_nothrow;
     #ifdef JSON_REF_COUNT
-	   void decRef(void);
-	   bool hasNoReferences(void);
+	   void decRef(void) json_nothrow json_hot;
+	   bool hasNoReferences(void) json_nothrow json_hot;
     #endif
-    internalJSONNode * makeUnique(void);
+    internalJSONNode * makeUnique(void) json_nothrow json_hot;
     
-    JSONNode ** begin(void) const;
-    JSONNode ** end(void) const;
-    #ifdef JSON_REF_COUNT
-	   size_t refcount BITS(20);
-    #endif
-    bool Fetched(void) const;
+    JSONNode ** begin(void) const json_nothrow;
+    JSONNode ** end(void) const json_nothrow;
+    bool Fetched(void) const json_nothrow json_hot;
     #ifdef JSON_MUTEX_CALLBACKS
-	   void * mylock;
-	   void _set_mutex(void * mutex, bool unset = true);
-	   void _unset_mutex(void);
+	   void _set_mutex(void * mutex, bool unset = true) json_nothrow json_cold;
+	   void _unset_mutex(void) json_nothrow json_cold;
     #endif
     #ifdef JSON_UNIT_TEST
-	   static void incinternalAllocCount(void);
-	   static void decinternalAllocCount(void);
+	   static void incinternalAllocCount(void) json_nothrow;
+	   static void decinternalAllocCount(void) json_nothrow;
     #endif
     
-    #ifdef JSON_WRITER
-	   json_string WriteName(bool formatted, bool arrayChild) const;
-	   json_string WriteChildren(unsigned int indent);
-	   json_string WriteComment(unsigned int indent) const;
-	   json_string Write(unsigned int indent, bool arrayChild);
+    #ifdef JSON_WRITE_PRIORITY
+	   json_string WriteName(bool formatted, bool arrayChild) const json_nothrow json_write_priority;
+	   json_string WriteChildren(unsigned int indent) json_nothrow json_write_priority;
+	   json_string WriteComment(unsigned int indent) const json_nothrow json_write_priority;
+	   json_string Write(unsigned int indent, bool arrayChild) json_nothrow json_write_priority;
     #endif
+    
+    
+    inline bool isContainer(void) const json_nothrow {
+	   return (_type == JSON_NODE || _type == JSON_ARRAY);
+    }
+    inline bool isNotContainer(void) const json_nothrow {
+	   return (_type != JSON_NODE && _type != JSON_ARRAY);
+    }
+    
+    #ifdef JSON_LESS_MEMORY
+	   inline void makeNotContainer(void){
+		  if (isContainer()){
+			 jsonChildren::deleteChildren(CHILDREN);
+		  }
+	   }
+	   inline void makeContainer(void){
+		  if (isNotContainer()){
+			 CHILDREN = jsonChildren::newChildren();
+		  }
+	   }
+    #endif
+    
+    void Nullify(void) const json_nothrow;  
+    
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
+	   void SetFetched(bool val) const json_nothrow json_hot;
+	   void Fetch(void) const json_nothrow json_hot;  //it's const because it doesn't change the VALUE of the function
+    #endif
+	   
+    #ifdef JSON_READ_PRIORITY
+	   void FetchString(void) const json_nothrow json_read_priority;
+	   void FetchNode(void) const json_nothrow json_read_priority; 
+	   void FetchArray(void) const json_nothrow json_read_priority;
+    #endif
+    void FetchNumber(void) const json_nothrow json_read_priority;
+    
+    #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
+	   static bool AreEqualNoCase(const json_char * ch_one, const json_char * ch_two) json_nothrow json_read_priority;
+    #endif
+    
+    inline void clearname(void) json_nothrow {
+	   clearString(_name);
+    }
+    
     #ifdef JSON_DEBUG
 	   #ifndef JSON_LIBRARY
-		  JSONNode Dump(size_t & totalmemory) const;
-		  JSONNode DumpMutex(void) const;
+		  JSONNode Dump(size_t & totalmemory) const json_nothrow;
+		  JSONNode DumpMutex(void) const json_nothrow;
 	   #endif
     #endif
     
-    //json parts
+    
     mutable unsigned char _type BITS(3);
+    
+    json_string _name;
     mutable bool _name_encoded BITS(1);  //must be above name due to initialization list order
-    json_string _name;	
     
     mutable json_string _string;   //these are both mutable because the string can change when it's fetched
     mutable bool _string_encoded BITS(1);
     
     //the value of the json
     union value_union_t {
-	   bool _bool;
+	   bool _bool BITS(1);
 	   json_number _number;
+	   #ifdef JSON_LESS_MEMORY
+		  jsonChildren * Children;
+	   #endif
     };
     mutable value_union_t _value; //internal structure changes depending on type
     
-    jsonChildren Children;  //container that holds all of my children
-    
-    #ifdef JSON_VALIDATE
-	   mutable bool isValid BITS(1);  //this does not need to be initialized, it's only used if it's null
-	   void Nullify(bool validation = true) const;
-	   bool validate(void);
-    #else
-	   void Nullify(void) const;
+    #ifdef JSON_MUTEX_CALLBACKS
+	   void * mylock;
     #endif
     
-    //Fetching and such
-    #ifndef JSON_PREPARSE
+    #ifdef JSON_REF_COUNT
+	   size_t refcount PACKED(20);
+    #endif
+    
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
 	   mutable bool fetched BITS(1);
-	   void SetFetched(bool val) const;
-	   void Fetch(void) const;  //it's const because it doesn't change the VALUE of the function
     #endif
-    
+	   
     #ifdef JSON_COMMENTS
 	   json_string _comment;
     #endif
-	   
-    void FetchString(void) const;
-    void FetchNode(void) const;
-    void FetchArray(void) const;
-    void FetchNumber(void) const;
-    #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-	   static bool AreEqualNoCase(const json_char * ch_one, const json_char * ch_two);
+    
+    #ifndef JSON_LESS_MEMORY
+	   jsonChildren * CHILDREN;
     #endif
 };
 
-inline internalJSONNode::internalJSONNode(char mytype) : _type(mytype), Children(), _name(), _name_encoded(), _string(), _string_encoded(), _value()
+inline internalJSONNode::internalJSONNode(char mytype) json_nothrow : _type(mytype), _name(), _name_encoded(), _string(), _string_encoded(), _value()
     initializeMutex(0)  
     initializeRefCount(1)
     initializeFetch(true)
-    initializeComment()
-    initializeValid(true){
+    initializeComment(EMPTY_JSON_STRING)
+    initializeChildren((_type == JSON_NODE || _type == JSON_ARRAY) ? jsonChildren::newChildren() : 0){
 	   
     incinternalAllocCount();
+	   
+    #ifdef JSON_LESS_MEMORY
+	   //if not less memory, its in the initialization list
+	   if (isContainer()){
+		  CHILDREN = jsonChildren::newChildren();
+	   }
+    #endif
 }
 
-inline internalJSONNode * internalJSONNode::incRef(void){
+inline internalJSONNode * internalJSONNode::incRef(void) json_nothrow {
     #ifdef JSON_REF_COUNT
 	   ++refcount;
 	   return this;
@@ -241,26 +307,27 @@ inline internalJSONNode * internalJSONNode::incRef(void){
     #endif
 }
 
-inline json_index_t internalJSONNode::size(void) const {
+inline json_index_t internalJSONNode::size(void) const json_nothrow {
+    if (isNotContainer()) return 0;
     Fetch();
-    return Children.size();
+    return CHILDREN -> size();
 }
 
-inline bool internalJSONNode::empty(void) const {
-    if (type() != JSON_NODE && type() != JSON_ARRAY) return true;
+inline bool internalJSONNode::empty(void) const json_nothrow {
+    if (isNotContainer()) return true;
     Fetch();
-    return Children.empty();
+    return CHILDREN -> empty();
 }
 
-inline unsigned char internalJSONNode::type(void) const {
+inline unsigned char internalJSONNode::type(void) const json_nothrow {
     return _type;
 }
 
-inline json_string internalJSONNode::name(void) const {
+inline json_string internalJSONNode::name(void) const json_nothrow {
     return _name;
 }
 
-inline void internalJSONNode::setname(const json_string & newname){
+inline void internalJSONNode::setname(const json_string & newname) json_nothrow {
     #ifdef JSON_LESS_MEMORY
 	   JSON_ASSERT(newname.capacity() == newname.length(), JSON_TEXT("name object too large"));
     #endif
@@ -269,24 +336,24 @@ inline void internalJSONNode::setname(const json_string & newname){
 }
 
 #ifdef JSON_COMMENTS
-    inline void internalJSONNode::setcomment(const json_string & comment){
+    inline void internalJSONNode::setcomment(const json_string & comment) json_nothrow {
 	   #ifdef JSON_LESS_MEMORY
 		  JSON_ASSERT(comment.capacity() == comment.length(), JSON_TEXT("comment object too large"));
 	   #endif
 	   _comment = comment;
     }
 
-    inline json_string internalJSONNode::getcomment(void) const {
+    inline json_string internalJSONNode::getcomment(void) const json_nothrow {
 	   return _comment;
     }
 #endif
 
-inline json_string internalJSONNode::as_string(void) const {
+inline json_string internalJSONNode::as_string(void) const json_nothrow {
     Fetch();
     return _string;
 }
 
-inline long internalJSONNode::as_int(void) const {
+inline long internalJSONNode::as_int(void) const json_nothrow {
     Fetch();
     switch(type()){
 	   case JSON_NULL:
@@ -299,11 +366,11 @@ inline long internalJSONNode::as_int(void) const {
     JSON_ASSERT(type() == JSON_NUMBER, JSON_TEXT("as_int returning undefined results"));
     JSON_ASSERT(_value._number > LONG_MIN, _string + JSON_TEXT(" is outside the lower range of long"));
     JSON_ASSERT(_value._number < LONG_MAX, _string + JSON_TEXT(" is outside the upper range of long"));
-    JSON_ASSERT(_value._number == (json_number)((int)_value._number), json_string(JSON_TEXT("as_int will truncate ")) + _string);
-    return (int)_value._number;
+    JSON_ASSERT(_value._number == (json_number)((long)_value._number), json_string(JSON_TEXT("as_int will truncate ")) + _string);
+    return (long)_value._number;
 }
 
-inline json_number internalJSONNode::as_float(void) const {
+inline json_number internalJSONNode::as_float(void) const json_nothrow {
     Fetch();
     switch(type()){
 	   case JSON_NULL:
@@ -317,7 +384,7 @@ inline json_number internalJSONNode::as_float(void) const {
     return _value._number;   
 }
 
-inline bool internalJSONNode::as_bool(void) const {
+inline bool internalJSONNode::as_bool(void) const json_nothrow {
     Fetch();
     switch(type()){
 	   case JSON_NUMBER:
@@ -329,37 +396,37 @@ inline bool internalJSONNode::as_bool(void) const {
     return _value._bool;
 }
 
-inline bool internalJSONNode::IsEqualTo(const json_string & val) const {
+inline bool internalJSONNode::IsEqualTo(const json_string & val) const json_nothrow {
     if (type() != JSON_STRING) return false;
     Fetch(); 
     return val == _string;
 }
 
-inline bool internalJSONNode::IsEqualTo(bool val) const {
+inline bool internalJSONNode::IsEqualTo(bool val) const json_nothrow {
     if (type() != JSON_BOOL) return false;
     Fetch(); 
     return val == _value._bool;
 }
 
 template<typename T>
-inline bool internalJSONNode::IsEqualToNum(T val) const {
+inline bool internalJSONNode::IsEqualToNum(T val) const json_nothrow {
     if (type() != JSON_NUMBER) return false;
     Fetch(); 
     return (json_number)val == _value._number;
 }
 
 #ifdef JSON_REF_COUNT
-    inline void internalJSONNode::decRef(void){
+    inline void internalJSONNode::decRef(void) json_nothrow {
 	   JSON_ASSERT(refcount != 0, JSON_TEXT("decRef on a 0 refcount internal"));
 	   --refcount;
     }
 
-    inline bool internalJSONNode::hasNoReferences(void){
+    inline bool internalJSONNode::hasNoReferences(void) json_nothrow {
 	   return refcount == 0;
     }
 #endif
 
-inline internalJSONNode * internalJSONNode::makeUnique(void){
+inline internalJSONNode * internalJSONNode::makeUnique(void) json_nothrow {
     #ifdef JSON_REF_COUNT
 	   if (refcount > 1){
 		  decRef();
@@ -372,47 +439,53 @@ inline internalJSONNode * internalJSONNode::makeUnique(void){
     #endif
 }
 
-#ifndef JSON_PREPARSE
-    inline void internalJSONNode::SetFetched(bool val) const {
+#if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
+    inline void internalJSONNode::SetFetched(bool val) const json_nothrow {
 	   fetched = val;
     }
 #endif
 
-inline bool internalJSONNode::Fetched(void) const {
-    #ifndef JSON_PREPARSE
+inline bool internalJSONNode::Fetched(void) const json_nothrow {
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
 	   return fetched;
     #else
 	   return true;
     #endif
 }
 
-inline JSONNode ** internalJSONNode::begin(void) const {
+inline JSONNode ** internalJSONNode::begin(void) const json_nothrow {
+    JSON_ASSERT_SAFE(isContainer(), JSON_TEXT("calling begin on non-container type"), return 0;);
     Fetch();
-    return Children.begin();
+    return CHILDREN -> begin();
 }
 
-inline JSONNode ** internalJSONNode::end(void) const {
+inline JSONNode ** internalJSONNode::end(void) const json_nothrow {
+    JSON_ASSERT_SAFE(isContainer(), JSON_TEXT("calling end on non-container type"), return 0;);
     Fetch();
-    return Children.end();
+    return CHILDREN -> end();
 }
 
-inline JSONNode * internalJSONNode::at(json_index_t pos){
+inline JSONNode * internalJSONNode::at(json_index_t pos) json_nothrow {
+    JSON_ASSERT_SAFE(isContainer(), JSON_TEXT("calling at on non-container type"), return 0;);
     Fetch();
-    return Children[pos];
+    return (*CHILDREN)[pos];
 }
 
-inline void internalJSONNode::reserve(json_index_t siz){
-    #ifndef JSON_LESS_MEMORY
-	   Fetch();
-	   Children.reserve2(siz);
-    #endif
+#if defined(JSON_LESS_MEMORY) && defined(__GNUC__)
+    inline void internalJSONNode::reserve(json_index_t __attribute__((unused)) siz) json_nothrow {
+#else
+    inline void internalJSONNode::reserve(json_index_t siz) json_nothrow {
+#endif
+    JSON_ASSERT_SAFE(isContainer(), JSON_TEXT("calling reserve on non-container type"), return;);
+    Fetch();
+    jsonChildren::reserve2(CHILDREN, siz);
 }
 
 /*
     These functions are to allow allocation to be completely controlled by the callbacks
 */
 
-inline void internalJSONNode::deleteInternal(internalJSONNode * ptr){
+inline void internalJSONNode::deleteInternal(internalJSONNode * ptr) json_nothrow {
     #ifdef JSON_MEMORY_CALLBACKS
 	   ptr -> ~internalJSONNode();
 	   libjson_free<internalJSONNode>(ptr);
@@ -421,7 +494,7 @@ inline void internalJSONNode::deleteInternal(internalJSONNode * ptr){
     #endif     
 }
 
-inline internalJSONNode * internalJSONNode::newInternal(char mytype){
+inline internalJSONNode * internalJSONNode::newInternal(char mytype) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<internalJSONNode>(1)) internalJSONNode(mytype);
     #else
@@ -429,7 +502,8 @@ inline internalJSONNode * internalJSONNode::newInternal(char mytype){
     #endif
 }
 
-inline internalJSONNode * internalJSONNode::newInternal(const json_string & unparsed){
+#ifdef JSON_READ_PRIORITY
+inline internalJSONNode * internalJSONNode::newInternal(const json_string & unparsed) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<internalJSONNode>(1)) internalJSONNode(unparsed);
     #else
@@ -437,15 +511,16 @@ inline internalJSONNode * internalJSONNode::newInternal(const json_string & unpa
     #endif   
 }
 
-inline internalJSONNode * internalJSONNode::newInternal(const json_string & name_t, const json_string & value_t){
+inline internalJSONNode * internalJSONNode::newInternal(const json_string & name_t, const json_string & value_t) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<internalJSONNode>(1)) internalJSONNode(name_t, value_t);
     #else
 	   return new internalJSONNode(name_t, value_t);
     #endif   
 }
+#endif
 
-inline internalJSONNode * internalJSONNode::newInternal(const internalJSONNode & orig){
+inline internalJSONNode * internalJSONNode::newInternal(const internalJSONNode & orig) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<internalJSONNode>(1)) internalJSONNode(orig);
     #else
@@ -453,5 +528,11 @@ inline internalJSONNode * internalJSONNode::newInternal(const internalJSONNode &
     #endif    
 }
 
-
+#ifdef JSON_LESS_MEMORY
+    #ifdef __GNUC__
+	   #pragma pack(pop)
+    #elif _MSC_VER
+	   #pragma pack(pop, internalJSONNode_pack,)
+    #endif
+#endif
 #endif

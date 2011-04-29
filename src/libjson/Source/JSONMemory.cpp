@@ -1,8 +1,8 @@
 #include "JSONMemory.h"
-#include "JSONNode.h"
 
 #ifdef JSON_MEMORY_MANAGE
-    void auto_expand::purge(void){
+    #include "JSONNode.h"
+    void auto_expand::purge(void) json_nothrow {
 	   for(std::map<void *, void *>::iterator i = mymap.begin(), en = mymap.end(); i != en; ++i){
 		  #if defined(JSON_DEBUG) || defined(JSON_SAFE)
 			 void * temp = (void*)i -> first;  //because its pass by reference
@@ -13,11 +13,20 @@
 	   }
     }
 
-    void auto_expand_node::purge(void){
+    void auto_expand_node::purge(void) json_nothrow {
 	   for(std::map<void *, JSONNode *>::iterator i = mymap.begin(), en = mymap.end(); i != en; ++i){
 		  JSONNode::deleteJSONNode((JSONNode *)i -> second); 
 	   }
     }
+
+    #ifdef JSON_STREAM
+	   #include "JSONStream.h"
+	   void auto_expand_stream::purge(void) json_nothrow {
+		  for(std::map<void *, JSONStream *>::iterator i = mymap.begin(), en = mymap.end(); i != en; ++i){
+			 JSONStream::deleteJSONStream((JSONStream *)i -> second); 
+		  }
+	   }
+    #endif
 #endif
 
 #ifdef JSON_MEMORY_CALLBACKS
@@ -26,8 +35,8 @@ json_malloc_t mymalloc = 0;
 json_realloc_t myrealloc = 0;
 json_free_t myfree = 0;
 
-void * JSONMemory::json_malloc(size_t siz){
-    if (mymalloc){
+void * JSONMemory::json_malloc(size_t siz) json_nothrow {
+    if (mymalloc != 0){
 	   #ifdef JSON_DEBUG  //in debug mode, see if the malloc was successful
 		  void * result = mymalloc(siz);
 		  JSON_ASSERT(result, JSON_TEXT("out of memory"));
@@ -45,8 +54,8 @@ void * JSONMemory::json_malloc(size_t siz){
     #endif
 }
 
-void * JSONMemory::json_realloc(void * ptr, size_t siz){
-    if (myrealloc){
+void * JSONMemory::json_realloc(void * ptr, size_t siz) json_nothrow {
+    if (myrealloc != 0){
 	   #ifdef JSON_DEBUG  //in debug mode, see if the malloc was successful
 		  void * result = myrealloc(ptr, siz);
 		  JSON_ASSERT(result, JSON_TEXT("out of memory"));
@@ -64,15 +73,15 @@ void * JSONMemory::json_realloc(void * ptr, size_t siz){
     #endif  
 }
 
-void JSONMemory::json_free(void * ptr){
-    if (myfree){
+void JSONMemory::json_free(void * ptr) json_nothrow {
+    if (myfree != 0){
 	   myfree(ptr);
     } else {
 	   free(ptr);
     }
 }
 
-void JSONMemory::registerMemoryCallbacks(json_malloc_t mal, json_realloc_t real, json_free_t fre){
+void JSONMemory::registerMemoryCallbacks(json_malloc_t mal, json_realloc_t real, json_free_t fre) json_nothrow {
     mymalloc = mal;
     myrealloc = real;
     myfree = fre;

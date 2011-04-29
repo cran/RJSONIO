@@ -1,7 +1,7 @@
 #ifndef JSONNODE_H
 #define JSONNODE_H
 
-#include "JSONDefs.h"   //for string type
+#include "JSONDebug.h"   //for string type
 #include "internalJSONNode.h"  //internal structure for json value
 #include <stdexcept>
 #include <cstdarg>  //for the ... parameter
@@ -10,11 +10,19 @@
     #include "JSON_Base64.h"
 #endif
 
+#ifdef JSON_LESS_MEMORY
+    #ifdef __GNUC__
+	   #pragma pack(push, 1)
+    #elif _MSC_VER
+	   #pragma pack(push, JSONNode_pack, 1)
+    #endif
+#endif
+
 #ifndef JSON_REF_COUNT
     #define makeUniqueInternal() (void)0
 #endif
 
-#define JSON_CHECK_INTERNAL() JSON_ASSERT(internal, JSON_TEXT("no internal"))
+#define JSON_CHECK_INTERNAL() JSON_ASSERT(internal != 0, JSON_TEXT("no internal"))
 
 #ifdef JSON_MUTEX_CALLBACKS
     #define JSON_MUTEX_COPY_DECL ,void * parentMutex
@@ -28,17 +36,17 @@
     #define JSON_PTR_LIB *
     #define JSON_NEW(x) JSONNode::newJSONNode_Shallow(x)
     #define DECLARE_FOR_ALL_TYPES(foo)\
-	   foo(long);\
-	   foo(json_number);\
-	   foo(bool);\
-	   foo(const json_string &);
+	   foo(long)json_nothrow;\
+	   foo(json_number) json_nothrow;\
+	   foo(bool) json_nothrow;\
+	   foo(const json_string &) json_nothrow;
 
     #define DECLARE_FOR_ALL_TYPES_CONST(foo)\
-	   foo(long) const;\
-	   foo(json_number) const;\
-	   foo(bool) const;\
-	   foo(const json_string &) const;\
-	   foo(const JSONNode &) const;
+	   foo(long) const json_nothrow;\
+	   foo(json_number) const json_nothrow;\
+	   foo(bool) const json_nothrow;\
+	   foo(const json_string &) const json_nothrow;\
+	   foo(const JSONNode &) const json_nothrow;
 
     #define IMPLEMENT_FOR_ALL_NUMBERS(foo)\
 	   foo(long)\
@@ -49,25 +57,25 @@
     #define JSON_PTR_LIB
     #define JSON_NEW(x) x
     #define DECLARE_FOR_ALL_TYPES(foo)\
-	   foo(char); foo(unsigned char);\
-	   foo(short); foo(unsigned short);\
-	   foo(int); foo(unsigned int);\
-	   foo(long); foo(unsigned long);\
-	   foo(float); foo(double);\
-	   foo(bool);\
-	   foo(const json_string &);\
-	   foo(const json_char *);
+	   foo(char) json_nothrow;	 foo(unsigned char) json_nothrow;\
+	   foo(short) json_nothrow;	 foo(unsigned short) json_nothrow;\
+	   foo(int) json_nothrow;	 foo(unsigned int) json_nothrow;\
+	   foo(long) json_nothrow;	 foo(unsigned long) json_nothrow;\
+	   foo(float) json_nothrow;	 foo(double) json_nothrow;\
+	   foo(bool) json_nothrow;\
+	   foo(const json_string &) json_nothrow;\
+	   foo(const json_char *) json_nothrow;
 
     #define DECLARE_FOR_ALL_TYPES_CONST(foo)\
-	   foo(char) const; foo(unsigned char) const;\
-	   foo(short) const; foo(unsigned short) const;\
-	   foo(int) const; foo(unsigned int) const;\
-	   foo(long) const; foo(unsigned long) const;\
-	   foo(float) const; foo(double) const;\
-	   foo(bool) const;\
-	   foo(const json_string &) const;\
-	   foo(const JSONNode &) const;\
-	   foo(const json_char *) const;
+	   foo(char) const json_nothrow;	foo(unsigned char) const json_nothrow;\
+	   foo(short) const json_nothrow;	foo(unsigned short) const json_nothrow;\
+	   foo(int) const json_nothrow;	foo(unsigned int) const json_nothrow;\
+	   foo(long) const json_nothrow;	foo(unsigned long) const json_nothrow;\
+	   foo(float) const json_nothrow;	foo(double) const json_nothrow;\
+	   foo(bool) const json_nothrow;\
+	   foo(const json_string &) const json_nothrow;\
+	   foo(const JSONNode &) const json_nothrow;\
+	   foo(const json_char *) const json_nothrow;
 
     #define IMPLEMENT_FOR_ALL_NUMBERS(foo)\
 	   foo(char) foo(unsigned char)\
@@ -92,85 +100,79 @@
 
 class JSONNode {
 public: 
-    explicit JSONNode(char mytype = JSON_NODE);
+    explicit JSONNode(char mytype = JSON_NODE) json_nothrow json_hot;
     #define DECLARE_CTOR(type) JSONNode(const json_string & name_t, type value_t)
     DECLARE_FOR_ALL_TYPES(DECLARE_CTOR)
     
-    JSONNode(const JSONNode & orig);    
-    ~JSONNode(void);
+    JSONNode(const JSONNode & orig) json_nothrow json_hot;    
+    ~JSONNode(void) json_nothrow json_hot;
  
-    json_index_t size(void) const;
-    bool empty(void) const;
-    void clear(void);
-    unsigned char type(void) const;
+    json_index_t size(void) const json_nothrow json_read_priority;
+    bool empty(void) const json_nothrow json_read_priority;
+    void clear(void) json_nothrow json_cold;
+    unsigned char type(void) const json_nothrow json_read_priority;
     
-    json_string name(void) const;
-    void set_name(const json_string & newname);
+    json_string name(void) const json_nothrow json_read_priority;
+    void set_name(const json_string & newname) json_nothrow json_write_priority;
     #ifdef JSON_COMMENTS
-	   void set_comment(const json_string & comment);
-	   json_string get_comment(void) const;
+	   void set_comment(const json_string & comment) json_nothrow;
+	   json_string get_comment(void) const json_nothrow;
     #endif
-    #ifndef JSON_PREPARSE
-	   void preparse(void);
-    #endif
-    #ifdef JSON_VALIDATE
-	   #ifndef JSON_SAFE
-		  #error JSON_VALIDATE also requires JSON_SAFE
-	   #endif
-	   bool validate(void);
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
+	   void preparse(void) json_nothrow json_read_priority;
     #endif
     
-    json_string as_string(void) const;
-    long as_int(void) const;
-    json_number as_float(void) const;
-    bool as_bool(void) const;
-    JSONNode as_node(void) const;
-    JSONNode as_array(void) const;
+    json_string as_string(void) const json_nothrow json_read_priority;
+    long as_int(void) const json_nothrow json_read_priority;
+    json_number as_float(void) const json_nothrow json_read_priority;
+    bool as_bool(void) const json_nothrow json_read_priority;
+    JSONNode as_node(void) const json_nothrow json_read_priority;
+    JSONNode as_array(void) const json_nothrow json_read_priority;
     
     #ifdef JSON_BINARY
-	   std::string as_binary(void) const;
-	   void set_binary(const unsigned char * bin, size_t bytes);
+	   std::string as_binary(void) const json_nothrow json_cold;
+	   void set_binary(const unsigned char * bin, size_t bytes) json_nothrow json_cold;
     #endif
     
-    JSONNode & at(json_index_t pos);
-    const JSONNode & at(json_index_t pos) const;
-    JSONNode & operator[](json_index_t pos);
-    const JSONNode & operator[](json_index_t pos) const;
+    JSONNode & at(json_index_t pos) json_throws(std::out_of_range);
+    const JSONNode & at(json_index_t pos) const json_throws(std::out_of_range);
+    JSONNode & operator[](json_index_t pos) json_nothrow;
+    const JSONNode & operator[](json_index_t pos) const json_nothrow;
    
-    JSONNode & at(const json_string & name_t);
-    const JSONNode & at(const json_string & name_t) const;
+    JSONNode & at(const json_string & name_t) json_throws(std::out_of_range);
+    const JSONNode & at(const json_string & name_t) const json_throws(std::out_of_range);
     #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-	   JSONNode & at_nocase(const json_string & name_t);
-	   const JSONNode & at_nocase(const json_string & name_t) const;
+	   JSONNode & at_nocase(const json_string & name_t) json_throws(std::out_of_range);
+	   const JSONNode & at_nocase(const json_string & name_t) const json_throws(std::out_of_range);
     #endif
-    JSONNode & operator[](const json_string & name_t);
-    const JSONNode & operator[](const json_string & name_t) const;
+    JSONNode & operator[](const json_string & name_t) json_nothrow;
+    const JSONNode & operator[](const json_string & name_t) const json_nothrow;
 
     #ifdef JSON_LIBRARY
-	   void push_back(JSONNode * node);
+	   void push_back(JSONNode * node) json_nothrow;
     #else
-	   void push_back(const JSONNode & node);
+	   void push_back(const JSONNode & node) json_nothrow;
     #endif
-    void reserve(json_index_t siz);
-    JSONNode JSON_PTR_LIB pop_back(json_index_t pos);
-    JSONNode JSON_PTR_LIB pop_back(const json_string & name_t);
+    void reserve(json_index_t siz) json_nothrow;
+    JSONNode JSON_PTR_LIB pop_back(json_index_t pos) json_throws(std::out_of_range);
+    JSONNode JSON_PTR_LIB pop_back(const json_string & name_t) json_throws(std::out_of_range);
     #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-	   JSONNode JSON_PTR_LIB pop_back_nocase(const json_string & name_t);
+	   JSONNode JSON_PTR_LIB pop_back_nocase(const json_string & name_t) json_throws(std::out_of_range);
     #endif
     
     DECLARE_FOR_ALL_TYPES(JSONNode & operator =)
-    JSONNode & operator = (const JSONNode &);
+    JSONNode & operator = (const JSONNode &) json_nothrow;
 
     DECLARE_FOR_ALL_TYPES_CONST(bool operator ==)
     DECLARE_FOR_ALL_TYPES_CONST(bool operator !=)
 
 
-    void nullify(void);
-    void swap(JSONNode & other);
-    void merge(JSONNode & other);
-    void merge(unsigned int num, ...);
-    JSONNode duplicate(void) const;
-    void cast(char newtype);
+    void nullify(void) json_nothrow;
+    void swap(JSONNode & other) json_nothrow;
+    void merge(JSONNode & other) json_nothrow json_cold;
+    void merge(unsigned int num, ...) json_nothrow json_cold;
+    JSONNode duplicate(void) const json_nothrow;
+    void cast(char newtype) json_nothrow;
     
     
     //iterator
@@ -179,232 +181,232 @@ public:
 		  #define json_iterator_ptr(iter) iter.it
 		  #define ptr_to_json_iterator(iter) json_iterator(iter)
 		  struct iterator {
-			 inline iterator& operator ++(void){ ++it; return *this; }
-			 inline iterator& operator --(void){ --it; return *this; }
-			 inline iterator& operator +=(long i){ it += i; return *this; }
-			 inline iterator& operator -=(long i){ it -= i; return *this; }
-			 inline iterator operator ++(int){
+			 inline iterator& operator ++(void) json_nothrow { ++it; return *this; }
+			 inline iterator& operator --(void) json_nothrow { --it; return *this; }
+			 inline iterator& operator +=(long i) json_nothrow { it += i; return *this; }
+			 inline iterator& operator -=(long i) json_nothrow { it -= i; return *this; }
+			 inline iterator operator ++(int) json_nothrow {
 				iterator result(*this);
 				++it;
 				return result;
 			 }
-			 inline iterator operator --(int){
+			 inline iterator operator --(int) json_nothrow {
 				iterator result(*this);
 				--it;
 				return result;
 			 }
-			 inline iterator operator +(long i) const {
+			 inline iterator operator +(long i) const json_nothrow {
 				iterator result(*this);
 				result.it += i;
 				return result;
 			 }
-			 inline iterator operator -(long i) const {
+			 inline iterator operator -(long i) const json_nothrow {
 				iterator result(*this);
 				result.it -= i;
 				return result;
 			 }
-			 inline JSONNode& operator [](size_t pos) const { return *it[pos]; };
-			 inline JSONNode& operator *(void) const { return *(*it); }
-			 inline bool operator == (const iterator & other) const { return it == other.it; }
-			 inline bool operator != (const iterator & other) const { return it != other.it; }
-			 inline bool operator > (const iterator & other) const { return it > other.it; }
-			 inline bool operator >= (const iterator & other) const { return it >= other.it; }
-			 inline bool operator < (const iterator & other) const { return it < other.it; }
-			 inline bool operator <= (const iterator & other) const { return it <= other.it; }
-			 inline iterator & operator = (const iterator & orig){ it = orig.it; return *this; }
-			 iterator (const iterator & orig) : it(orig.it) {}
+			 inline JSONNode& operator [](size_t pos) const json_nothrow { return *it[pos]; };
+			 inline JSONNode& operator *(void) const json_nothrow { return *(*it); }
+			 inline bool operator == (const iterator & other) const json_nothrow { return it == other.it; }
+			 inline bool operator != (const iterator & other) const json_nothrow { return it != other.it; }
+			 inline bool operator > (const iterator & other) const json_nothrow { return it > other.it; }
+			 inline bool operator >= (const iterator & other) const json_nothrow { return it >= other.it; }
+			 inline bool operator < (const iterator & other) const json_nothrow { return it < other.it; }
+			 inline bool operator <= (const iterator & other) const json_nothrow { return it <= other.it; }
+			 inline iterator & operator = (const iterator & orig) json_nothrow { it = orig.it; return *this; }
+			 iterator (const iterator & orig) json_nothrow : it(orig.it) {}
 		  private:
 			 JSONNode ** it;
-			 iterator(JSONNode ** starter) : it(starter) {}
+			 iterator(JSONNode ** starter) json_nothrow : it(starter) {}
 			 friend class JSONNode;
 		  };
 		  typedef iterator json_iterator;
     
 		  struct const_iterator {
-			 inline const_iterator& operator ++(void){ ++it; return *this; }
-			 inline const_iterator& operator --(void){ --it; return *this; }
-			 inline const_iterator& operator +=(long i){ it += i; return *this; }
-			 inline const_iterator& operator -=(long i){ it -= i; return *this; }
-			 inline const_iterator operator ++(int){
+			 inline const_iterator& operator ++(void) json_nothrow { ++it; return *this; }
+			 inline const_iterator& operator --(void) json_nothrow { --it; return *this; }
+			 inline const_iterator& operator +=(long i) json_nothrow { it += i; return *this; }
+			 inline const_iterator& operator -=(long i) json_nothrow { it -= i; return *this; }
+			 inline const_iterator operator ++(int) json_nothrow {
 				const_iterator result(*this);
 				++it;
 				return result;
 			 }
-			 inline const_iterator operator --(int){
+			 inline const_iterator operator --(int) json_nothrow {
 				const_iterator result(*this);
 				--it;
 				return result;
 			 }
-			 inline const_iterator operator +(long i) const {
+			 inline const_iterator operator +(long i) const json_nothrow {
 				const_iterator result(*this);
 				result.it += i;
 				return result;
 			 }
-			 inline const_iterator operator -(long i) const {
+			 inline const_iterator operator -(long i) const json_nothrow {
 				const_iterator result(*this);
 				result.it -= i;
 				return result;
 			 }
-			 inline const JSONNode& operator [](size_t pos) const { return const_cast<const JSONNode&>(*it[pos]); };
-			 inline const JSONNode& operator *(void) const { return const_cast<const JSONNode&>(*(*it)); }
-			 inline bool operator == (const const_iterator & other) const { return it == other.it; }
-			 inline bool operator != (const const_iterator & other) const { return it != other.it; }
-			 inline bool operator > (const const_iterator & other) const { return it > other.it; }
-			 inline bool operator >= (const const_iterator & other) const { return it >= other.it; }
-			 inline bool operator < (const const_iterator & other) const { return it < other.it; }
-			 inline bool operator <= (const const_iterator & other) const { return it <= other.it; }
-			 inline const_iterator & operator =(const const_iterator & orig){ it = orig.it; return *this; }
-			 const_iterator (const const_iterator & orig) : it(orig.it) {}
+			 inline const JSONNode& operator [](size_t pos) const json_nothrow { return const_cast<const JSONNode&>(*it[pos]); };
+			 inline const JSONNode& operator *(void) const json_nothrow { return const_cast<const JSONNode&>(*(*it)); }
+			 inline bool operator == (const const_iterator & other) const json_nothrow { return it == other.it; }
+			 inline bool operator != (const const_iterator & other) const json_nothrow { return it != other.it; }
+			 inline bool operator > (const const_iterator & other) const json_nothrow { return it > other.it; }
+			 inline bool operator >= (const const_iterator & other) const json_nothrow { return it >= other.it; }
+			 inline bool operator < (const const_iterator & other) const json_nothrow { return it < other.it; }
+			 inline bool operator <= (const const_iterator & other) const json_nothrow { return it <= other.it; }
+			 inline const_iterator & operator =(const const_iterator & orig) json_nothrow { it = orig.it; return *this; }
+			 const_iterator (const const_iterator & orig) json_nothrow : it(orig.it) {}
 		  private:
 			 JSONNode ** it;
 			 const_iterator(JSONNode ** starter) : it(starter) {}
 			 friend class JSONNode;
 		  };
-		  const_iterator begin(void) const;
-		  const_iterator end(void) const;
+		  const_iterator begin(void) const json_nothrow;
+		  const_iterator end(void) const json_nothrow;
 		  
 		  struct reverse_iterator {
-			 inline reverse_iterator& operator ++(void){ --it; return *this; }
-			 inline reverse_iterator& operator --(void){ ++it; return *this; }
-			 inline reverse_iterator& operator +=(long i){ it -= i; return *this; }
-			 inline reverse_iterator& operator -=(long i){ it += i; return *this; }
-			 inline reverse_iterator operator ++(int){
+			 inline reverse_iterator& operator ++(void) json_nothrow { --it; return *this; }
+			 inline reverse_iterator& operator --(void) json_nothrow { ++it; return *this; }
+			 inline reverse_iterator& operator +=(long i) json_nothrow { it -= i; return *this; }
+			 inline reverse_iterator& operator -=(long i) json_nothrow { it += i; return *this; }
+			 inline reverse_iterator operator ++(int) json_nothrow {
 				reverse_iterator result(*this);
 				--it;
 				return result;
 			 }
-			 inline reverse_iterator operator --(int){
+			 inline reverse_iterator operator --(int) json_nothrow {
 				reverse_iterator result(*this);
 				++it;
 				return result;
 			 }
-			 inline reverse_iterator operator +(long i) const {
+			 inline reverse_iterator operator +(long i) const json_nothrow {
 				reverse_iterator result(*this);
 				result.it -= i;
 				return result;
 			 }
-			 inline reverse_iterator operator -(long i) const {
+			 inline reverse_iterator operator -(long i) const json_nothrow {
 				reverse_iterator result(*this);
 				result.it += i;
 				return result;
 			 }
-			 inline JSONNode& operator [](size_t pos) const { return *it[pos]; };
-			 inline JSONNode& operator *(void) const { return *(*it); }
-			 inline bool operator == (const reverse_iterator & other) const { return it == other.it; }
-			 inline bool operator != (const reverse_iterator & other) const { return it != other.it; }
-			 inline bool operator < (const reverse_iterator & other) const { return it > other.it; }
-			 inline bool operator <= (const reverse_iterator & other) const { return it >= other.it; }
-			 inline bool operator > (const reverse_iterator & other) const { return it < other.it; }
-			 inline bool operator >= (const reverse_iterator & other) const { return it <= other.it; }
-			 inline reverse_iterator & operator = (const reverse_iterator & orig){ it = orig.it; return *this; }
-			 reverse_iterator (const reverse_iterator & orig) : it(orig.it) {}
+			 inline JSONNode& operator [](size_t pos) const json_nothrow { return *it[pos]; };
+			 inline JSONNode& operator *(void) const json_nothrow { return *(*it); }
+			 inline bool operator == (const reverse_iterator & other) const json_nothrow { return it == other.it; }
+			 inline bool operator != (const reverse_iterator & other) const json_nothrow { return it != other.it; }
+			 inline bool operator < (const reverse_iterator & other) const json_nothrow { return it > other.it; }
+			 inline bool operator <= (const reverse_iterator & other) const json_nothrow { return it >= other.it; }
+			 inline bool operator > (const reverse_iterator & other) const json_nothrow { return it < other.it; }
+			 inline bool operator >= (const reverse_iterator & other) const json_nothrow { return it <= other.it; }
+			 inline reverse_iterator & operator = (const reverse_iterator & orig) json_nothrow { it = orig.it; return *this; }
+			 reverse_iterator (const reverse_iterator & orig) json_nothrow : it(orig.it) {}
 		  private:
 			 JSONNode ** it;
-			 reverse_iterator(JSONNode ** starter) : it(starter) {}
+			 reverse_iterator(JSONNode ** starter) json_nothrow : it(starter) {}
 			 friend class JSONNode;
 		  };
-		  reverse_iterator rbegin(void);
-		  reverse_iterator rend(void);
+		  reverse_iterator rbegin(void) json_nothrow;
+		  reverse_iterator rend(void) json_nothrow;
 		  
 		  struct reverse_const_iterator {
-			 inline reverse_const_iterator& operator ++(void){ --it; return *this; }
-			 inline reverse_const_iterator& operator --(void){ ++it; return *this; }
-			 inline reverse_const_iterator& operator +=(long i){ it -= i; return *this; }
-			 inline reverse_const_iterator& operator -=(long i){ it += i; return *this; }
-			 inline reverse_const_iterator operator ++(int){
+			 inline reverse_const_iterator& operator ++(void) json_nothrow{ --it; return *this; }
+			 inline reverse_const_iterator& operator --(void) json_nothrow{ ++it; return *this; }
+			 inline reverse_const_iterator& operator +=(long i) json_nothrow{ it -= i; return *this; }
+			 inline reverse_const_iterator& operator -=(long i) json_nothrow{ it += i; return *this; }
+			 inline reverse_const_iterator operator ++(int) json_nothrow{
 				reverse_const_iterator result(*this);
 				--it;
 				return result;
 			 }
-			 inline reverse_const_iterator operator --(int){
+			 inline reverse_const_iterator operator --(int) json_nothrow{
 				reverse_const_iterator result(*this);
 				++it;
 				return result;
 			 }
-			 inline reverse_const_iterator operator +(long i) const {
+			 inline reverse_const_iterator operator +(long i) const json_nothrow {
 				reverse_const_iterator result(*this);
 				result.it -= i;
 				return result;
 			 }
-			 inline reverse_const_iterator operator -(long i) const {
+			 inline reverse_const_iterator operator -(long i) const json_nothrow {
 				reverse_const_iterator result(*this);
 				result.it += i;
 				return result;
 			 }
-			 inline const JSONNode& operator [](size_t pos) const { return const_cast<const JSONNode&>(*it[pos]); };
-			 inline const JSONNode& operator *(void) const { return const_cast<const JSONNode&>(*(*it)); }
-			 inline bool operator == (const reverse_const_iterator & other) const { return it == other.it; }
-			 inline bool operator != (const reverse_const_iterator & other) const { return it != other.it; }
-			 inline bool operator < (const reverse_const_iterator & other) const { return it > other.it; }
-			 inline bool operator <= (const reverse_const_iterator & other) const { return it >= other.it; }
-			 inline bool operator > (const reverse_const_iterator & other) const { return it < other.it; }
-			 inline bool operator >= (const reverse_const_iterator & other) const { return it <= other.it; }
-			 inline reverse_const_iterator & operator = (const reverse_const_iterator & orig){ it = orig.it; return *this; }
-			 reverse_const_iterator (const reverse_const_iterator & orig) : it(orig.it) {}
+			 inline const JSONNode& operator [](size_t pos) const json_nothrow { return const_cast<const JSONNode&>(*it[pos]); };
+			 inline const JSONNode& operator *(void) const json_nothrow { return const_cast<const JSONNode&>(*(*it)); }
+			 inline bool operator == (const reverse_const_iterator & other) const json_nothrow { return it == other.it; }
+			 inline bool operator != (const reverse_const_iterator & other) const json_nothrow { return it != other.it; }
+			 inline bool operator < (const reverse_const_iterator & other) const json_nothrow { return it > other.it; }
+			 inline bool operator <= (const reverse_const_iterator & other) const json_nothrow { return it >= other.it; }
+			 inline bool operator > (const reverse_const_iterator & other) const json_nothrow { return it < other.it; }
+			 inline bool operator >= (const reverse_const_iterator & other) const json_nothrow { return it <= other.it; }
+			 inline reverse_const_iterator & operator = (const reverse_const_iterator & orig) json_nothrow { it = orig.it; return *this; }
+			 reverse_const_iterator (const reverse_const_iterator & orig) json_nothrow : it(orig.it) {}
 		  private:
 			 JSONNode ** it;
-			 reverse_const_iterator(JSONNode ** starter) : it(starter) {}
+			 reverse_const_iterator(JSONNode ** starter) json_nothrow : it(starter) {}
 			 friend class JSONNode;
 		  };
-		  reverse_const_iterator rbegin(void) const;
-		  reverse_const_iterator rend(void) const;
+		  reverse_const_iterator rbegin(void) const json_nothrow;
+		  reverse_const_iterator rend(void) const json_nothrow;
 		  
-		  const_iterator find(const json_string & name_t) const;
+		  const_iterator find(const json_string & name_t) const json_nothrow;
 		  #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-			 const_iterator find_nocase(const json_string & name_t) const;
+			 const_iterator find_nocase(const json_string & name_t) const json_nothrow;
 		  #endif
     
-		  reverse_iterator erase(reverse_iterator pos);
-		  reverse_iterator erase(reverse_iterator start, const reverse_iterator & end);
+		  reverse_iterator erase(reverse_iterator pos) json_nothrow;
+		  reverse_iterator erase(reverse_iterator start, const reverse_iterator & end) json_nothrow;
 	   
-		  iterator insert(iterator pos, const JSONNode & x);
-		  reverse_iterator insert(reverse_iterator pos, const JSONNode & x);
-		  iterator insert(iterator pos, const reverse_iterator & _start, const reverse_iterator & _end);
-		  reverse_iterator insert(reverse_iterator pos, const iterator & _start, const iterator & _end);
-		  reverse_iterator insert(reverse_iterator pos, const reverse_iterator & _start, const reverse_iterator & _end);
+		  iterator insert(iterator pos, const JSONNode & x) json_nothrow;
+		  reverse_iterator insert(reverse_iterator pos, const JSONNode & x) json_nothrow;
+		  iterator insert(iterator pos, const reverse_iterator & _start, const reverse_iterator & _end) json_nothrow;
+		  reverse_iterator insert(reverse_iterator pos, const iterator & _start, const iterator & _end) json_nothrow;
+		  reverse_iterator insert(reverse_iterator pos, const reverse_iterator & _start, const reverse_iterator & _end) json_nothrow;
     
-		  json_iterator insert(json_iterator pos, const const_iterator & _start, const const_iterator & _end);
-		  reverse_iterator insert(reverse_iterator pos, const const_iterator & _start, const const_iterator & _end);
-		  json_iterator insert(json_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end);
-		  reverse_iterator insert(reverse_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end);
+		  json_iterator insert(json_iterator pos, const const_iterator & _start, const const_iterator & _end) json_nothrow;
+		  reverse_iterator insert(reverse_iterator pos, const const_iterator & _start, const const_iterator & _end) json_nothrow;
+		  json_iterator insert(json_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end) json_nothrow;
+		  reverse_iterator insert(reverse_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end) json_nothrow;
 	   #else
 		  typedef JSONNode** json_iterator;
 		  #define json_iterator_ptr(iter) iter
 		  #define ptr_to_json_iterator(iter) iter
-		  json_iterator insert(json_iterator pos, JSONNode * x);
+		  json_iterator insert(json_iterator pos, JSONNode * x) json_nothrow;
 	   #endif
     
-	   json_iterator begin(void);
-	   json_iterator end(void);
+	   json_iterator begin(void) json_nothrow;
+	   json_iterator end(void) json_nothrow;
 	   
-	   json_iterator find(const json_string & name_t);
+	   json_iterator find(const json_string & name_t) json_nothrow;
 	   #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-		  json_iterator find_nocase(const json_string & name_t);
+		  json_iterator find_nocase(const json_string & name_t) json_nothrow;
 	   #endif
-	   json_iterator erase(json_iterator pos);
-	   json_iterator erase(json_iterator start, const json_iterator & end);
-	   json_iterator insert(json_iterator pos, const json_iterator & _start, const json_iterator & _end);
+	   json_iterator erase(json_iterator pos) json_nothrow;
+	   json_iterator erase(json_iterator start, const json_iterator & end) json_nothrow;
+	   json_iterator insert(json_iterator pos, const json_iterator & _start, const json_iterator & _end) json_nothrow;
     #endif
     
     
     #ifdef JSON_MUTEX_CALLBACKS
-	   static void register_mutex_callbacks(json_mutex_callback_t lock, json_mutex_callback_t unlock, void * manager_lock);
+	   static void register_mutex_callbacks(json_mutex_callback_t lock, json_mutex_callback_t unlock, void * manager_lock) json_nothrow json_cold;
 	   #ifdef JSON_MUTEX_MANAGE
-		  static void register_mutex_destructor(json_mutex_callback_t destroy);
+		  static void register_mutex_destructor(json_mutex_callback_t destroy) json_nothrow json_cold;
 	   #endif
-	   static void set_global_mutex(void * mutex);
-	   void set_mutex(void * mutex);
-	   void lock(int thread);
-	   void unlock(int thread);
+	   static void set_global_mutex(void * mutex) json_nothrow json_cold;
+	   void set_mutex(void * mutex) json_nothrow json_cold;
+	   void lock(int thread) json_nothrow json_cold;
+	   void unlock(int thread) json_nothrow json_cold;
 	   struct auto_lock {
 		  public:
-			 auto_lock(JSONNode & node, int thread) : mynode(&node), mythread(thread){
+			 auto_lock(JSONNode & node, int thread)  json_nothrow: mynode(&node), mythread(thread){
 				mynode -> lock(mythread);
 			 }
-			 auto_lock(JSONNode * node, int thread) : mynode(node), mythread(thread){
+			 auto_lock(JSONNode * node, int thread)  json_nothrow: mynode(node), mythread(thread){
 				mynode -> lock(mythread);
 			 }
-			 ~auto_lock(void){
+			 ~auto_lock(void) json_nothrow{
 				mynode -> unlock(mythread);
 			 }
 		  private:
@@ -413,7 +415,7 @@ public:
 			 JSONNode * mynode;
 			 int mythread;
 	   };
-	   static void * getThisLock(JSONNode * pthis);
+	   static void * getThisLock(JSONNode * pthis) json_nothrow json_cold;
     #endif
     
     #ifdef JSON_UNIT_TEST
@@ -421,56 +423,68 @@ public:
 	   static int getNodeDeallocationCount(void);
 	   static int getInternalAllocationCount(void);
 	   static int getInternalDeallocationCount(void);
+	   static int getChildrenAllocationCount(void);
+	   static int getChildrenDeallocationCount(void);
 	   static void incAllocCount(void);
 	   static void decAllocCount(void);
 	   static void incinternalAllocCount(void);
 	   static void decinternalAllocCount(void);
+	   static void incChildrenAllocCount(void);
+	   static void decChildrenAllocCount(void);
     #endif
     
-    #ifdef JSON_WRITER
-	   json_string write(void);
-	   json_string write_formatted(void);
+    #ifdef JSON_WRITE_PRIORITY
+	   json_string write(void) json_nothrow json_write_priority;
+	   json_string write_formatted(void) json_nothrow json_write_priority;
     #endif
     
     #ifdef JSON_DEBUG
 	   #ifndef JSON_LIBRARY
-		  JSONNode dump(void) const;
+		  JSONNode dump(void) const json_nothrow;
 	   #endif
     #endif
-    static void deleteJSONNode(JSONNode * ptr);
-    static JSONNode * newJSONNode_Shallow(const JSONNode & orig);
+    static void deleteJSONNode(JSONNode * ptr) json_nothrow json_hot;
+    static JSONNode * newJSONNode_Shallow(const JSONNode & orig) json_hot;
 JSON_PRIVATE
-    static JSONNode * newJSONNode(const JSONNode & orig     JSON_MUTEX_COPY_DECL2);
-    static JSONNode * newJSONNode(internalJSONNode * internal_t);
-    //used by JSONWorker
-    JSONNode(const json_string & unparsed) : internal(internalJSONNode::newInternal(unparsed)){ //root, specialized because it can only be array or node
+    static JSONNode * newJSONNode(const JSONNode & orig     JSON_MUTEX_COPY_DECL2) json_hot;
+    static JSONNode * newJSONNode(internalJSONNode * internal_t) json_hot;
+    #ifdef JSON_READ_PRIORITY
+	   //used by JSONWorker
+	   JSONNode(const json_string & unparsed) json_nothrow : internal(internalJSONNode::newInternal(unparsed)){ //root, specialized because it can only be array or node
+		  incAllocCount();
+	   }
+    #endif
+    JSONNode(internalJSONNode * internal_t) json_nothrow : internal(internal_t){ //do not increment anything, this is only used in one case and it's already taken care of 
 	   incAllocCount();
     }
-    JSONNode(internalJSONNode * internal_t) : internal(internal_t){ //do not increment anything, this is only used in one case and it's already taken care of 
-	   incAllocCount();
-    }
-    JSONNode(bool, JSONNode & orig);
+    JSONNode(bool, JSONNode & orig) json_nothrow json_hot;
     
-    void decRef(void);  //decrements internal's counter, deletes it if needed
+    void decRef(void) json_nothrow json_hot;  //decrements internal's counter, deletes it if needed
     #ifdef JSON_REF_COUNT
-	   void makeUniqueInternal(void); //makes internal it's own
-	   void merge(JSONNode * other);
+	   void makeUniqueInternal(void) json_nothrow; //makes internal it's own
+	   void merge(JSONNode * other) json_nothrow json_cold;
     #endif
     
     #ifdef JSON_DEBUG
 	   #ifndef JSON_LIBRARY
-		  JSONNode dump(size_t & totalmemory);
+		  JSONNode dump(size_t & totalmemory) json_nothrow;
 	   #endif
     #endif
     
     #ifdef JSON_ITERATORS
 	   #ifndef JSON_LIBRARY
-		  json_iterator insertFRR(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end);
-		  reverse_iterator insertRRR(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end);
-		  reverse_iterator insertRFF(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end);
+		  json_iterator insertFRR(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow;
+		  reverse_iterator insertRRR(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow;
+		  reverse_iterator insertRFF(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow;
 	   #endif
-	   json_iterator insertFFF(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end);
+	   json_iterator insertFFF(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow;
     #endif
+
+	inline void clear_name(void) json_nothrow {
+	    JSON_CHECK_INTERNAL();
+	    makeUniqueInternal();
+	    internal -> clearname();
+	}
     
     mutable internalJSONNode * internal;
     friend class JSONWorker;
@@ -484,7 +498,7 @@ JSON_PRIVATE
     file because they are inlined.
 */
 
-inline JSONNode::JSONNode(char mytype) : internal(internalJSONNode::newInternal(mytype)){
+inline JSONNode::JSONNode(char mytype) json_nothrow : internal(internalJSONNode::newInternal(mytype)){
     JSON_ASSERT((mytype == JSON_NULL) ||
 			 (mytype == JSON_STRING) ||
 			 (mytype == JSON_NUMBER) ||
@@ -494,128 +508,128 @@ inline JSONNode::JSONNode(char mytype) : internal(internalJSONNode::newInternal(
     incAllocCount();
 }
 
-inline JSONNode::JSONNode(const JSONNode & orig): internal(orig.internal -> incRef()){
+inline JSONNode::JSONNode(const JSONNode & orig) json_nothrow : internal(orig.internal -> incRef()){
     incAllocCount();
 }
 
 //this allows a temp node to simply transfer its contents, even with ref counting off
-inline JSONNode::JSONNode(bool, JSONNode & orig): internal(orig.internal){
+inline JSONNode::JSONNode(bool, JSONNode & orig) json_nothrow : internal(orig.internal){
     orig.internal = 0;
     incAllocCount();
 }
 
-inline JSONNode::~JSONNode(void){
-    if (internal) decRef();
+inline JSONNode::~JSONNode(void) json_nothrow{
+    if (internal != 0) decRef();
     decAllocCount();
 }
 
-inline json_index_t JSONNode::size(void) const {
+inline json_index_t JSONNode::size(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> size();
 }
 
-inline bool JSONNode::empty(void) const {
+inline bool JSONNode::empty(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> empty();
 }
 
-inline void JSONNode::clear(void){
+inline void JSONNode::clear(void) json_nothrow {
     JSON_CHECK_INTERNAL();
     if (!empty()){
 	   makeUniqueInternal();
-	   internal -> Children.clear();
+	   internal -> CHILDREN -> clear();
     }
 }
 
-inline unsigned char JSONNode::type(void) const {
+inline unsigned char JSONNode::type(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> type();
 }
 
-inline json_string JSONNode::name(void) const {
+inline json_string JSONNode::name(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> name();
 }
 
-inline void JSONNode::set_name(const json_string & newname){
+inline void JSONNode::set_name(const json_string & newname) json_nothrow{
     JSON_CHECK_INTERNAL();
     makeUniqueInternal();
     internal -> setname(newname);
 }
 
 #ifdef JSON_COMMENTS
-    inline void JSONNode::set_comment(const json_string & newname){
+    inline void JSONNode::set_comment(const json_string & newname) json_nothrow{
 	   JSON_CHECK_INTERNAL();
 	   makeUniqueInternal();
 	   internal -> setcomment(newname);
     }
 
-    inline json_string JSONNode::get_comment(void) const { 
+    inline json_string JSONNode::get_comment(void) const json_nothrow { 
 	   JSON_CHECK_INTERNAL();
 	   return internal -> getcomment();
     }
 #endif
 
-inline json_string JSONNode::as_string(void) const {
+inline json_string JSONNode::as_string(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> as_string();
 }
 
-inline long JSONNode::as_int(void) const {
+inline long JSONNode::as_int(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> as_int();
 }
 
-inline json_number JSONNode::as_float(void) const {
+inline json_number JSONNode::as_float(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> as_float();    
 }
 
-inline bool JSONNode::as_bool(void) const {
+inline bool JSONNode::as_bool(void) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> as_bool();
 }
 
 #ifdef JSON_BINARY
-    inline void JSONNode::set_binary(const unsigned char * bin, size_t bytes){
+    inline void JSONNode::set_binary(const unsigned char * bin, size_t bytes) json_nothrow{
 	   JSON_CHECK_INTERNAL();
 	   *this = JSONBase64::json_encode64(bin, bytes);
     }
 
-    inline std::string JSONNode::as_binary(void) const {
+    inline std::string JSONNode::as_binary(void) const json_nothrow {
 	   JSON_ASSERT_SAFE(type() == JSON_STRING, JSON_TEXT("using as_binary for a non-string type"), return EMPTY_STD_STRING;);
 	   JSON_CHECK_INTERNAL();
 	   return JSONBase64::json_decode64(as_string());
     }
 #endif
 
-inline JSONNode & JSONNode::operator[](const json_string & name_t){
+inline JSONNode & JSONNode::operator[](const json_string & name_t) json_nothrow{
     JSON_CHECK_INTERNAL();
     makeUniqueInternal();
     return *(*(internal -> at(name_t)));
 }
 
-inline const JSONNode & JSONNode::operator[](const json_string & name_t) const {
+inline const JSONNode & JSONNode::operator[](const json_string & name_t) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return *(*(internal -> at(name_t)));
 }
 
 #ifdef JSON_LIBRARY
-inline void JSONNode::push_back(JSONNode * child){
+inline void JSONNode::push_back(JSONNode * child) json_nothrow{
 #else
-inline void JSONNode::push_back(const JSONNode & child){
+inline void JSONNode::push_back(const JSONNode & child) json_nothrow{
 #endif
     JSON_CHECK_INTERNAL();
     makeUniqueInternal();
     internal -> push_back(child);
 }
     
-inline void JSONNode::reserve(json_index_t siz){
+inline void JSONNode::reserve(json_index_t siz) json_nothrow{
     makeUniqueInternal();
     internal -> reserve(siz);
 }
 
-inline JSONNode & JSONNode::operator = (const JSONNode & orig){
+inline JSONNode & JSONNode::operator = (const JSONNode & orig) json_nothrow {
     JSON_CHECK_INTERNAL();
     #ifdef JSON_REF_COUNT
 	   if (internal == orig.internal) return *this;  //don't want it accidentally deleting itself
@@ -626,7 +640,7 @@ inline JSONNode & JSONNode::operator = (const JSONNode & orig){
 }
 
 #ifndef JSON_LIBRARY
-    inline JSONNode & JSONNode::operator = (const json_char * val){
+    inline JSONNode & JSONNode::operator = (const json_char * val) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   *this = json_string(val);
 	   return *this;
@@ -634,7 +648,7 @@ inline JSONNode & JSONNode::operator = (const JSONNode & orig){
 #endif
     
 #define NODE_SET_TYPED(type)\
-    inline JSONNode & JSONNode::operator = (type val){\
+    inline JSONNode & JSONNode::operator = (type val) json_nothrow {\
 	   JSON_CHECK_INTERNAL();\
 	   makeUniqueInternal();\
 	   internal -> Set(val);\
@@ -649,30 +663,30 @@ IMPLEMENT_FOR_ALL_TYPES(NODE_SET_TYPED)
 */
 
 #define NODE_CHECK_EQUALITY(type)\
-    inline bool JSONNode::operator == (type val) const {\
+    inline bool JSONNode::operator == (type val) const json_nothrow {\
 	   JSON_CHECK_INTERNAL();\
 	   return internal -> IsEqualToNum<type>(val);\
     }
 
 IMPLEMENT_FOR_ALL_NUMBERS(NODE_CHECK_EQUALITY)
 
-inline bool JSONNode::operator == (const json_string & val) const {
+inline bool JSONNode::operator == (const json_string & val) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> IsEqualTo(val);
 }
 
 #ifndef JSON_LIBRARY
-    inline bool JSONNode::operator == (const json_char * val) const {
+    inline bool JSONNode::operator == (const json_char * val) const json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   return *this == json_string(val);
     }
 #endif
 
-inline bool JSONNode::operator == (bool val) const {
+inline bool JSONNode::operator == (bool val) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> IsEqualTo(val);
 }
-inline bool JSONNode::operator == (const JSONNode & val) const {
+inline bool JSONNode::operator == (const JSONNode & val) const json_nothrow {
     JSON_CHECK_INTERNAL();
     return internal -> IsEqualTo(val.internal);
 }
@@ -684,7 +698,7 @@ inline bool JSONNode::operator == (const JSONNode & val) const {
 
 
 #define NODE_CHECK_INEQUALITY(type)\
-    inline bool JSONNode::operator != (type val) const {\
+    inline bool JSONNode::operator != (type val) const json_nothrow {\
 	   JSON_CHECK_INTERNAL();\
 	   return !(*this == val);\
     }
@@ -695,13 +709,13 @@ NODE_CHECK_INEQUALITY(const JSONNode &)
     NODE_CHECK_INEQUALITY(const json_char * )
 #endif
     
-inline void JSONNode::nullify(void){
+inline void JSONNode::nullify(void) json_nothrow {
     JSON_CHECK_INTERNAL();
     makeUniqueInternal();
     internal -> Nullify();
 }
 
-inline void JSONNode::swap(JSONNode & other){
+inline void JSONNode::swap(JSONNode & other) json_nothrow {
     JSON_CHECK_INTERNAL();
     internalJSONNode * temp = other.internal;
     other.internal = internal;
@@ -709,7 +723,7 @@ inline void JSONNode::swap(JSONNode & other){
     JSON_CHECK_INTERNAL();
 }
 
-inline void JSONNode::decRef(void){ //decrements internal's counter, deletes it if needed
+inline void JSONNode::decRef(void) json_nothrow { //decrements internal's counter, deletes it if needed
     JSON_CHECK_INTERNAL();
     #ifdef JSON_REF_COUNT
 	   internal -> decRef();
@@ -722,21 +736,21 @@ inline void JSONNode::decRef(void){ //decrements internal's counter, deletes it 
 }
 
 #ifdef JSON_REF_COUNT
-    inline void JSONNode::makeUniqueInternal(){ //makes internal it's own
+    inline void JSONNode::makeUniqueInternal() json_nothrow { //makes internal it's own
 	   JSON_CHECK_INTERNAL();
 	   internal = internal -> makeUnique();  //might return itself or a new one that's exactly the same
     }
 #endif
 
 #ifdef JSON_ITERATORS
-    inline JSONNode::json_iterator JSONNode::begin(void){
+    inline JSONNode::json_iterator JSONNode::begin(void) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 	   makeUniqueInternal();
 	   return json_iterator(internal -> begin());
     }
 
-    inline JSONNode::json_iterator JSONNode::end(void){
+    inline JSONNode::json_iterator JSONNode::end(void) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 	   makeUniqueInternal();
@@ -744,86 +758,86 @@ inline void JSONNode::decRef(void){ //decrements internal's counter, deletes it 
     }
     
     #ifndef JSON_LIBRARY
-	   inline JSONNode::const_iterator JSONNode::begin(void) const {
+	   inline JSONNode::const_iterator JSONNode::begin(void) const json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 		  return JSONNode::const_iterator(internal -> begin());
 	   }
 
-	   inline JSONNode::const_iterator JSONNode::end(void) const {
+	   inline JSONNode::const_iterator JSONNode::end(void) const json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 		  return JSONNode::const_iterator(internal -> end());
 	   }
 
-	   inline JSONNode::reverse_iterator JSONNode::rbegin(void){
+	   inline JSONNode::reverse_iterator JSONNode::rbegin(void) json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 		  makeUniqueInternal();
 		  return JSONNode::reverse_iterator(internal -> end() - 1);
 	   }
 
-	   inline JSONNode::reverse_iterator JSONNode::rend(void){
+	   inline JSONNode::reverse_iterator JSONNode::rend(void) json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 		  makeUniqueInternal();
 		  return JSONNode::reverse_iterator(internal -> begin() - 1);
 	   }
 
-	   inline JSONNode::reverse_const_iterator JSONNode::rbegin(void) const {
+	   inline JSONNode::reverse_const_iterator JSONNode::rbegin(void) const json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 		  return JSONNode::reverse_const_iterator(internal -> end() - 1);
 	   }
 
-	   inline JSONNode::reverse_const_iterator JSONNode::rend(void) const {
+	   inline JSONNode::reverse_const_iterator JSONNode::rend(void) const json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("iterating a non-iteratable node"));
 		  return JSONNode::reverse_const_iterator(internal -> begin() - 1);
 	   }
     
-	   inline JSONNode::iterator JSONNode::insert(json_iterator pos, const const_iterator & _start, const const_iterator & _end){
+	   inline JSONNode::iterator JSONNode::insert(json_iterator pos, const const_iterator & _start, const const_iterator & _end) json_nothrow {
 		  return insertFFF(pos, _start.it, _end.it);
 	   }
     
-	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const const_iterator & _start, const const_iterator & _end){
+	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const const_iterator & _start, const const_iterator & _end) json_nothrow {
 		  return insertRFF(pos, _start.it, _end.it);
 	   }
 	   
-	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const iterator & _start, const iterator & _end){
+	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const iterator & _start, const iterator & _end) json_nothrow {
 		  return insertRFF(pos, _start.it, _end.it);
 	   }
 	   
-	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end){
+	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end) json_nothrow {
 		  return insertRRR(pos, _start.it, _end.it);
 	   }
 	   
-	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const reverse_iterator & _start, const reverse_iterator & _end){
+	   inline JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const reverse_iterator & _start, const reverse_iterator & _end) json_nothrow {
 		  return insertRRR(pos, _start.it, _end.it);
 	   }
     
-	   inline JSONNode::iterator JSONNode::insert(json_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end){
+	   inline JSONNode::iterator JSONNode::insert(json_iterator pos, const reverse_const_iterator & _start, const reverse_const_iterator & _end) json_nothrow {
 		  return insertFRR(pos, _start.it, _end.it); 
 	   }
 	   
-	   inline JSONNode::iterator JSONNode::insert(iterator pos, const reverse_iterator & _start, const reverse_iterator & _end){
+	   inline JSONNode::iterator JSONNode::insert(iterator pos, const reverse_iterator & _start, const reverse_iterator & _end) json_nothrow {
 		  return insertFRR(pos, _start.it, _end.it); 
 	   }
     #endif
     
-    inline JSONNode::json_iterator JSONNode::insert(json_iterator pos, const json_iterator & _start, const json_iterator & _end){
+    inline JSONNode::json_iterator JSONNode::insert(json_iterator pos, const json_iterator & _start, const json_iterator & _end) json_nothrow {
 	   return insertFFF(pos, json_iterator_ptr(_start), json_iterator_ptr(_end));
     }  
 #endif
 
-#ifdef JSON_WRITER
-    inline json_string JSONNode::write(void){
+#ifdef JSON_WRITE_PRIORITY
+    inline json_string JSONNode::write(void) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT_SAFE(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("Writing a non-writable node"), return EMPTY_JSON_STRING;);
 	   return internal -> Write(0xFFFFFFFF, true);
     }
 
-    inline json_string JSONNode::write_formatted(void){
+    inline json_string JSONNode::write_formatted(void) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT_SAFE(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("Writing a non-writable node"), return EMPTY_JSON_STRING;);
 	   return internal -> Write(0, true);
@@ -831,41 +845,28 @@ inline void JSONNode::decRef(void){ //decrements internal's counter, deletes it 
 
 #endif
 
-#ifndef JSON_PREPARSE
-    inline void JSONNode::preparse(void){
+#if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
+    inline void JSONNode::preparse(void) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   internal -> preparse();
     }
 #endif
 
-#ifdef JSON_VALIDATE
-    inline bool JSONNode::validate(void){
-	   JSON_CHECK_INTERNAL();
-	   if (type() == JSON_NULL) return false;
-	   JSON_ASSERT_SAFE(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("Validating non root node"), return false;);
-	   #ifndef JSON_PREPARSE
-		  internal -> Fetch();  //will nullify it if it's bad
-	   #endif
-	   if (type() == JSON_NULL) return false;
-	   return internal -> validate();
-    }
-#endif
-
 #ifdef JSON_DEBUG
     #ifndef JSON_LIBRARY
-	   inline JSONNode JSONNode::dump(void) const {
+	   inline JSONNode JSONNode::dump(void) const json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSONNode dumpage(JSON_NODE);
 		  dumpage.push_back(JSON_NEW(JSONNode(JSON_TEXT("this"), (long)this)));
 		  size_t total = 0;
-		  JSONNode node = internal -> Dump(total);
+		  JSONNode node(internal -> Dump(total));
 		  dumpage.push_back(JSON_NEW(JSONNode(JSON_TEXT("total bytes used"), total)));
 		  dumpage.push_back(JSON_NEW(JSONNode(JSON_TEXT("bytes used"), sizeof(JSONNode))));
 		  dumpage.push_back(JSON_NEW(node));
 		  return dumpage;
 	   }
 
-	   inline JSONNode JSONNode::dump(size_t & totalmemory){
+	   inline JSONNode JSONNode::dump(size_t & totalmemory) json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSONNode dumpage(JSON_NODE);
 		  dumpage.push_back(JSON_NEW(JSONNode(JSON_TEXT("this"), (long)this)));
@@ -877,7 +878,7 @@ inline void JSONNode::decRef(void){ //decrements internal's counter, deletes it 
 #endif
 
 
-inline void JSONNode::deleteJSONNode(JSONNode * ptr){
+inline void JSONNode::deleteJSONNode(JSONNode * ptr) json_nothrow {
     #ifdef JSON_MEMORY_CALLBACKS
 	   ptr -> ~JSONNode();
 	   libjson_free<JSONNode>(ptr);
@@ -886,7 +887,7 @@ inline void JSONNode::deleteJSONNode(JSONNode * ptr){
     #endif     
 }
 
-inline JSONNode * _newJSONNode(const JSONNode & orig){
+inline JSONNode * _newJSONNode(const JSONNode & orig) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<JSONNode>(1)) JSONNode(orig);
     #else
@@ -894,9 +895,9 @@ inline JSONNode * _newJSONNode(const JSONNode & orig){
     #endif    
 }
 
-inline JSONNode * JSONNode::newJSONNode(const JSONNode & orig    JSON_MUTEX_COPY_DECL){
+inline JSONNode * JSONNode::newJSONNode(const JSONNode & orig    JSON_MUTEX_COPY_DECL) {
     #ifdef JSON_MUTEX_CALLBACKS
-	   if (parentMutex){
+	   if (parentMutex != 0){
 		  JSONNode * temp = _newJSONNode(orig);
 		  temp -> set_mutex(parentMutex);
 		  return temp;
@@ -905,7 +906,7 @@ inline JSONNode * JSONNode::newJSONNode(const JSONNode & orig    JSON_MUTEX_COPY
     return _newJSONNode(orig);
 }
 
-inline JSONNode * JSONNode::newJSONNode(internalJSONNode * internal_t){
+inline JSONNode * JSONNode::newJSONNode(internalJSONNode * internal_t) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<JSONNode>(1)) JSONNode(internal_t);
     #else
@@ -913,11 +914,20 @@ inline JSONNode * JSONNode::newJSONNode(internalJSONNode * internal_t){
     #endif 
 }
     
-inline JSONNode * JSONNode::newJSONNode_Shallow(const JSONNode & orig){
+inline JSONNode * JSONNode::newJSONNode_Shallow(const JSONNode & orig) {
     #ifdef JSON_MEMORY_CALLBACKS
 	   return new(json_malloc<JSONNode>(1)) JSONNode(true, const_cast<JSONNode &>(orig));
     #else
 	   return new JSONNode(true, const_cast<JSONNode &>(orig));
     #endif   
 }
+
+    
+#ifdef JSON_LESS_MEMORY
+    #ifdef __GNUC__
+	   #pragma pack(pop)
+    #elif _MSC_VER
+	   #pragma pack(pop, JSONNode_pack)
+    #endif
+#endif
 #endif

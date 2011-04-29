@@ -3,6 +3,7 @@
 
 #include <cstdlib> //for malloc, realloc, and free
 #include <cstring> //for memmove
+#include <string> //for memmove
 #include "../JSONOptions.h"
 #include "JSONDebug.h"
 
@@ -15,32 +16,40 @@
 #ifdef JSON_MEMORY_CALLBACKS
     class JSONMemory {
     public:
-	   static void * json_malloc(size_t siz);
-	   static void * json_realloc(void * ptr, size_t siz);
-	   static void json_free(void * ptr);
-	   static void registerMemoryCallbacks(json_malloc_t mal, json_realloc_t real, json_free_t fre);
+	   #ifdef __GNUC__
+		  static void * json_malloc(size_t siz) json_malloc_attr;
+		  static void * json_realloc(void * ptr, size_t siz) json_malloc_attr;
+	   #else
+		  static void * json_malloc(size_t siz) json_nothrow;
+		  static void * json_realloc(void * ptr, size_t siz) json_nothrow;
+	   #endif
+	   static void json_free(void * ptr) json_nothrow;
+	   static void registerMemoryCallbacks(json_malloc_t mal, json_realloc_t real, json_free_t fre) json_nothrow json_cold;
     };
 
-    template <typename T> static inline T * json_malloc(size_t count){
+    template <typename T> static inline T * json_malloc(size_t count) json_malloc_attr;
+    template <typename T> static inline T * json_malloc(size_t count) json_nothrow {
 	   return (T *)JSONMemory::json_malloc(sizeof(T) * count);
     }
 
-    template <typename T> static inline T * json_realloc(T * ptr, size_t count){
+    template <typename T> static inline T * json_realloc(T * ptr, size_t count) json_malloc_attr;
+    template <typename T> static inline T * json_realloc(T * ptr, size_t count) json_nothrow {
 	   return (T *)JSONMemory::json_realloc(ptr, sizeof(T) * count);
     }
 
-    template <typename T> static inline void libjson_free(T * JSON_FREE_PASSTYPE ptr){
+    template <typename T> static inline void libjson_free(T * JSON_FREE_PASSTYPE ptr) json_nothrow {
 	   JSONMemory::json_free(ptr);
 	   #if defined(JSON_DEBUG) || defined(JSON_SAFE)  //in debug or safe mode, set the pointer to 0 so that it can't be used again
 		  ptr = 0;
 	   #endif
     }
 #else
-    template <typename T>
-    static inline T * json_malloc(size_t count){
+
+    template <typename T> static inline T * json_malloc(size_t count) json_malloc_attr;
+    template <typename T> static inline T * json_malloc(size_t count) json_nothrow {
 	   #ifdef JSON_DEBUG  //in debug mode, see if the malloc was successful
 		  void * result = malloc(count * sizeof(T));
-		  JSON_ASSERT(result, JSON_TEXT("out of memory"));
+		  JSON_ASSERT(result != 0, JSON_TEXT("out of memory"));
 		  #ifdef JSON_NULL_MEMORY
 			 memset(result, '\0', count  * sizeof(T));
 		  #endif
@@ -50,19 +59,18 @@
 	   #endif
     }
 
-    template <typename T>
-    static inline void libjson_free(T * JSON_FREE_PASSTYPE ptr){
+    template <typename T> static inline void libjson_free(T * JSON_FREE_PASSTYPE ptr) json_nothrow {
 	   free(ptr);
 	   #if defined(JSON_DEBUG) || defined(JSON_SAFE)  //in debug or safe mode, set the pointer to 0 so that it can't be used again
 		  ptr = 0;
 	   #endif
     }
 
-    template <typename T>
-    static inline T * json_realloc(T * ptr, size_t count){
+    template <typename T> static inline T * json_realloc(T * ptr, size_t count) json_malloc_attr;
+    template <typename T> static inline T * json_realloc(T * ptr, size_t count) json_nothrow {
 	   #ifdef JSON_DEBUG  //in debug mode, check the results of realloc to be sure it was successful
 		  void * result = realloc(ptr, count * sizeof(T));
-		  JSON_ASSERT(result, JSON_TEXT("out of memory"));
+		  JSON_ASSERT(result != 0, JSON_TEXT("out of memory"));
 		  #ifdef JSON_NULL_MEMORY
 			 memset(result, '\0', count  * sizeof(T));
 		  #endif
@@ -77,12 +85,12 @@
     #include <map>
     class JSONNode;
     struct auto_expand {
-	   auto_expand(void) : mymap(){}
-	   ~auto_expand(void){ purge(); }
-	   void purge(void);
-	   inline void clear(void){ purge(); mymap.clear(); }
-	   inline void * insert(void * ptr){ mymap[ptr] = ptr; return ptr; }
-	   inline void remove(void * ptr){ 
+	   auto_expand(void) json_nothrow : mymap(){}
+	   ~auto_expand(void) json_nothrow { purge(); }
+	   void purge(void) json_nothrow;
+	   inline void clear(void) json_nothrow { purge(); mymap.clear(); }
+	   inline void * insert(void * ptr) json_nothrow { mymap[ptr] = ptr; return ptr; }
+	   inline void remove(void * ptr) json_nothrow { 
 		  std::map<void *, void *>::iterator i = mymap.find(ptr);
 		  JSON_ASSERT(i != mymap.end(), JSON_TEXT("Removing a non-managed item"));
 		  mymap.erase(i);
@@ -91,29 +99,45 @@
     };
 
     struct auto_expand_node {
-	   auto_expand_node(void) : mymap(){}
-	   ~auto_expand_node(void){ purge(); }
-	   void purge(void);
-	   inline void clear(void){ purge(); mymap.clear(); }
-	   inline JSONNode * insert(JSONNode * ptr){ mymap[ptr] = ptr; return ptr; }
-	   inline void remove(void * ptr){ 
+	   auto_expand_node(void) json_nothrow : mymap(){}
+	   ~auto_expand_node(void) json_nothrow { purge(); }
+	   void purge(void) json_nothrow ;
+	   inline void clear(void) json_nothrow { purge(); mymap.clear(); }
+	   inline JSONNode * insert(JSONNode * ptr) json_nothrow { mymap[ptr] = ptr; return ptr; }
+	   inline void remove(void * ptr) json_nothrow { 
 		  std::map<void *, JSONNode *>::iterator i = mymap.find(ptr);
-		  if(i != mymap.end()) mymap.erase(i);
+		  if(json_likely(i != mymap.end())) mymap.erase(i);
 	   }
 	   std::map<void *, JSONNode *> mymap;
     };
+
+    #ifdef JSON_STREAM
+	   class JSONStream;
+	   struct auto_expand_stream {
+		  auto_expand_stream(void) json_nothrow : mymap(){}
+		  ~auto_expand_stream(void) json_nothrow { purge(); }
+		  void purge(void) json_nothrow ;
+		  inline void clear(void) json_nothrow { purge(); mymap.clear(); }
+		  inline JSONStream * insert(JSONStream * ptr) json_nothrow { mymap[ptr] = ptr; return ptr; }
+		  inline void remove(void * ptr) json_nothrow { 
+			 std::map<void *, JSONStream *>::iterator i = mymap.find(ptr);
+			 if(json_likely(i != mymap.end())) mymap.erase(i);
+		  }
+		  std::map<void *, JSONStream *> mymap;
+	   };
+    #endif
 #endif
 
 //The C++ way, use an self-deleting pointer and let the optimizer decide when it gets destroyed
 template <typename T>
 class json_auto {
     public:
-	   json_auto(void) : ptr(0){}
-	   json_auto(size_t count) : ptr(json_malloc<T>(count)){}
-	   ~json_auto(void){
+	   json_auto(void) json_nothrow : ptr(0){}
+	   json_auto(size_t count) json_nothrow : ptr(json_malloc<T>(count)){}
+	   ~json_auto(void) json_nothrow {
 		  libjson_free<T>(ptr);
 	   }
-	   inline void set(T * p){
+	   inline void set(T * p) json_nothrow{
 		  ptr = p; 
 	   }
 	   T * ptr;
@@ -123,7 +147,7 @@ class json_auto {
 };
 
 //Clears a string, if required, frees the memory
-static inline void clearString(json_string & str){
+static inline void clearString(json_string & str) json_nothrow {
     #ifdef JSON_LESS_MEMORY
 	   json_string().swap(str);
     #else
@@ -133,9 +157,9 @@ static inline void clearString(json_string & str){
 
 //Shrinks a string
 #ifdef JSON_LESS_MEMORY
-    static inline json_string shrinkString(const json_string & str){
+    static inline json_string shrinkString(const json_string & str) json_nothrow {
 	   if (str.capacity() == str.length()) return str;
-	   return str.c_str();
+	   return json_string(str.c_str());
     }
 #else
     #define shrinkString(str) str

@@ -13,7 +13,7 @@
 	   #define JSON_MUTEX_COPY2
     #endif
 
-JSONNode::json_iterator JSONNode::find(const json_string & name_t){
+JSONNode::json_iterator JSONNode::find(const json_string & name_t) json_nothrow {
     JSON_CHECK_INTERNAL();
     JSON_ASSERT(type() == JSON_NODE, JSON_TEXT("finding a non-iteratable node"));
     makeUniqueInternal();
@@ -24,7 +24,7 @@ JSONNode::json_iterator JSONNode::find(const json_string & name_t){
 }
 
 #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-    JSONNode::json_iterator JSONNode::find_nocase(const json_string & name_t){
+    JSONNode::json_iterator JSONNode::find_nocase(const json_string & name_t) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE, JSON_TEXT("finding a non-iteratable node"));
 	   makeUniqueInternal();
@@ -35,18 +35,18 @@ JSONNode::json_iterator JSONNode::find(const json_string & name_t){
     }
 #endif
 
-JSONNode::json_iterator JSONNode::erase(json_iterator pos){
+JSONNode::json_iterator JSONNode::erase(json_iterator pos) json_nothrow {
     JSON_CHECK_INTERNAL();
     JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
     JSON_ASSERT_UNIQUE("erase 1");
     JSON_ASSERT_SAFE(pos < end(), JSON_TEXT("erase out of range"), return end(););
     JSON_ASSERT_SAFE(pos >= begin(), JSON_TEXT("erase out of range"), return begin(););
     deleteJSONNode(*(json_iterator_ptr(pos)));
-    internal -> Children.erase(json_iterator_ptr(pos));
+    internal -> CHILDREN -> erase(json_iterator_ptr(pos));
     return (empty()) ? end() : pos;
 }
 
-JSONNode::json_iterator JSONNode::erase(json_iterator _start, const json_iterator & _end){
+JSONNode::json_iterator JSONNode::erase(json_iterator _start, const json_iterator & _end) json_nothrow {
     if (_start == _end) return _start;
     JSON_CHECK_INTERNAL();
     JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
@@ -59,32 +59,32 @@ JSONNode::json_iterator JSONNode::erase(json_iterator _start, const json_iterato
 	   deleteJSONNode(*pos);
     }
     
-    internal -> Children.erase(json_iterator_ptr(_start), (json_index_t)(json_iterator_ptr(_end) - json_iterator_ptr(_start)));
+    internal -> CHILDREN -> erase(json_iterator_ptr(_start), (json_index_t)(json_iterator_ptr(_end) - json_iterator_ptr(_start)));
     return (empty()) ? end() : _start;
 }
 
 #ifdef JSON_LIBRARY
-JSONNode::json_iterator JSONNode::insert(json_iterator pos, JSONNode * x){
+JSONNode::json_iterator JSONNode::insert(json_iterator pos, JSONNode * x) json_nothrow {
 #else
-JSONNode::json_iterator JSONNode::insert(json_iterator pos, const JSONNode & x){
+JSONNode::json_iterator JSONNode::insert(json_iterator pos, const JSONNode & x) json_nothrow {
 #endif
     JSON_CHECK_INTERNAL();
     JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
     JSON_ASSERT_UNIQUE("insert 1");
-    if (json_iterator_ptr(pos) >= internal -> Children.end()){
+    if (json_iterator_ptr(pos) >= internal -> CHILDREN -> end()){
 	   internal -> push_back(x);
 	   return end() - 1;
     }
     JSON_ASSERT_SAFE(pos >= begin(), JSON_TEXT("insert out of lo range"), return begin(););
     #ifdef JSON_LIBRARY
-	   internal -> Children.insert(json_iterator_ptr(pos), x);
+	   internal -> CHILDREN -> insert(json_iterator_ptr(pos), x);
     #else
-	   internal -> Children.insert(json_iterator_ptr(pos), newJSONNode(x));
+	   internal -> CHILDREN -> insert(json_iterator_ptr(pos), newJSONNode(x));
     #endif
     return pos;
 }
     
-JSONNode::json_iterator JSONNode::insertFFF(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end){
+JSONNode::json_iterator JSONNode::insertFFF(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow {
     JSON_CHECK_INTERNAL();
     JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
     JSON_ASSERT_UNIQUE("insertFFF");
@@ -96,12 +96,12 @@ JSONNode::json_iterator JSONNode::insertFFF(json_iterator pos, JSONNode ** const
     for (JSONNode ** po = _start; po < _end; ++po){
 	   *runner++ = newJSONNode(*(*po)  JSON_MUTEX_COPY2);
     }
-    internal -> Children.insert(json_iterator_ptr(pos), mem.ptr, num);
+    internal -> CHILDREN -> insert(json_iterator_ptr(pos), mem.ptr, num);
     return pos;   
 }
 
 #ifndef JSON_LIBRARY
-    JSONNode::const_iterator JSONNode::find(const json_string & name_t) const {
+    JSONNode::const_iterator JSONNode::find(const json_string & name_t) const json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE, JSON_TEXT("finding a non-iteratable node"));
 	   if (JSONNode ** res = internal -> at(name_t)){
@@ -111,7 +111,7 @@ JSONNode::json_iterator JSONNode::insertFFF(json_iterator pos, JSONNode ** const
     }
     
     #ifdef JSON_CASE_INSENSITIVE_FUNCTIONS
-	   JSONNode::const_iterator JSONNode::find_nocase(const json_string & name_t) const {
+	   JSONNode::const_iterator JSONNode::find_nocase(const json_string & name_t) const json_nothrow {
 		  JSON_CHECK_INTERNAL();
 		  JSON_ASSERT(type() == JSON_NODE, JSON_TEXT("finding a non-iteratable node"));
 		  if (JSONNode ** res = internal -> at_nocase(name_t)){
@@ -121,18 +121,18 @@ JSONNode::json_iterator JSONNode::insertFFF(json_iterator pos, JSONNode ** const
 	   }
     #endif
     
-    JSONNode::reverse_iterator JSONNode::erase(reverse_iterator pos){
+    JSONNode::reverse_iterator JSONNode::erase(reverse_iterator pos) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
 	   JSON_ASSERT_UNIQUE("erase 2");
 	   JSON_ASSERT_SAFE(pos < rend(), JSON_TEXT("erase out of range"), return rend(););
 	   JSON_ASSERT_SAFE(pos >= rbegin(), JSON_TEXT("erase out of range"), return rbegin(););
 	   deleteJSONNode(*(pos.it));
-	   internal -> Children.erase(pos.it);
+	   internal -> CHILDREN -> erase(pos.it);
 	   return (empty()) ? rend() : pos + 1;
     }
     
-    JSONNode::reverse_iterator JSONNode::erase(reverse_iterator _start, const reverse_iterator & _end){
+    JSONNode::reverse_iterator JSONNode::erase(reverse_iterator _start, const reverse_iterator & _end) json_nothrow {
 	   if (_start == _end) return _start;
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
@@ -144,69 +144,69 @@ JSONNode::json_iterator JSONNode::insertFFF(json_iterator pos, JSONNode ** const
 	   for (JSONNode ** pos = _start.it; pos > _end.it; --pos){
 		  deleteJSONNode(*pos);
 	   }
-	   const json_index_t num = _start.it - _end.it;
-	   internal -> Children.erase(_end.it + 1, num, _start.it);
+	   const json_index_t num = (json_index_t)(_start.it - _end.it);
+	   internal -> CHILDREN -> erase(_end.it + 1, num, _start.it);
 	   return (empty()) ? rend() : _start + num;
     }
     
-    JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const JSONNode & x){
+    JSONNode::reverse_iterator JSONNode::insert(reverse_iterator pos, const JSONNode & x) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
 	   JSON_ASSERT_UNIQUE("insert 1");
-	   if (pos.it < internal -> Children.begin()){
+	   if (pos.it < internal -> CHILDREN -> begin()){
 		  internal -> push_front(x);
 		  return rend() - 1;
 	   }
 	   JSON_ASSERT_SAFE(pos >= rbegin(), JSON_TEXT("insert out of range"), return rbegin(););
-	   internal -> Children.insert(++pos.it, newJSONNode(x), true);
+	   internal -> CHILDREN -> insert(++pos.it, newJSONNode(x), true);
 	   return pos;
     }
     
-    JSONNode::reverse_iterator JSONNode::insertRFF(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end){
+    JSONNode::reverse_iterator JSONNode::insertRFF(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
 	   JSON_ASSERT_UNIQUE("insert RFF");
 	   JSON_ASSERT_SAFE(pos <= rend(), JSON_TEXT("insert out of range"), return rend(););
 	   JSON_ASSERT_SAFE(pos >= rbegin(), JSON_TEXT("insert out of range"), return rbegin(););
-	   const json_index_t num = _end - _start;
+	   const json_index_t num = (json_index_t)(_end - _start);
 	   json_auto<JSONNode *> mem(num);
 	   JSONNode ** runner = mem.ptr + num;
 	   for (JSONNode ** po = _start; po < _end; ++po){  //fill it backwards
 		  *(--runner) = newJSONNode(*(*po)    JSON_MUTEX_COPY2);
 	   }
-	   internal -> Children.insert(++pos.it, mem.ptr, num);
+	   internal -> CHILDREN -> insert(++pos.it, mem.ptr, num);
 	   return pos - num + 1;
     }
     
-    JSONNode::iterator JSONNode::insertFRR(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end){
+    JSONNode::iterator JSONNode::insertFRR(json_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
 	   JSON_ASSERT_UNIQUE("insert FRR");
 	   JSON_ASSERT_SAFE(pos <= end(), JSON_TEXT("insert out of range"), return end(););
 	   JSON_ASSERT_SAFE(pos >= begin(), JSON_TEXT("insert out of range"), return begin(););
-	   const json_index_t num = _start - _end;
+	   const json_index_t num = (json_index_t)(_start - _end);
 	   json_auto<JSONNode *> mem(num);
 	   JSONNode ** runner = mem.ptr;
 	   for (JSONNode ** po = _start; po > _end; --po){
 		  *runner++ = newJSONNode(*(*po)    JSON_MUTEX_COPY2);
 	   }
-	   internal -> Children.insert(pos.it, mem.ptr, num);
+	   internal -> CHILDREN -> insert(pos.it, mem.ptr, num);
 	   return pos; 
     }
     
-    JSONNode::reverse_iterator JSONNode::insertRRR(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end){
+    JSONNode::reverse_iterator JSONNode::insertRRR(reverse_iterator pos, JSONNode ** const _start, JSONNode ** const _end) json_nothrow {
 	   JSON_CHECK_INTERNAL();
 	   JSON_ASSERT(type() == JSON_NODE || type() == JSON_ARRAY, JSON_TEXT("erasing a non-iteratable node"));
 	   JSON_ASSERT_UNIQUE("insert RRR");
 	   JSON_ASSERT_SAFE(pos <= rend(), JSON_TEXT("insert out of range"), return rend(););
 	   JSON_ASSERT_SAFE(pos >= rbegin(), JSON_TEXT("insert out of range"), return rbegin(););
-	   const json_index_t num = _start - _end;
+	   const json_index_t num = (json_index_t)(_start - _end);
 	   json_auto<JSONNode *> mem(num);
 	   JSONNode ** runner = mem.ptr;
 	   for (JSONNode ** po = _start; po > _end; --po){
 		  *runner++ = newJSONNode(*(*po)    JSON_MUTEX_COPY2);
 	   }
-	   internal -> Children.insert(++pos.it, mem.ptr, num);
+	   internal -> CHILDREN -> insert(++pos.it, mem.ptr, num);
 	   return pos - num + 1;   
     }
 #endif

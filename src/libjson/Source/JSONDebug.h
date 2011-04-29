@@ -2,19 +2,12 @@
 #define JSON_DEBUG_H
 
 #include "JSONDefs.h"
-#include "../JSONOptions.h"
-
-#ifdef JSON_UNIT_TEST
-    #define JSON_PRIVATE
-#else
-    #define JSON_PRIVATE private:
-#endif
 
 #ifdef JSON_DEBUG
     #ifdef JSON_SAFE
 	   #define JSON_ASSERT_SAFE(condition, msg, code)\
 		  {\
-			 if (!(condition)){\
+			 if (json_unlikely(!(condition))){\
 				JSON_FAIL(msg);\
 				code\
 			 }\
@@ -29,22 +22,22 @@
 	   #define JSON_FAIL_SAFE(msg, code) JSON_FAIL(msg)
     #endif
 
-    #define JSON_FAIL JSONDebug::_JSON_FAIL	
-    #define JSON_ASSERT JSONDebug::_JSON_ASSERT	
+    #define JSON_FAIL(msg) JSONDebug::_JSON_FAIL(msg)
+    #define JSON_ASSERT(bo, msg) JSONDebug::_JSON_ASSERT(bo, msg)
 
     class JSONDebug {
     public:
 	   #ifndef JSON_STDERROR
-		  static void register_callback(json_error_callback_t callback);
+		  static void register_callback(json_error_callback_t callback) json_nothrow json_cold;
 	   #endif
-	   static void _JSON_FAIL(const json_string & msg);
-	   static void _JSON_ASSERT(bool condition, const json_string & msg);
+	   static void _JSON_FAIL(const json_string & msg) json_nothrow json_cold;
+	   static void _JSON_ASSERT(bool condition, const json_string & msg) json_nothrow json_cold;
     };
 #else
     #ifdef JSON_SAFE
 	   #define JSON_ASSERT_SAFE(condition, msg, code)\
 		  {\
-			 if (!(condition)){\
+			 if (json_unlikely(!(condition))){\
 				code\
 			 }\
 		  }

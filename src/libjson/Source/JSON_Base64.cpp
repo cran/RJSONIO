@@ -1,17 +1,16 @@
 #include "JSON_Base64.h"
-#include "JSONDefs.h"
 
-#ifdef JSON_BINARY  //if this is not needed, don't waste space and time compiling it
+#if defined(JSON_BINARY) || defined(JSON_EXPOSE_BASE64)  //if this is not needed, don't waste space and time compiling it
 
-static const json_char * chars64 = JSON_TEXT("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+static const json_char * chars64(JSON_TEXT("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"));
 
-json_string JSONBase64::json_encode64(const unsigned char * binary, size_t bytes){
+json_string JSONBase64::json_encode64(const unsigned char * binary, size_t bytes) json_nothrow {
     size_t misaligned = bytes % 3;
     json_string result;
     result.reserve((size_t)(((float)bytes) * 1.37f) + 4);
     
     //do all of the ones that are 3 byte aligned
-    for (size_t i = 0, aligned = (bytes - misaligned) / 3; i < aligned; ++i){
+    for (size_t i = 0, aligned((bytes - misaligned) / 3); i < aligned; ++i){
 	   result += chars64[(binary[0] & 0xFC) >> 2];
 	   result += chars64[((binary[0] & 0x03) << 4) + ((binary[1] & 0xF0) >> 4)];
 	   result += chars64[((binary[1] & 0x0F) << 2) + ((binary[2] & 0xC0) >> 6)];
@@ -19,7 +18,7 @@ json_string JSONBase64::json_encode64(const unsigned char * binary, size_t bytes
 	   binary += 3;
     }
     
-    if (misaligned){
+    if (json_likely(misaligned != 0)){
 	   //copy the rest into a temporary buffer
 	   unsigned char temp[3];
 	   for (unsigned int i = 0; i < misaligned; ++i){
@@ -43,27 +42,24 @@ json_string JSONBase64::json_encode64(const unsigned char * binary, size_t bytes
     return result;
 }
 
-inline json_char toBinary(json_char c){
-    if (c == JSON_TEXT('+')){
-	   return JSON_TEXT('>');
-    } else if (c == JSON_TEXT('/')){
-	   return JSON_TEXT('?');
-    } else if (c < JSON_TEXT(':')){
-	   return c + JSON_TEXT('\x04');
-    } else if (c < JSON_TEXT('[')){
-	   return c - JSON_TEXT('\x41');
-    }
-    return c - 71;
+
+//define it first for the pure qualifier
+
+//generated array initialization.  If there is a bug in toBinary, regenerate this array
+const json_uchar binaryConvert[80] = {62,48,49,50,63,52,53,54,55,56,57,58,59,60,61,249,250,251,252,253,254,255,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51};
+
+inline json_uchar toBinary(json_uchar c) json_pure;
+inline json_uchar toBinary(json_uchar c) json_nothrow {
+    JSON_ASSERT_SAFE(c >= 43, JSON_TEXT("Encoded outside low range"), return JSON_TEXT('0'););
+    JSON_ASSERT_SAFE(c <= 122, JSON_TEXT("Encoded outside high range"), return JSON_TEXT('0'););
+    return binaryConvert[c - 43];
 }
 
-/*
- Must be a std::string because it's binary, and chars must be 1 byte
- */
-std::string JSONBase64::json_decode64(const json_string & encoded){
+std::string JSONBase64::json_decode64(const json_string & encoded) json_nothrow {
     const size_t length = encoded.length();
     #if defined JSON_DEBUG || defined JSON_SAFE
 	   size_t pos = encoded.find_first_not_of(chars64);
-	   if (pos != json_string::npos){
+	   if (json_unlikely(pos != json_string::npos)){
 		  JSON_ASSERT_SAFE(encoded[pos] == JSON_TEXT('='), JSON_TEXT("Not Base64"), return EMPTY_STD_STRING;);
 		  if (pos != length - 1){
 			 JSON_ASSERT_SAFE(pos == length - 2, JSON_TEXT("Not Base64"), return EMPTY_STD_STRING;);
@@ -74,7 +70,7 @@ std::string JSONBase64::json_decode64(const json_string & encoded){
     const json_char * runner = encoded.c_str();
     size_t aligned = length / 4; //don't do the last ones as they might be = padding
     std::string result;
-    if (aligned){
+    if (json_likely(aligned != 0)){
 	   --aligned;
 	   result.reserve((size_t)((float)length / 1.37) + 1);
 	   

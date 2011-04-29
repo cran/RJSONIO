@@ -1,5 +1,5 @@
 #include "JSONNode.h"
-#ifdef JSON_WRITER
+#ifdef JSON_WRITE_PRIORITY
 #include "JSONWorker.h"
 
 const static json_string WRITER_EMPTY;
@@ -12,7 +12,8 @@ const static json_string WRITER_EMPTY;
 #ifdef JSON_INDENT
     const static json_string INDENT(JSON_TEXT(JSON_INDENT));
 
-    inline json_string makeIndent(unsigned int amount){
+    inline json_string makeIndent(unsigned int amount) json_nothrow json_write_priority;
+    inline json_string makeIndent(unsigned int amount) json_nothrow {
 	   if (amount == 0xFFFFFFFF) return WRITER_EMPTY;
 	   json_string result;
 	   result.reserve(amount * INDENT.length());
@@ -23,13 +24,13 @@ const static json_string WRITER_EMPTY;
 	   return result;
     }
 #else
-    inline json_string makeIndent(unsigned int amount){
+    inline json_string makeIndent(unsigned int amount) json_nothrow {
 	   if (amount == 0xFFFFFFFF) return WRITER_EMPTY;
 	   return json_string(amount, JSON_TEXT('\t'));
     }
 #endif
 
-json_string internalJSONNode::WriteName(bool formatted, bool arrayChild) const {
+json_string internalJSONNode::WriteName(bool formatted, bool arrayChild) const json_nothrow {
     if (arrayChild){
 	   return WRITER_EMPTY ;
     } else {
@@ -37,9 +38,9 @@ json_string internalJSONNode::WriteName(bool formatted, bool arrayChild) const {
     }
 }
 
-json_string internalJSONNode::WriteChildren(unsigned int indent){
+json_string internalJSONNode::WriteChildren(unsigned int indent) json_nothrow {
     //Iterate through the children and write them
-    if (Children.empty()) return WRITER_EMPTY;
+    if (json_likely(CHILDREN -> empty())) return WRITER_EMPTY;
     
     json_string indent_this;
     json_string res;
@@ -52,13 +53,13 @@ json_string internalJSONNode::WriteChildren(unsigned int indent){
     }
 
     //else it's not formatted, leave the indentation strings empty
-    const size_t size_minus_one = Children.size() - 1;
+    const size_t size_minus_one = CHILDREN -> size() - 1;
     size_t i = 0;
-    JSONNode ** it = Children.begin();
-    for(JSONNode ** it_end = Children.end(); it != it_end; ++it, ++i){
+    JSONNode ** it = CHILDREN -> begin();
+    for(JSONNode ** it_end = CHILDREN -> end(); it != it_end; ++it, ++i){
 	   
 	   res += indent_plus_one + (*it) -> internal -> Write(indent, type() == JSON_ARRAY);
-	   if (i < size_minus_one) res += JSON_TEXT(",");  //the last one does not get a comma, but all of the others do
+	   if (json_likely(i < size_minus_one)) res += JSON_TEXT(",");  //the last one does not get a comma, but all of the others do
     }
     return res + indent_this;
 }
@@ -70,11 +71,11 @@ json_string internalJSONNode::WriteChildren(unsigned int indent){
 	   const static json_string SINGLELINE(JSON_TEXT("//"));
     #endif
 
-    json_string internalJSONNode::WriteComment(unsigned int indent) const {
+    json_string internalJSONNode::WriteComment(unsigned int indent) const json_nothrow {
 	   if (indent == 0xFFFFFFFF) return WRITER_EMPTY;
-	   if (_comment.empty()) return WRITER_EMPTY;
+	   if (json_likely(_comment.empty())) return WRITER_EMPTY;
 	   size_t pos = _comment.find(JSON_TEXT('\n'));
-	   if (pos == json_string::npos){  //Single line comment
+	   if (json_likely(pos == json_string::npos)){  //Single line comment
 		  return NEW_LINE + makeIndent(indent) + SINGLELINE + _comment + NEW_LINE + makeIndent(indent);
 	   }
 	   
@@ -88,11 +89,12 @@ json_string internalJSONNode::WriteChildren(unsigned int indent){
 	   #endif
 	   size_t old = 0;
 	   while(pos != json_string::npos){
-		  if (pos && _comment[pos - 1] == JSON_TEXT('\r')) --pos;
+		  if (json_unlikely(pos && _comment[pos - 1] == JSON_TEXT('\r'))) --pos;
 		  #if defined(JSON_WRITE_BASH_COMMENTS) || defined(JSON_WRITE_SINGLE_LINE_COMMENTS)
 			 result += SINGLELINE;
 		  #endif
-		  result += _comment.substr(old, pos - old) + NEW_LINE;
+		  result.append(_comment.begin() + old, _comment.begin() + pos);
+		  result += NEW_LINE;
 		  #if defined(JSON_WRITE_BASH_COMMENTS) || defined(JSON_WRITE_SINGLE_LINE_COMMENTS)
 			 result += makeIndent(indent);
 		  #else
@@ -104,7 +106,9 @@ json_string internalJSONNode::WriteChildren(unsigned int indent){
 	   #if defined(JSON_WRITE_BASH_COMMENTS) || defined(JSON_WRITE_SINGLE_LINE_COMMENTS)
 		  result += SINGLELINE;
 	   #endif
-	   result += _comment.substr(old, pos - old) + NEW_LINE + makeIndent(indent);
+	   result.append(_comment.begin() + old, _comment.end());
+	   result += NEW_LINE;
+	   result += makeIndent(indent);
 	   #if defined(JSON_WRITE_BASH_COMMENTS) || defined(JSON_WRITE_SINGLE_LINE_COMMENTS)
 		  return result;
 	   #else
@@ -112,15 +116,15 @@ json_string internalJSONNode::WriteChildren(unsigned int indent){
 	   #endif
     }
 #else
-    json_string internalJSONNode::WriteComment(unsigned int) const {
+    inline json_string internalJSONNode::WriteComment(unsigned int) const json_nothrow {
 	   return WRITER_EMPTY;
     }
 #endif
 
-json_string internalJSONNode::Write(unsigned int indent, bool arrayChild){
+json_string internalJSONNode::Write(unsigned int indent, bool arrayChild) json_nothrow {
     const bool formatted = indent != 0xFFFFFFFF;
     
-    #ifndef JSON_PREPARSE
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
 	   if (!(formatted || fetched)){  //It's not formatted or fetched, just do a raw dump
 		  return WriteComment(indent) + WriteName(false, arrayChild) + _string;
 	   }
@@ -142,8 +146,8 @@ json_string internalJSONNode::Write(unsigned int indent, bool arrayChild){
     
     JSON_ASSERT_SAFE(type() == JSON_STRING, JSON_TEXT("Writing an unknown JSON node type"), return JSON_TEXT(""););
     //If it go here, then it's a json_string
-    #ifndef JSON_PREPARSE
-	   if (fetched) return WriteComment(indent) + WriteName(formatted, arrayChild) + JSON_TEXT("\"") + JSONWorker::UnfixString(_string, _string_encoded) + JSON_TEXT("\"");  //It's already been fetched, meaning that it's unescaped
+    #if !defined(JSON_PREPARSE) && defined(JSON_READ_PRIORITY) 
+	   if (json_likely(fetched)) return WriteComment(indent) + WriteName(formatted, arrayChild) + JSON_TEXT("\"") + JSONWorker::UnfixString(_string, _string_encoded) + JSON_TEXT("\"");  //It's already been fetched, meaning that it's unescaped
 	   return WriteComment(indent) + WriteName(formatted, arrayChild) + _string;  //it hasn't yet been fetched, so it's already unescaped, just do a dump
     #else
 	   return WriteComment(indent) + WriteName(formatted, arrayChild) + JSON_TEXT("\"") + JSONWorker::UnfixString(_string, _string_encoded) + JSON_TEXT("\"");

@@ -37,7 +37,7 @@
   as an array of length 1 in JSON
 }
 \usage{
-toJSON(x, container = length(x) > 1 || length(names(x)) > 0, collapse = "\n", ...)
+toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, collapse = "\n", ..., .level = 1L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -50,6 +50,10 @@ toJSON(x, container = length(x) > 1 || length(names(x)) > 0, collapse = "\n", ..
     array or primitive in JavaScript.}
   \item{collapse}{a string that is used as the separator when combining the individual lines of the 
     generated JSON content}
+ \item{.level}{an integer value. This is not a parameter the caller is supposed to supply. It is a
+  value that is passed in recursive calls to identify the top-level and sub-level serialization to JSON
+  and so help to identify when a scalar needs to be in a container and when it is legitimate to 
+  output a  scalar value directly.}
 }
 
 \value{

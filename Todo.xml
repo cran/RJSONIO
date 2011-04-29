@@ -6,6 +6,13 @@
 <items>
 
 <item>
+Swap in the latest version of libjson (e.g. 7.0)
+<br/>
+We should allow the package to be built against
+an existing installed libjson.
+</item>
+
+<item>
 Perhaps allow objects with homogeneous elements to be converted
 to named vectors, e.g. servlet-mapping in web.json
 </item>

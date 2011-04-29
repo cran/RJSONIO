@@ -15,6 +15,12 @@
 
 
 /*
+ *  JSON_STRICT removes all of libjson's extensions.  Meaning no comments, no special numbers
+ */
+//#define JSON_STRICT
+
+
+/*
  *  JSON_DEBUG is used to perform extra error checking.  Because libjson usually 
  *  does on the fly parsing, validation is impossible, so this option will allow
  *  you to register an error callback so that you can record what is going wrong 
@@ -23,6 +29,13 @@
  *  for release candidates
  */
 //#define JSON_DEBUG
+
+
+/*
+ *  JSON_ISO_STRICT turns off all code that uses non-standard C++.  This removes all
+ *  references to long long and long double as well as a few others
+ */
+//#define JSON_ISO_STRICT
 
 
 /*
@@ -85,10 +98,26 @@
 
 
 /*
+ *  JSON_EXPOSE_BASE64 is used to turn on the functionality of libjson's base64 encoding
+ *  and decoding.  This may be useful if you want to obfuscate your json, or send binary data over
+ *  a network
+ */
+//#define JSON_EXPOSE_BASE64
+
+
+/*
  *  JSON_ITERATORS turns on all of libjson's iterating functionality.  This would usually
  *  only be turned off while compiling for use with C
  */
 //#define JSON_ITERATORS
+
+
+/*
+ *  JSON_STREAM turns on libjson's streaming functionality.  This allows you to give parts of 
+ *  your json into a stream, which will automatically hit a callback when full nodes are
+ *  completed
+ */
+//#define JSON_STREAM
 
 
 /*
@@ -129,13 +158,6 @@
 
 
 /*
- *  JSON_ISO_STRICT turns off all code that uses non-standard C++.  This removes all
- *  references to long long and long double as well as a few others
- */
-//#define JSON_ISO_STRICT
-
-
-/*
  *  JSON_NO_C_CONSTS removes consts from the C interface.  It still acts the same way, but
  *  this may be useful for using the header with languages or variants that don't have const
  */
@@ -143,10 +165,24 @@
 
 
 /*
- *  JSON_WRITER turns on libjson's writing capabilties.  Without this libjson can only
- *  read and parse json, this allows it to write back out
+ *  JSON_OCTAL allows libjson to use octal values in numbers.
  */
-#define JSON_WRITER
+//#define JSON_OCTAL
+
+
+/*
+ *  JSON_WRITE_PRIORITY turns on libjson's writing capabilties.  Without this libjson can only
+ *  read and parse json, this allows it to write back out.  Changing the value of the writer
+ *  changes how libjson compiles, and how fast it will go when writing
+ */
+#define JSON_WRITE_PRIORITY MED
+
+
+/*
+ *  JSON_READ_PRIORITY turns on libjson's reading capabilties.  Changing the value of the reader
+ *  changes how libjson compiles, and how fast it will go when writing
+ */
+#define JSON_READ_PRIORITY HIGH
 
 
 /*
@@ -163,7 +199,6 @@
  *  that you specify.  If this is not turned on, then it will use the tab (\t) character
  */
 //#define JSON_INDENT "    "
-
 
 
 /*
@@ -240,6 +275,21 @@
  *  of libjson.  This should not be turned on by end users.
  */
 //#define JSON_UNIT_TEST
+
+
+/*
+ *  JSON_NO_EXCEPTIONS turns off any exception trhowing by the library.  It may still use exceptions
+ *  internally, but the interface will never throw anything.
+ */
+//#define JSON_NO_EXCEPTIONS
+
+
+/*
+ *  JSON_DEPRECATED_FUNCTIONS turns on functions that have been deprecated, this is for backwards
+ *  compatibility between major releases.  It is highly recommended that you move your functions
+ *  over to the new equivalents
+ */
+#define JSON_DEPRECATED_FUNCTIONS
 
 #endif
 

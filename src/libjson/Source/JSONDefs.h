@@ -8,6 +8,15 @@
 */
 
 #include "../JSONOptions.h"
+#include "JSONDefs/Unknown_C.h"
+#include "JSONDefs/GNU_C.h"
+#include "JSONDefs/Visual_C.h"
+#include "JSONDefs/Strings_Defs.h"
+
+#define __LIBJSON_MAJOR__ 7
+#define __LIBJSON_MINOR__ 0
+#define __LIBJSON_PATCH__ 1
+#define __LIBJSON_VERSION__ (__LIBJSON_MAJOR__ * 10000 + __LIBJSON_MINOR__ * 100 + __LIBJSON_PATCH__)
 
 #define JSON_NULL '\0'
 #define JSON_STRING '\1'
@@ -19,51 +28,55 @@
 #ifdef __cplusplus
     #ifdef JSON_STRING_HEADER
 	   #include JSON_STRING_HEADER
-    #else
-	   #include <string>
     #endif
 #endif
 
-#ifdef JSON_UNICODE
-    #ifdef JSON_ISO_STRICT
-	   #error, You can not use unicode under ISO Strict C++
-    #endif
-    #define json_char wchar_t
-    #define json_uchar wchar_t
-    #ifdef __cplusplus
-	   #include <cwchar>  //need wide characters
-	   #ifndef JSON_STRING_HEADER
-		  typedef std::wstring json_string;
-	   #endif
-    #else
-	   #include <wchar.h>  //need wide characters
-    #endif
-    #define JSON_TEXT(s) L ## s
-    #define json_strlen wcslen
-    #define json_strcmp wcscmp
+#ifdef JSON_NO_EXCEPTIONS
+    #define json_throw(x)
+    #define json_try 
+    #define json_catch(exception, code) 
 #else
-    #define json_char char
-    #define json_uchar unsigned char
-    #ifdef __cplusplus
-	   #ifndef JSON_STRING_HEADER
-		  typedef std::string json_string;
+    #define json_throw(x) throw(x)
+    #define json_try try
+    #define json_catch(exception, code) catch(exception){ code }
+#endif
+
+#ifdef JSON_STRICT
+    #ifndef JSON_UNICODE
+	   #error, JSON_UNICODE is required for JSON_STRICT
+    #endif
+    #ifdef JSON_COMMENTS
+	   #error, JSON_COMMENTS is required to be off for JSON_STRICT
+    #endif
+#endif
+
+#ifdef JSON_ISO_STRICT
+    #ifdef JSON_UNICODE
+	   #error, You can not use unicode under ANSI Strict C++
+    #endif
+#else
+    #ifdef __GNUC__
+	   #ifdef JSON_ISO_STRICT
+		  #warning, Using -ansi GCC option, but JSON_ISO_STRICT not on, turning it on for you
+		  #define JSON_ISO_STRICT
 	   #endif
     #endif
-    #define JSON_TEXT(s) s
-    #define json_strlen strlen
-    #define json_strcmp strcmp
 #endif
+
 
 #ifdef JSON_LESS_MEMORY
-    #define BITS(x) :x  //tells the compiler how many bits to use for a field
+    /* PACKED and BITS stored in compiler specific headers */
     #define START_MEM_SCOPE {
     #define END_MEM_SCOPE }
     typedef float json_number;
+    #define JSON_FLOAT_THRESHHOLD 0.00001f
 #else
+    #define PACKED(x)
     #define BITS(x)
     #define START_MEM_SCOPE
     #define END_MEM_SCOPE
     typedef double json_number;
+    #define JSON_FLOAT_THRESHHOLD 0.00001
 #endif
 
 #if defined JSON_DEBUG || defined JSON_SAFE
@@ -92,10 +105,50 @@ typedef void (*json_free_t)(void *);
     typedef void * (*json_malloc_t)(size_t);
     typedef void * (*json_realloc_t)(void *, size_t);
 #else
-    #define JSONNODE void  //so that JSONNODE* is void*
+    #define JSONNODE void  /* so that JSONNODE* is void* */
     typedef JSONNODE** JSONNODE_ITERATOR;
+    #ifdef JSON_STREAM
+	   #define JSONSTREAM void
+	   typedef void (*json_stream_callback_t)(JSONNODE *);
+    #endif
     typedef void * (*json_malloc_t)(unsigned long);
     typedef void * (*json_realloc_t)(void *, unsigned long);
 #endif
 
-#endif //JSONDEFS_H
+#ifdef JSON_DEBUG
+    #ifdef NDEBUG
+	   #ifdef __GNUC__
+		  #warning, Have JSON_DEBUG on in a release build
+	   #else
+		  #error, Have JSON_DEBUG on in a release build
+	   #endif
+    #endif
+#else
+	#ifndef NDEBUG
+	   #ifdef __GNUC__
+		  #warning, Release build of libjson, but NDEBUG is not on
+	   #else
+		  #error, Release build of libjson, but NDEBUG is not on
+	   #endif
+	#endif
+#endif
+
+#ifdef JSON_UNIT_TEST
+    #define JSON_PRIVATE
+    #define JSON_PROTECTED
+#else
+    #define JSON_PRIVATE private:
+    #define JSON_PROTECTED protected:
+#endif
+#ifdef JSON_STREAM
+    #ifndef JSON_READ_PRIORITY
+	   #error, JSON_STREAM also requires JSON_READ_PRIORITY
+    #endif
+#endif
+#ifdef JSON_VALIDATE
+    #ifndef JSON_READ_PRIORITY
+	   #error, JSON_VALIDATE also requires JSON_READ_PRIORITY
+    #endif
+#endif
+
+#endif
