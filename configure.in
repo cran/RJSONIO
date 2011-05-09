@@ -47,7 +47,8 @@ else
        echo "        ****************"
        exit 1;
    fi
-   echo "Using local libjson code"
+   echo "Using local libjson code. Copying files"
+   echo "`pwd`"
    CPP_FILES=`(cd src/libjson/Source/; ls *.cpp)`
    cp src/libjson/Source/*.cpp src/
    LIBJSON_CFLAGS="-I. -Ilibjson -Ilibjson/Source"
