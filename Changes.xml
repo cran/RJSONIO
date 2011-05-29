@@ -3,7 +3,27 @@
            xmlns:env="http://www.shell.org">
 <omg:pkg>RJSONIO</omg:pkg>
 
-<version num="0.6-0">
+<version num="0.7-3">
+<change>
+Honor the collapse argument in more places to allow avoiding new line characters being
+inserted.
+</change>
+</version>
+
+<version num="0.7-2">
+<change>
+Copied compiler flags for libjson code into Makevars.win
+</change>
+</version>
+
+<version num="0.7-1">
+<change>
+Correction for toJSON() method for handling of \ in strings so that they round-trip and work in other JSON tools.
+     Thanks to Patrick Perry.
+</change>
+</version>
+
+<version num="0.7-0">
 <change>
 Round-tripping from JSON to R and back behaves a lot more consistently.
 Thanks to Kevin Coombes for the examples/tests.<br/>

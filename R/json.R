@@ -1,5 +1,9 @@
 emptyNamedList = structure(list(), names = character())
 
+trim =
+function (x) 
+  gsub("(^[[:space:]]+|[[:space:]]+$)", "", x)
+
 dQuote =
 function(x)
   paste('"', x, '"', sep = "")
@@ -31,7 +35,7 @@ setMethod("toJSON", "integer",
 
              if(container) {
                 if(length(names(x)))
-                   paste("{\n", paste(dQuote(names(x)), x, sep = ": ", collapse = sprintf(",%s", collapse)), "\n}")
+                   paste(sprintf("{%s", collapse), paste(dQuote(names(x)), x, sep = ": ", collapse = sprintf(",%s", collapse)), sprintf("%s}", collapse))
                 else
                    paste("[", paste(x, collapse = ", "), "]")
              }
@@ -46,7 +50,7 @@ setMethod("toJSON", "hexmode",
              tmp = paste("0x", format(x), sep = "")
              if(container) {
                 if(length(names(x)))
-                   paste("{\n", paste(dQuote(names(x)), tmp, sep = ": ", collapse = sprintf(",%s", collapse)), "\n}")
+                   paste(sprintf("{%s", collapse), paste(dQuote(names(x)), tmp, sep = ": ", collapse = sprintf(",%s", collapse)), sprintf("%s}", collapse))
                 else               
                 paste("[", paste(tmp, collapse = ", "), "]")
              } else
@@ -64,7 +68,7 @@ setMethod("toJSON", "logical",
              tmp = ifelse(x, "true", "false")
              if(container) {
                 if(length(names(x)))
-                   paste("{\n", paste(dQuote(names(x)), tmp, sep = ": ", collapse = ",\n   "), "\n}")
+                   paste(sprintf("{%s", collapse), paste(dQuote(names(x)), tmp, sep = ": ", collapse = sprintf(",%s", collapse)), sprintf("%s}", collapse))
                 else               
                    paste("[", paste(tmp, collapse = ", "), "]")
              } else
@@ -76,7 +80,8 @@ setMethod("toJSON", "numeric",
              tmp = formatC(x, digits = digits)
              if(container) {
                 if(length(names(x)))
-                   paste("{\n", paste(dQuote(names(x)), tmp, sep = ": ", collapse = ",\n   "), "\n}")
+                   paste(sprintf("{%s", collapse), paste(dQuote(names(x)), tmp, sep = ": ", collapse = sprintf(",%s", collapse)),
+                                   sprintf("%s}", collapse))
                 else
                    paste("[", paste(tmp, collapse = ", "), "]")
              } else
@@ -92,7 +97,9 @@ setMethod("toJSON", "character",
              tmp = dQuote(tmp)
              if(container) {
                 if(length(names(x)))
-                   paste("{\n", paste(dQuote(names(x)), tmp, sep = ": ", collapse = ",\n   "), "\n}")
+                   paste(sprintf("{%s", collapse),
+                          paste(dQuote(names(x)), tmp, sep = ": ", collapse = sprintf(",%s", collapse)),
+                         sprintf("%s}", collapse))
                 else               
                    paste("[", paste(tmp, collapse = ", "), "]")
              } else
@@ -116,7 +123,7 @@ setMethod("toJSON", "AsIs",
 
 setMethod("toJSON", "matrix",
            function(x, container = length(x) > 1 || length(names(x)) > 0, collapse = "\n", ...) {
-             tmp = paste(apply(x, 1, toJSON), collapse = ",\n")
+             tmp = paste(apply(x, 1, toJSON), collapse = sprintf(",%s", collapse))
              if(!container)
                return(tmp)
 
@@ -143,7 +150,9 @@ setMethod("toJSON", "list",
                return(els)
              
              if(length(names(x)))
-                paste("{\n", paste(dQuote(names(x)), els, sep = ": ", collapse = ",\n   "), "\n}")
+                paste(sprintf("{%s", collapse),
+                      paste(dQuote(names(x)), els, sep = ": ", collapse = sprintf(",%s", collapse)),
+                      sprintf("%s}", collapse))
              else
-                 paste("[\n", paste(els, collapse = ",\n"), "\n]")
+                 paste(sprintf("[%s", collapse), paste(els, collapse = sprintf(",%s", collapse)), sprintf("%s]", collapse))
            })

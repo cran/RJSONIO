@@ -1,10 +1,24 @@
 
 RJSONIO
 
+
+Version 0.7-3
+
+  *  Honor the collapse argument in more places to allow avoiding new line characters being inserted.
+
+
+
+Version 0.7-2
+
+  *  Copied compiler flags for libjson code into Makevars.win
+
+
+
 Version 0.7-1
 
-  *  Correction for toJSON() method for handling of \ in strings so that they round-trip and work in other JSON tools.
-     Thanks to Patrick Perry.
+  *  Correction for toJSON() method for handling of \ in strings so that they round-trip and work in other JSON tools. Thanks to Patrick Perry.
+
+
 
 Version 0.7-0
 
