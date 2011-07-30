@@ -2,6 +2,27 @@
 RJSONIO
 
 
+Version 0.8-0
+
+  *  Corrections to the libjson C/C++ code from Brian Ripley.
+
+
+
+Version 0.8-0
+
+  *  Added a .withNames parameter to toJSON() so that the caller can explicitly control whether an R object with names is written as an associative array or as a simple array.
+
+
+  *  Added a simplify parameter to fromJSON() that controls whether we collapse lists of homogeneous element types to an R vector.
+
+
+
+Version 0.7-3
+
+  *  Added .withNames parameter for toJSON() which allows the caller to control whether we ignore or use any names. Defaults to use the names if they are present.
+
+
+
 Version 0.7-3
 
   *  Honor the collapse argument in more places to allow avoiding new line characters being inserted.

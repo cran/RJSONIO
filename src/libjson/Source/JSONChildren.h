@@ -1,6 +1,8 @@
 #ifndef JSONCHILDREN_H
 #define JSONCHILDREN_H
 
+using namespace std;
+
 #include "JSONMemory.h"
 #include "JSONDebug.h"  //for JSON_ASSERT macro
 

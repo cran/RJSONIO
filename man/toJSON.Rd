@@ -37,7 +37,9 @@
   as an array of length 1 in JSON
 }
 \usage{
-toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, collapse = "\n", ..., .level = 1L)
+toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, 
+        collapse = "\n", ..., .level = 1L,
+         .withNames = length(x) > 0 && length(names(x)) > 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -54,6 +56,12 @@ toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, col
   value that is passed in recursive calls to identify the top-level and sub-level serialization to JSON
   and so help to identify when a scalar needs to be in a container and when it is legitimate to 
   output a  scalar value directly.}
+\item{.withNames}{a logical value. If we are dealing with a named
+  vector/list, we typically generate a JSON associative
+  array/dictionary. If there are no names, we create a simple array.
+  This argument allows us to explicitly control whether we use a
+  dictionary  or to ignore the names and use an array.
+}
 }
 
 \value{
@@ -107,6 +115,9 @@ toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, col
           I("hi"))
  toJSON(x)
 
+  # examples of specifying .withNames
+ toJSON(structure(1:3, names = letters[1:3]))
+ toJSON(structure(1:3, names = letters[1:3]), .withNames = FALSE)
 }
 
 \keyword{IO}

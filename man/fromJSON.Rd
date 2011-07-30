@@ -21,7 +21,8 @@
 \usage{
 fromJSON(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE,
-           asText = isContent(content), data = NULL, ...)
+           asText = isContent(content), data = NULL,
+            maxChar = c(0L, nchar(content)), simplify = TRUE, ...)
 }
 
 \arguments{
@@ -56,6 +57,15 @@ fromJSON(content, handler = NULL,
      \code{handler} is a native (C) routine.
      In this case, the value is passed in each call to that C routine
      by the JSON tokenizer.
+   }
+   \item{maxChar}{an integer vector of length 2 giving the start and end
+     offsets in the character string to be processed. This allows the
+    caller to specify a subset of the string to process without explicitly
+    having to make a copy of the substring. }
+   \item{simplify}{a logical value that controls whether we attempt to
+     collapse collections/arrays of homogeneous elements to R vectors.
+     Currently this is only implemented when the caller does not provide
+     a handler and in the C code.
    }
    \item{\dots}{additional parameters for methods.}
 }

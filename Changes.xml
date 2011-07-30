@@ -3,6 +3,34 @@
            xmlns:env="http://www.shell.org">
 <omg:pkg>RJSONIO</omg:pkg>
 
+<version num="0.8-0">
+<change>
+Corrections to the libjson C/C++ code from Brian Ripley.
+</change>
+</version>
+
+<version num="0.8-0">
+<change>
+Added a <r:arg>.withNames</r:arg> parameter to <r:func>toJSON</r:func>
+so that the caller can explicitly control whether an R object with names
+is written as an associative array or as a simple array.
+</change>
+
+<change>
+Added a <r:arg>simplify</r:arg> parameter to <r:func>fromJSON</r:func> 
+that controls whether we collapse lists of homogeneous element types
+to an R vector.
+</change>
+</version>
+
+<version num="0.7-3">
+<change>
+Added .withNames parameter for <r:func>toJSON</r:func> which allows the
+caller to control whether we ignore or use any names. Defaults to 
+use the names if they are present.
+</change>
+</version>
+
 <version num="0.7-3">
 <change>
 Honor the collapse argument in more places to allow avoiding new line characters being

@@ -1,22 +1,22 @@
 #include <libjson/libjson.h>
 #include <Rdefines.h>
 
-SEXP processJSONNode(JSONNODE *node, int parentType);
+SEXP processJSONNode(JSONNODE *node, int parentType, int simplify);
 
 SEXP
-R_fromJSON(SEXP r_str)
+R_fromJSON(SEXP r_str, SEXP simplify)
 {
     const char * str = CHAR(STRING_ELT(r_str, 0));
     JSONNODE *node;
     SEXP ans;
     node = json_parse(str);
-    ans = processJSONNode(node, json_type(node));
+    ans = processJSONNode(node, json_type(node), LOGICAL(simplify)[0]);
     json_delete(node);
     return(ans);
 }
 
 SEXP 
-processJSONNode(JSONNODE *n, int parentType)
+processJSONNode(JSONNODE *n, int parentType, int simplify)
 {
     if (n == NULL){
         PROBLEM "invalid JSON input"
@@ -57,7 +57,7 @@ processJSONNode(JSONNODE *n, int parentType)
 	       break;
    	   case JSON_ARRAY:
   	   case JSON_NODE:
-	       el = processJSONNode(i, type);
+	       el = processJSONNode(i, type, simplify);
 	       break;
  	   case JSON_NUMBER:
 	       el = ScalarReal(json_as_float(i));
@@ -107,13 +107,13 @@ processJSONNode(JSONNODE *n, int parentType)
 	}
 
     } else {
-         if(homogeneous == len) {
-      	SEXP tmp;
-             PROTECT(tmp = NEW_NUMERIC(len)); nprotect++;
-      	for(ctr = 0; ctr < len; ctr++)
-      	    REAL(tmp)[ctr] = REAL(VECTOR_ELT(ans, ctr))[0];
-      	ans = tmp;
-         }
+        if(simplify && homogeneous == len) {
+        	SEXP tmp;
+		PROTECT(tmp = NEW_NUMERIC(len)); nprotect++;
+		for(ctr = 0; ctr < len; ctr++)
+		    REAL(tmp)[ctr] = REAL(VECTOR_ELT(ans, ctr))[0];
+		ans = tmp;
+	}
     }
        
 

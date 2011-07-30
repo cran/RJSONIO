@@ -5,7 +5,14 @@
 #ifdef JSON_LESS_MEMORY
     #include "JSONMemory.h"
 #endif
+
+#ifdef __SUNPRO_CC
+#include <stdio.h>
+#else
 #include <cstdio>
+#endif
+
+
 #ifdef JSON_STRICT
     #include <cmath>
 #endif
