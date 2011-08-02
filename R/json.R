@@ -91,7 +91,8 @@ setMethod("toJSON", "numeric",
 
 setMethod("toJSON", "character",
            function(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, collapse = "\n", digits = 5, ..., .level = 1L, .withNames = length(x) > 0 && length(names(x)) > 0) {
-             tmp = gsub("\\\n", "\\\\n", x)
+# Don't do this: !             tmp = gsub("\\\n", "\\\\n", x)
+             tmp = x
              tmp = gsub('"', '\\\\"', tmp)
              tmp = gsub('(\\\\)', '\\1\\1', tmp)                          
              tmp = dQuote(tmp)
