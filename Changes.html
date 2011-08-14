@@ -9,6 +9,45 @@
 </center></h1>
 <code class="omgpkg"><a href="http://www.omegahat.org/RJSONIO">RJSONIO</a></code>
 
+<h2>Version 0.91-0</h2>
+<dl>
+<dt><li>
+Added <i>.escapeEscapes</i> to <a href="http://www.omegahat.org/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> to allow the caller
+to preserve new lines and tabs symbolically or not. Thanks to Antonio Piccolboni for the report about the issue.
+</li></dt>
+<dd></dd>
+</dl>
+<hr width="50%">
+
+<h2>Version 0.9-0</h2>
+<dl>
+<dt><li>
+Added <i>.na</i> parameter to the <a href="http://www.omegahat.org/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> function and methods
+so that the caller can control how <b xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.org" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org"><a href="library/base/html/NA.html">NA</a></b> values are mapped to JSON.
+This defaults to "null" so that the resulting JSON is well-formed.
+However, users should explicitly think  about how <b xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.org" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org"><a href="library/base/html/NA.html">NA</a></b> values 
+(and Inf and NaN) are mapped to JSON in order to avoid ambiguity and
+faithfully serialize their data in a meaningful manner.
+</li></dt>
+<dd></dd>
+<dt><li>
+Added a <i>nullValue</i> parameter to <a href="http://www.omegahat.org/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a>
+to allow the caller to provide an R object that will be used
+when we encounter a JSON null value. 
+This can be used for example to map null to <b xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.org" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org"><a href="library/base/html/NA.html">NA</a></b> in R.
+</li></dt>
+<dd></dd>
+<dt><li>
+Added more support for simplifying lists to vectors of different types. 
+In the future, I might add a simplify = "strict" mode that would
+only collapse vectors if all the elements were of the same type,
+not just compatible types. In other words,
+ [true, 1 ] would not collapse to c(1, 1) in R.
+</li></dt>
+<dd></dd>
+</dl>
+<hr width="50%">
+
 <h2>Version 0.8-2</h2>
 <dl>
 <dt><li>

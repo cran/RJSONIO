@@ -39,7 +39,8 @@
 \usage{
 toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, 
         collapse = "\n", ..., .level = 1L,
-         .withNames = length(x) > 0 && length(names(x)) > 0)
+         .withNames = length(x) > 0 && length(names(x)) > 0, .na = "null",
+         .escapeEscapes = TRUE )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -62,6 +63,18 @@ toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0,
   This argument allows us to explicitly control whether we use a
   dictionary  or to ignore the names and use an array.
 }
+ \item{.na}{a value to use when we encounter an \code{NA} value in the R
+  objects. This allows the caller to convert these to whatever makes
+  sense to them.  For example, we might specify this as \code{"null"}
+  and then the \code{NA} values will appear as \code{null} in the JSON
+  output. One can also specify an unusual numeric value, e.g. -9999999
+   to indicate a missing value!
+ }
+ \item{.escapeEscapes}{a logical value that controls how
+   new line and tab characters are serialized.  If this is \code{TRUE},
+   we preserve them symbolically by escaping the \\.
+   Otherwise, we replace them with their literal value.
+  }
 }
 
 \value{
@@ -118,6 +131,41 @@ toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0,
   # examples of specifying .withNames
  toJSON(structure(1:3, names = letters[1:3]))
  toJSON(structure(1:3, names = letters[1:3]), .withNames = FALSE)
+
+
+  # Controlling NAs and mapping them to whatever we want.
+ toJSON(c(1L, 2L, NA), .na = "null")
+ toJSON(c(1L, 2L, NA), .na = -9999)
+
+ toJSON(c(1, 2, pi, NA), .na = "null")
+
+ toJSON(c(TRUE, FALSE, NA), .na = "null")
+
+ toJSON(c("A", "BCD", NA), .na = "null")
+
+ toJSON( factor(c("A", "B", "A", NA, "A")), .na = "null" )
+
+ toJSON(list(TRUE, list(1, NA), NA), .na = "null")
+
+
+
+ setClass("Foo", representation(a = "integer", b = "character"))
+ obj = new("Foo", a = c(1L, 2L, NA, 4L), b = c("abc", NA, "def"))
+ toJSON(obj)
+ toJSON(obj, .na = "null")
+
+  # hexmode example with .na ?
+
+ toJSON(matrix(c(1, 2, NA, 4), 2, 2), .na = "null")
+ toJSON(matrix(c(1, 2, NA, 4), 2, 2), .na = -9999999)
+
+
+ x = '"foo\tbar\n\tagain"'
+ cat(toJSON(x))
+ cat(toJSON(list(x)))
+
+  # if we want to expand the new lines and tab characters
+ cat(toJSON(x), .escapeEscapes = FALSE)
 }
 
 \keyword{IO}

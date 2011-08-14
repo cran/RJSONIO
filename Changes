@@ -2,6 +2,22 @@
 RJSONIO
 
 
+Version 0.91-0
+
+  *  Added .escapeEscapes to toJSON() to allow the caller to preserve new lines and tabs symbolically or not. Thanks to Antonio Piccolboni for the report about the issue.
+
+
+
+Version 0.9-0
+
+  *  Added .na parameter to the toJSON() function and methods so that the caller can control how values are mapped to JSON. This defaults to "null" so that the resulting JSON is well-formed. However, users should explicitly think about how values (and Inf and NaN) are mapped to JSON in order to avoid ambiguity and faithfully serialize their data in a meaningful manner.
+
+  *  Added a nullValue parameter to fromJSON() to allow the caller to provide an R object that will be used when we encounter a JSON null value. This can be used for example to map null to in R.
+
+  *  Added more support for simplifying lists to vectors of different types. In the future, I might add a simplify = "strict" mode that would only collapse vectors if all the elements were of the same type, not just compatible types. In other words, [true, 1 ] would not collapse to c(1, 1) in R.
+
+
+
 Version 0.8-2
 
   *  Corrected what toJSON() does with new lines (\n) and avoid the escaping of the \. Thanks to Antonio Piccolboni for the report.

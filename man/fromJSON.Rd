@@ -22,7 +22,8 @@
 fromJSON(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE,
            asText = isContent(content), data = NULL,
-            maxChar = c(0L, nchar(content)), simplify = TRUE, ...)
+            maxChar = c(0L, nchar(content)), simplify = TRUE,
+             nullValue = NULL, ...)
 }
 
 \arguments{
@@ -66,6 +67,11 @@ fromJSON(content, handler = NULL,
      collapse collections/arrays of homogeneous elements to R vectors.
      Currently this is only implemented when the caller does not provide
      a handler and in the C code.
+   }
+   \item{nullValue}{an R value that is used when we encounter
+     a JSON \code{null} value in the JSON content.
+     This can be used to map \code{null} to something more R-like
+     such as \code{NA}.  This can be an arbitrary R object.
    }
    \item{\dots}{additional parameters for methods.}
 }
@@ -164,6 +170,18 @@ if(require(rjson)) {
   v = fromJSON(I(str),
            getNativeSymbolInfo("R_json_RealArrayCallback", PACKAGE = "RJSONIO"),
            data = matrix(0, 1000, 1000))
+
+
+    # nulls and NAs
+  fromJSON("{ 'abc': 1, 'def': 23, 'xyz': null, 'ooo': 4}", nullValue = NA)
+  fromJSON("{ 'abc': 1, 'def': 23, 'xyz': null, 'ooo': 4}", nullValue =  NULL) # default
+
+  fromJSON("[1, 2, 3, null, 4]", nullValue = NA)
+  fromJSON("[1, 2, 3, null, 4]", nullValue = NULL)
+
+
+   # we can supply a complex object for null if we ever should need to.
+  fromJSON('[ 1, 2, null]', nullValue = list(a = 1, b = 1:10))[[3]]
 }
 \keyword{IO}
 \keyword{programming}
