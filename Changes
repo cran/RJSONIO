@@ -4,6 +4,12 @@ RJSONIO
 
 Version 0.91-0
 
+  *  Added to the ability to control whether we simplify the content by
+
+
+
+Version 0.91-0
+
   *  Added .escapeEscapes to toJSON() to allow the caller to preserve new lines and tabs symbolically or not. Thanks to Antonio Piccolboni for the report about the issue.
 
 

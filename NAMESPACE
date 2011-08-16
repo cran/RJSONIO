@@ -13,3 +13,4 @@ export(asJSVars)
 export(basicJSONHandler)
 
 
+export(Strict)

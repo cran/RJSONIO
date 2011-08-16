@@ -8,6 +8,8 @@
 \alias{fromJSON,AsIs,function-method}
 \alias{fromJSON,AsIs,NativeSymbolInfo-method}
 
+\alias{Strict}
+
 \title{Convert JSON content to R objects}
 \description{
   This function and its methods read content in JSON format
@@ -22,7 +24,7 @@
 fromJSON(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE,
            asText = isContent(content), data = NULL,
-            maxChar = c(0L, nchar(content)), simplify = TRUE,
+            maxChar = c(0L, nchar(content)), simplify = Strict,
              nullValue = NULL, ...)
 }
 
@@ -63,8 +65,17 @@ fromJSON(content, handler = NULL,
      offsets in the character string to be processed. This allows the
     caller to specify a subset of the string to process without explicitly
     having to make a copy of the substring. }
-   \item{simplify}{a logical value that controls whether we attempt to
-     collapse collections/arrays of homogeneous elements to R vectors.
+   \item{simplify}{either a logical value or the value of the variable \code{Strict} (the
+  default) that controls whether we attempt to
+  collapse collections/arrays of homogeneous scalar elements to R
+  vectors.
+  If this is \code{FALSE}, no effort to combine scalars is made and they
+  remain as separate list elements.
+  If this is \code{TRUE}, then logicals, numbers and strings are
+  collapsed to their common types in the same manner as \code{c}.
+  The value  \code{Strict} does attempt to collapse collections of
+  scalars but only if they are all of the same type, i.e. all strings,
+  all numbers or all logicals.
      Currently this is only implemented when the caller does not provide
      a handler and in the C code.
    }

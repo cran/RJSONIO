@@ -5,6 +5,13 @@
 
 <version num="0.91-0">
 <change>
+Added to the ability to control whether we simplify the content
+by 
+</change>
+</version>
+
+<version num="0.91-0">
+<change>
 Added <r:arg>.escapeEscapes</r:arg> to <r:func>toJSON</r:func> to allow the caller
 to preserve new lines and tabs symbolically or not. Thanks to Antonio Piccolboni for the report about the issue.
 </change>
