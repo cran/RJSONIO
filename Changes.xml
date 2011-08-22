@@ -3,10 +3,27 @@
            xmlns:env="http://www.shell.org">
 <omg:pkg>RJSONIO</omg:pkg>
 
-<version num="0.91-0">
+<version num="0.94-0">
 <change>
-Added to the ability to control whether we simplify the content
-by 
+Added <r:arg>simplifyWithNames</r:arg> to <r:func>fromJSON</r:func> for controlling whether we attempt to collapse
+collections of values read from JSON if they have names.  This can be used to collapse unnamed
+vectors, but leave named lists that would otherwise be collapsed to vectors.
+</change>
+</version>
+
+<version num="0.93-0">
+<change>
+Added support in fromJSON<r:func></r:func> for collapsing particular types of elements,
+i.e. logicals, numbers or characters via 
+ <r:var>StrictLogical</r:var>, <r:var>StrictNumeric</r:var> and <r:var>StrictCharacter</r:var>.
+This allows "strict" collapsing, but for different types, while leaving others as lists.
+These can be combined.
+</change>
+</version>
+
+<version num="0.92-0">
+<change>
+Added to the ability to control whether we simplify the content using simplify = Strict or <r:true/> or <r:false/>.
 </change>
 </version>
 

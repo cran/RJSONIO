@@ -1,27 +1,27 @@
 #include <libjson/libjson.h>
 #include <Rdefines.h>
 
-SEXP processJSONNode(JSONNODE *node, int parentType, int simplify, SEXP nullValue);
+SEXP processJSONNode(JSONNODE *node, int parentType, int simplify, SEXP nullValue, int simplifyWithNames);
 
-typedef enum {NONE, ALL, STRICT} SimplifyStyle;
+typedef enum {NONE, ALL, STRICT_LOGICAL = 2, STRICT_NUMERIC = 4, STRICT_CHARACTER = 8, STRICT = 14} SimplifyStyle;
 
 int setType(int cur, int newType);
 SEXP makeVector(SEXP l, int len, int type, SEXP nullValue);
 
 SEXP
-R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue)
+R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames)
 {
     const char * str = CHAR(STRING_ELT(r_str, 0));
     JSONNODE *node;
     SEXP ans;
     node = json_parse(str);
-    ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue);
+    ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue, LOGICAL(simplifyWithNames)[0]);
     json_delete(node);
     return(ans);
 }
 
 SEXP 
-processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue)
+processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int simplifyWithNames)
 {
     if (n == NULL){
         PROBLEM "invalid JSON input"
@@ -73,7 +73,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue)
 	       break;
    	   case JSON_ARRAY:
   	   case JSON_NODE:
-	       el = processJSONNode(i, type, simplify, nullValue);
+	       el = processJSONNode(i, type, simplify, nullValue, simplifyWithNames);
 	       if(Rf_length(el) > 1)
 		   elType = VECSXP;
 	       else
@@ -132,10 +132,15 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue)
 	   SET_CLASS(ans, ScalarString(mkChar("AsIs")));
 	}
 
-    } else {
+    } else if(simplifyWithNames || names == NULL || Rf_length(names) == 0) {
 	int allSame = numNumbers == len || numStrings == len || numLogicals == len;
         homogeneous = allSame ||  ( (numNumbers + numStrings + numLogicals ) == len);
         if(simplify == NONE) {
+	} else if(allSame && 
+                   (numNumbers == len && (simplify & STRICT_NUMERIC)) ||
+  		    (numLogicals == len && (simplify & STRICT_LOGICAL)) ||
+   		     (numStrings == len && (simplify & STRICT_CHARACTER))) {
+   	       ans = makeVector(ans, len, elType, nullValue);
 	} else if((simplify == ALL && homogeneous) || simplify == STRICT && allSame) {
    	       ans = makeVector(ans, len, elType, nullValue);
 	}

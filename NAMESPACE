@@ -13,4 +13,5 @@ export(asJSVars)
 export(basicJSONHandler)
 
 
-export(Strict)
+export(Strict, StrictNumeric, StrictCharacter, StrictLogical)
+

@@ -9,11 +9,34 @@
 </center></h1>
 <code class="omgpkg"><a href="http://www.omegahat.org/RJSONIO">RJSONIO</a></code>
 
-<h2>Version 0.91-0</h2>
+<h2>Version 0.94-0</h2>
 <dl>
 <dt><li>
-Added to the ability to control whether we simplify the content
-by 
+Added <i>simplifyWithNames</i> to <a href="http://www.omegahat.org/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a> for controlling whether we attempt to collapse
+collections of values read from JSON if they have names.  This can be used to collapse unnamed
+vectors, but leave named lists that would otherwise be collapsed to vectors.
+</li></dt>
+<dd></dd>
+</dl>
+<hr width="50%">
+
+<h2>Version 0.93-0</h2>
+<dl>
+<dt><li>
+Added support in fromJSON<a href="http://www.omegahat.org/RJSONIO/docs/html/.html"><code class="rfunc">()</code></a> for collapsing particular types of elements,
+i.e. logicals, numbers or characters via 
+ StrictLogical, StrictNumeric and StrictCharacter.
+This allows "strict" collapsing, but for different types, while leaving others as lists.
+These can be combined.
+</li></dt>
+<dd></dd>
+</dl>
+<hr width="50%">
+
+<h2>Version 0.92-0</h2>
+<dl>
+<dt><li>
+Added to the ability to control whether we simplify the content using simplify = Strict or <i><code>TRUE</code></i> or <i><code>FALSE</code></i>.
 </li></dt>
 <dd></dd>
 </dl>

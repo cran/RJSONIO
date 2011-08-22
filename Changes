@@ -2,9 +2,21 @@
 RJSONIO
 
 
-Version 0.91-0
+Version 0.94-0
 
-  *  Added to the ability to control whether we simplify the content by
+  *  Added simplifyWithNames to fromJSON() for controlling whether we attempt to collapse collections of values read from JSON if they have names. This can be used to collapse unnamed vectors, but leave named lists that would otherwise be collapsed to vectors.
+
+
+
+Version 0.93-0
+
+  *  Added support in fromJSON() for collapsing particular types of elements, i.e. logicals, numbers or characters via StrictLogical, StrictNumeric and StrictCharacter. This allows "strict" collapsing, but for different types, while leaving others as lists. These can be combined.
+
+
+
+Version 0.92-0
+
+  *  Added to the ability to control whether we simplify the content using simplify = Strict or or .
 
 
 

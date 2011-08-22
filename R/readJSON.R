@@ -15,29 +15,33 @@ function(content)
   inherits(content, "AsIs") || (!file.exists(content) && length(grep("^[[:space:]]*[[{]", content)))
 }
 
-Strict = 2L
+StrictLogical = 2L
+StrictNumeric = 4L
+StrictCharacter = 8L
+
+Strict = StrictNumeric + StrictCharacter + StrictLogical
 
 setGeneric("fromJSON",
             function(content, handler = NULL, default.size = 100, depth = 150L,
                       allowComments = TRUE,  asText = isContent(content),
-                       data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict,  nullValue = NULL, ...)
+                       data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict,  nullValue = NULL, simplifyWithNames = TRUE, ...)
                   standardGeneric("fromJSON"))
 
 setMethod("fromJSON", c("AsIs", handler = "NULL"),
 function(content,  handler = NULL, default.size = 100, depth = 150L,
 	 allowComments = TRUE,  asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)
 {
-  .Call("R_fromJSON", content, as.integer(simplify), nullValue)  
+  .Call("R_fromJSON", content, as.integer(sum(simplify)), nullValue, as.logical(simplifyWithNames))  
 })
 
 setMethod("fromJSON", "AsIs",
 function(content, handler = NULL, default.size = 100,
          depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
    fromJSON(as.character(content), handler, default.size, depth, allowComments, asText = TRUE, data, maxChar,
-             simplify = simplify, ..., nullValue = nullValue)  
+             simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames)  
 })
 
 
@@ -45,7 +49,7 @@ function(content, handler = NULL, default.size = 100,
 setMethod("fromJSON", c("character"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
   if(!asText) {
     content = I(suppressWarnings(paste(readLines(content), collapse = "\n")))
@@ -53,39 +57,41 @@ function(content, handler = NULL,
   } else
     content = I(content)
 
-  fromJSON(content, handler, default.size, depth, allowComments, asText = FALSE, data, maxChar, simplify = simplify, ..., nullValue = nullValue)
+  fromJSON(content, handler, default.size, depth, allowComments, asText = FALSE, data, maxChar, simplify = simplify, ...,
+             nullValue = nullValue, simplifyWithNames = simplifyWithNames)
 })
 
   
 setMethod("fromJSON", c("AsIs", "JSONParserHandler"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
-  fromJSON(content, handler$update, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., nullValue = nullValue)
+  fromJSON(content, handler$update, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames)
   handler$value()
 })
 
 setMethod("fromJSON", c("AsIs", "function"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
-  oldFromJSON(content, handler, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ...)
+  oldFromJSON(content, handler, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., simplifyWithNames = simplifyWithNames, nullValue = nullValue)
 })
 
 setMethod("fromJSON", c("AsIs", "NativeSymbolInfo"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
-  oldFromJSON(content, handler$address, depth = depth, allowComments = allowComments, data = data, maxChar = maxChar, simplify = simplify, ...)
+  oldFromJSON(content, handler$address, depth = depth, allowComments = allowComments, data = data, maxChar = maxChar,
+               simplify = simplify, ..., simplifyWithNames = simplifyWithNames, nullValue = nullValue)
 })
 
 oldFromJSON = 
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
   if(inherits(handler, "NativeSymbol")) {
      data = list(handler, data)
@@ -112,11 +118,11 @@ function(content, handler = NULL,
 setMethod("fromJSON", "connection",
 function(content, handler = NULL, default.size = 100,
          depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), maxNumLines = -1L, simplify = Strict, nullValue = NULL, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), maxNumLines = -1L, simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, ...)  
 {
   txt = paste(readLines(content, maxNumLines), collapse = "")
   fromJSON(I(txt), handler, default.size, depth, allowComments, asText = TRUE, data = data, maxNumLines = maxNumLines,
-             simplify = simplify, ..., nullValue = nullValue)
+             simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames)
 })
 
 

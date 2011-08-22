@@ -9,6 +9,9 @@
 \alias{fromJSON,AsIs,NativeSymbolInfo-method}
 
 \alias{Strict}
+\alias{StrictNumeric}
+\alias{StrictCharacter}
+\alias{StrictLogical}
 
 \title{Convert JSON content to R objects}
 \description{
@@ -25,7 +28,7 @@ fromJSON(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE,
            asText = isContent(content), data = NULL,
             maxChar = c(0L, nchar(content)), simplify = Strict,
-             nullValue = NULL, ...)
+             nullValue = NULL, simplifyWithNames = TRUE, ...)
 }
 
 \arguments{
@@ -65,8 +68,8 @@ fromJSON(content, handler = NULL,
      offsets in the character string to be processed. This allows the
     caller to specify a subset of the string to process without explicitly
     having to make a copy of the substring. }
-   \item{simplify}{either a logical value or the value of the variable \code{Strict} (the
-  default) that controls whether we attempt to
+   \item{simplify}{either a logical value or a number, e.g. the value of the variable \code{Strict} (the
+  default).  This  controls whether we attempt to
   collapse collections/arrays of homogeneous scalar elements to R
   vectors.
   If this is \code{FALSE}, no effort to combine scalars is made and they
@@ -76,14 +79,32 @@ fromJSON(content, handler = NULL,
   The value  \code{Strict} does attempt to collapse collections of
   scalars but only if they are all of the same type, i.e. all strings,
   all numbers or all logicals.
-     Currently this is only implemented when the caller does not provide
-     a handler and in the C code.
+  If we want to collapse numbers, but not logicals or characters,
+  we can use \code{StrictNumeric}. Similarly, to collapse
+  logicals but not numeric or character collections, we use
+  \code{StrictLogical}. And, to collapse only character collections,
+  we use \code{StrictCharacter}. If we want to collapse two types
+  but not a third, we add the two values, e.g.
+  \code{StrictLogical + StrictNumeric}, or
+  pass them as a vector \code{c(StrictLogical, StrictNumeric)}.
+  \code{Strict} is merely the combination of all 3 of the individual
+  strict variables.
+  %
+  Currently this is only implemented when the caller does not provide
+  a handler and in the C code.
    }
    \item{nullValue}{an R value that is used when we encounter
      a JSON \code{null} value in the JSON content.
      This can be used to map \code{null} to something more R-like
      such as \code{NA}.  This can be an arbitrary R object.
    }
+   \item{simplifyWithNames}{ a logical value that controls whether we
+  attempt to collapse collections if the elements have names in the JSON
+   content, i.e. a dictionary/associative array.  If this is
+  \code{TRUE}, then we consider collapsing according to the value of
+  \code{simplify}.  If this is \code{FALSE}, if the collection has
+  names, we do not attempt to simplify.
+  }
    \item{\dots}{additional parameters for methods.}
 }
 
@@ -193,6 +214,22 @@ if(require(rjson)) {
 
    # we can supply a complex object for null if we ever should need to.
   fromJSON('[ 1, 2, null]', nullValue = list(a = 1, b = 1:10))[[3]]
+
+
+  # Using StrictNumeric, etc.
+  x = list(sub1 = list(a = 1:10, b = 100, c = 1000),
+           sub2 = list(animal1 = "ape", animal2 = "bear", animal3 = "cat"),
+           sub3 = rep(c(TRUE, FALSE), 3))
+  js = toJSON(x)
+
+  fromJSON(js)
+    # leave character strings uncollapsed
+  fromJSON(js, simplify = StrictNumeric + StrictLogical)
+  fromJSON(js, simplify = c(StrictNumeric, StrictLogical))
+
+
+  fromJSON(js, simplifyWithNames = FALSE)
+  fromJSON(js, simplifyWithNames = TRUE)
 }
 \keyword{IO}
 \keyword{programming}
