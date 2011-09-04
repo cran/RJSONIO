@@ -3,6 +3,13 @@
            xmlns:env="http://www.shell.org">
 <omg:pkg>RJSONIO</omg:pkg>
 
+<version num="0.95-0">
+<change>
+In <r:func>fromJSON</r:func>, when <r:arg>nullValue</r:arg> is <r:na/> (the logical NA)
+we attempt to simplify vectors with JSON null values.
+</change>
+</version>
+
 <version num="0.94-0">
 <change>
 Added <r:arg>simplifyWithNames</r:arg> to <r:func>fromJSON</r:func> for controlling whether we attempt to collapse

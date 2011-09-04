@@ -2,6 +2,12 @@
 RJSONIO
 
 
+Version 0.95-0
+
+  *  In fromJSON(), when nullValue is (the logical NA) we attempt to simplify vectors with JSON null values.
+
+
+
 Version 0.94-0
 
   *  Added simplifyWithNames to fromJSON() for controlling whether we attempt to collapse collections of values read from JSON if they have names. This can be used to collapse unnamed vectors, but leave named lists that would otherwise be collapsed to vectors.

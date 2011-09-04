@@ -133,15 +133,17 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 	}
 
     } else if(simplifyWithNames || names == NULL || Rf_length(names) == 0) {
-	int allSame = numNumbers == len || numStrings == len || numLogicals == len;
-        homogeneous = allSame ||  ( (numNumbers + numStrings + numLogicals ) == len);
+	int allSame = (numNumbers == len || numStrings == len || numLogicals == len) || 
+	    ((TYPEOF(nullValue) == LGLSXP && LOGICAL(nullValue)[0] == NA_INTEGER) && 
+	     ((numNumbers + numNulls) == len || (numStrings + numNulls) == len || (numLogicals + numNulls) == len));
+        homogeneous = allSame ||  ( (numNumbers + numStrings + numLogicals + numNulls) == len);
         if(simplify == NONE) {
 	} else if(allSame && 
                    (numNumbers == len && (simplify & STRICT_NUMERIC)) ||
-  		    (numLogicals == len && (simplify & STRICT_LOGICAL)) ||
-   		     (numStrings == len && (simplify & STRICT_CHARACTER))) {
+	        	  ((numLogicals == len) && (simplify & STRICT_LOGICAL)) ||
+		      ( (numStrings == len) && (simplify & STRICT_CHARACTER))) {
    	       ans = makeVector(ans, len, elType, nullValue);
-	} else if((simplify == ALL && homogeneous) || simplify == STRICT && allSame) {
+	} else if((simplify == ALL && homogeneous) || (simplify == STRICT && allSame)) {
    	       ans = makeVector(ans, len, elType, nullValue);
 	}
     }
@@ -164,7 +166,7 @@ makeVector(SEXP ans, int len, int type, SEXP nullValue)
 	PROTECT(tmp = NEW_NUMERIC(len)); 
 	for(ctr = 0; ctr < len; ctr++) {
 	    SEXP el = VECTOR_ELT(ans, ctr);
-	    REAL(tmp)[ctr] = TYPEOF(el) == REALSXP ? REAL(el)[0] : Rf_asReal(el);
+	    REAL(tmp)[ctr] = TYPEOF(el) == LGLSXP && LOGICAL(el)[0] == NA_INTEGER ? NA_REAL : (TYPEOF(el) == REALSXP ? REAL(el)[0] : Rf_asReal(el));
 	}
     } else if(type == LGLSXP) {
 	PROTECT(tmp = NEW_LOGICAL(len)); 
@@ -179,7 +181,7 @@ makeVector(SEXP ans, int len, int type, SEXP nullValue)
 	    if(TYPEOF(el) == STRSXP)
 		SET_STRING_ELT(tmp, ctr, STRING_ELT(el, 0));
 	    else if(TYPEOF(el) == LGLSXP) {
-		SET_STRING_ELT(tmp, ctr, mkChar(LOGICAL(el)[0] ? "TRUE" : "FALSE"));
+		SET_STRING_ELT(tmp, ctr, LOGICAL(el)[0] == NA_INTEGER ? NA_STRING : mkChar(LOGICAL(el)[0] ? "TRUE" : "FALSE"));
 	    } else if(TYPEOF(el) == REALSXP) {
 		char buf[70];
 		sprintf(buf, "%lf", REAL(el)[0]);

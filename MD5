@@ -1,7 +1,7 @@
-3326e4082b37859ccf1f4ef8b21eca55 *Changes
-9d5a020e551802c619155806177a5738 *Changes.html
-9abc0c8119aebca63877dbdd178d1b3c *Changes.xml
-169c8d3987ce4ce001b4518c52f98c67 *DESCRIPTION
+52fe933d73e5c543a131b65c830f0d36 *Changes
+88d137bd817fa9b68fe7974340a1c334 *Changes.html
+b7ab28dbf823c8deff3b5a493a90c79b *Changes.xml
+17f9a22d34ff0d0446e6318772953cc7 *DESCRIPTION
 fc97bc4eac6dbbb917cbd4e75fc55477 *NAMESPACE
 c33e558360f7fbd75d93cad7b6126002 *R/asVars.R
 189a2799626f26283e42d1f95cd09f54 *R/json.R
@@ -11,7 +11,7 @@ c1104751e4499a720f62a2b6b4862663 *README
 9f5988801bc367a367744734c16e73a4 *README.libjson
 95093dd0d9da19a773bbce8c179b5d8f *Todo.xml
 017e610d0c478f2ec474f02f610c9ca7 *Web/configure
-ba71f86e18059da6f9ffcd8d39314c51 *Web/index.html
+c7e8305b460ed731b67ef2d7e74fd28c *Web/index.html
 7f9e4acb9eeccab9660c3ae409d51015 *Web/index.html.in
 71c7a9edfc5c7493921a89b5ede1e536 *cleanup
 21b0dfe3dc40fc8d727d647a45c8d5ae *cleanup.in
@@ -19,6 +19,7 @@ ba71f86e18059da6f9ffcd8d39314c51 *Web/index.html
 b55cf6ff1f65581a2cd4fbe9d3fcc9b3 *configure.in
 c8ff95176ecf0ff5cae7a25f82afde95 *configure.win
 c4f05c6c7506f431c63def1716bf5c67 *cp_libjson
+ec2028abf145c55d2c015cf14d34e4da *dataframe.R
 37d0cfa5b7ad01e81cb86d785604b9b1 *fail.R
 1aa42af680f878468c5d3d9381c8b9f9 *foo.html
 c25900e1e25e7f9a07b4d08be2b8361a *inst/doc/biblio.xml
@@ -107,7 +108,7 @@ fa98b5211650d9acbe06d7f3388efd9e *src/libjson/Source/internalJSONNode.cpp
 a99c973379e79b41b1b20db87cf069d2 *src/libjson/bdr
 8921e01e0cd0a8708b86de9822bc2981 *src/libjson/libjson.h
 a7c63342a5ad618199cb3e9081786fdb *src/libjson/makefile
-bfec606b5fedc91b274769765db24281 *src/rlibjson.c
+866635fb22faebb2adbd82805f9ff5b1 *src/rlibjson.c
 62ebb4ed425d6c162434dbdd2e003d20 *tests.R
 321652a53609a06ad957f506e2d30dff *tests/bigInt.R
 dcf636487596071765c1ff7b989507a0 *tests/con1.R
@@ -120,7 +121,7 @@ bca19f2949148380b551c310190debad *tests/performance.R
 511e518d3956e07d0e3d58ceacc289ce *tests/prealloc.R
 ecd073bc081479006e6c71c78c4c7326 *tests/serialize.R
 e7bec84bf8c510db67d736c5f4cb8607 *tests/simple.R
-0d9cfcf11600540529aa9e789dd96394 *tests/simplify.R
+f9feed0ba596a10c31aabe63a5379e91 *tests/simplify.R
 ec75e0bf51db3acd502cd7c7f7f8e68b *tests/toJSON.R
 76fd9888460552ab34d1a110b405e6a9 *tests/utf8.R
 2177d23ff6b9d33407e8f7a861793ec7 *utf/json.c

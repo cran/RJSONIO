@@ -23,3 +23,11 @@ stopifnot(is.numeric(fromJSON('{ "a": 1, "b": 2}', simplify = Strict)))
 
 stopifnot(is.list(fromJSON('{ "a": 1, "b": 2}', simplify = FALSE)))
 
+
+is.na(fromJSON(toJSON( c("a", NA, "b", "c")), nullValue = NA, simplify = TRUE))
+is.na(fromJSON(toJSON( c(1, NA, 3, 4)), nullValue = NA, simplify = TRUE))
+
+is.na(fromJSON(toJSON( c(TRUE, NA, FALSE, TRUE)), nullValue = NA, simplify = TRUE))
+
+
+
