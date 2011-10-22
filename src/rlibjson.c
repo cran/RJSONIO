@@ -1,7 +1,7 @@
 #include <libjson/libjson.h>
 #include <Rdefines.h>
 
-SEXP processJSONNode(JSONNODE *node, int parentType, int simplify, SEXP nullValue, int simplifyWithNames);
+SEXP processJSONNode(JSONNODE *node, int parentType, int simplify, SEXP nullValue, int simplifyWithNames, cetype_t);
 
 typedef enum {NONE, ALL, STRICT_LOGICAL = 2, STRICT_NUMERIC = 4, STRICT_CHARACTER = 8, STRICT = 14} SimplifyStyle;
 
@@ -9,20 +9,22 @@ int setType(int cur, int newType);
 SEXP makeVector(SEXP l, int len, int type, SEXP nullValue);
 
 SEXP
-R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames)
+R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames, SEXP encoding)
 {
     const char * str = CHAR(STRING_ELT(r_str, 0));
     JSONNODE *node;
     SEXP ans;
     node = json_parse(str);
-    ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue, LOGICAL(simplifyWithNames)[0]);
+    ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue, LOGICAL(simplifyWithNames)[0],
+ 			  INTEGER(encoding)[0]);
     json_delete(node);
     return(ans);
 }
 
 SEXP 
-processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int simplifyWithNames)
+processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int simplifyWithNames, cetype_t charEncoding)
 {
+    
     if (n == NULL){
         PROBLEM "invalid JSON input"
 	    ERROR;
@@ -73,7 +75,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 	       break;
    	   case JSON_ARRAY:
   	   case JSON_NODE:
-	       el = processJSONNode(i, type, simplify, nullValue, simplifyWithNames);
+	       el = processJSONNode(i, type, simplify, nullValue, simplifyWithNames, charEncoding);
 	       if(Rf_length(el) > 1)
 		   elType = VECSXP;
 	       else
@@ -95,7 +97,11 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 //XXX Garbage collection
 	       char *tmp = json_as_string(i);
                    // do we need to strdup here?
+#if 0
 	       el = ScalarString(mkChar(tmp));
+#else
+               el = ScalarString(mkCharCE(tmp, charEncoding));
+#endif
 	       elType = setType(elType, STRSXP);
 	       json_free(tmp);
 	       numStrings++;

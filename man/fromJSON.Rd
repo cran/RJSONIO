@@ -28,7 +28,8 @@ fromJSON(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE,
            asText = isContent(content), data = NULL,
             maxChar = c(0L, nchar(content)), simplify = Strict,
-             nullValue = NULL, simplifyWithNames = TRUE, ...)
+             nullValue = NULL, simplifyWithNames = TRUE,
+              encoding = NA_character_, ...)
 }
 
 \arguments{
@@ -104,7 +105,11 @@ fromJSON(content, handler = NULL,
   \code{TRUE}, then we consider collapsing according to the value of
   \code{simplify}.  If this is \code{FALSE}, if the collection has
   names, we do not attempt to simplify.
-  }
+}
+  \item{encoding}{the encoding for the content. This is used to ensure
+  the encoding of any resulting strings/character vectors have this
+  encoding.
+  The default for this value is to use the same encoding as the input content.}
    \item{\dots}{additional parameters for methods.}
 }
 

@@ -3,6 +3,13 @@
            xmlns:env="http://www.shell.org">
 <omg:pkg>RJSONIO</omg:pkg>
 
+<version num="0.96-0">
+<change>
+Added encoding argument for <r:func>fromJSON</r:func> and that encoding is preserved on
+the resulting strings. Thanks to Tony Breyal for pointing out the issue.
+</change>
+</version>
+
 <version num="0.95-0">
 <change>
 In <r:func>fromJSON</r:func>, when <r:arg>nullValue</r:arg> is <r:na/> (the logical NA)
