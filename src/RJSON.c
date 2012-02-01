@@ -141,7 +141,7 @@ R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *pa
         if (next_char <= 0) {
             break;
         }
-	// fprintf(stderr, "%d) %c %u\n", count, next_char, (unsigned int) next_char);fflush(stderr);
+	/* fprintf(stderr, "%d) %c %u\n", count, next_char, (unsigned int) next_char);fflush(stderr); */
         if (!JSON_parser_char(parser, next_char)) {
             delete_JSON_parser(parser);
             PROBLEM "JSON parser error: syntax error, byte %d (%c)\n", count, input[count]
@@ -298,7 +298,7 @@ convertJSONValueToR(int type, const struct JSON_value_struct *value, cetype_t en
 int
 R_json_testNativeCallback(void* ctx, int type, const struct JSON_value_struct* value)
 {
-    fprintf(stderr, "%d (ctx = %p, value = %p)\n", type, ctx, value);
+    REprintf("%d (ctx = %p, value = %p)\n", type, ctx, value);
     return(1);
 }
 
