@@ -1,7 +1,7 @@
-817af7d63d5ecd41add7ab8cb88e2c7c *Changes
+63abd09f93454fd420c2733725914186 *Changes
 ff902954434999e6eca5e26871ea6a87 *Changes.html
 4bb1f05127306e0e56ccc7b76e0a4444 *Changes.xml
-834baaf3185afb99b12fe0e360157303 *DESCRIPTION
+98f2756f4f56d6e3105d35a59eb61713 *DESCRIPTION
 ec3e7f2a77cf5b42bdb01f89743c59cc *NAMESPACE
 c33e558360f7fbd75d93cad7b6126002 *R/asVars.R
 53e1a1c9a8cef993e6d697f8cf1e9630 *R/isValid.R
@@ -70,7 +70,7 @@ e39a910ed997b6719b239fb75f8c4363 *src/ConvertUTF.h
 d925c515d81f1a8b6d14f64648f17078 *src/JSON_parser.h
 b5ee2b94a24ec39f086be7b53cd8b7c7 *src/Makevars
 0eaef1df68d62f00d50dd11c15edcbfa *src/Makevars.in
-b462a68a585006c788d18d91f81c13ab *src/Makevars.win
+ab657f38b5dfcaec81a4957ec813714a *src/Makevars.win
 78595e1c680df75afcfdf72f4074171d *src/RJSON.c
 fbbf59d6cd4ac498c47e6b031d95aedd *src/libjson/JSONOptions.h
 cebe661e002daaeae68254a3c8b7a7df *src/libjson/License.txt
@@ -106,7 +106,7 @@ eb44996a1b6538279fe155344cf35119 *src/libjson/Source/JSONValidator.h
 d1857e2737009c6065d8e736f1723c33 *src/libjson/Source/JSONWriter.cpp
 669ee5e318ac227bde0e30337e03e60c *src/libjson/Source/JSON_Base64.cpp
 297a6b1066173663eddb52c252f56eb8 *src/libjson/Source/JSON_Base64.h
-df4bbac3673296f0afba6b57c2a77794 *src/libjson/Source/NumberToString.h
+8a929e9587f16b67a4d51446e13b99c8 *src/libjson/Source/NumberToString.h
 267729c4ac6eeece59b884d864c8da97 *src/libjson/Source/internalJSONNode.cpp
 8185ea8b29ab5115b35287fbbee26c9f *src/libjson/Source/internalJSONNode.h
 57c175c3e40307d0e5bcc26ee06c199c *src/libjson/Source/libjson.cpp
