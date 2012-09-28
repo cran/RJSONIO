@@ -1,28 +1,54 @@
-#include <libjson/libjson.h>
-#include <Rdefines.h>
-
-SEXP processJSONNode(JSONNODE *node, int parentType, int simplify, SEXP nullValue, int simplifyWithNames, cetype_t);
-
-typedef enum {NONE, ALL, STRICT_LOGICAL = 2, STRICT_NUMERIC = 4, STRICT_CHARACTER = 8, STRICT = 14} SimplifyStyle;
+#include "Rlibjson.h"
 
 int setType(int cur, int newType);
 SEXP makeVector(SEXP l, int len, int type, SEXP nullValue);
 
+/* Simple routine to return the parsed JSONNODE pointer.
+   This would be the start of allowing the caller to manipulate the tree
+   directly. */
 SEXP
-R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames, SEXP encoding)
+R_json_parse(SEXP str)
+{
+    JSONNODE *node;
+    node = json_parse(CHAR(STRING_ELT(str, 0)));
+    return(R_MakeExternalPtr(node, Rf_install("JSONNODE"), R_NilValue));
+}
+
+SEXP
+R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames, SEXP encoding,
+            SEXP r_stringFun, SEXP r_str_type)
 {
     const char * str = CHAR(STRING_ELT(r_str, 0));
     JSONNODE *node;
     SEXP ans;
+    int nprotect = 0;
+    StringFunctionType str_fun_type = GARBAGE;
+
+    if(r_stringFun != R_NilValue) {
+	if(TYPEOF(r_stringFun) == CLOSXP) {
+	    SEXP e;
+	    PROTECT(e = allocVector(LANGSXP, 2));
+	    nprotect++;
+	    SETCAR(e, r_stringFun);
+	    r_stringFun = e;
+	}
+	str_fun_type = INTEGER(r_str_type)[0];
+    } else 
+	r_stringFun = NULL;
+
     node = json_parse(str);
     ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue, LOGICAL(simplifyWithNames)[0],
- 			  INTEGER(encoding)[0]);
+ 			  INTEGER(encoding)[0], r_stringFun, str_fun_type);
     json_delete(node);
+    if(nprotect)
+	UNPROTECT(nprotect);
+
     return(ans);
 }
 
 SEXP 
-processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int simplifyWithNames, cetype_t charEncoding)
+processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int simplifyWithNames, cetype_t charEncoding,
+                 SEXP r_stringCall, StringFunctionType str_fun_type)
 {
     
     if (n == NULL){
@@ -37,7 +63,8 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
     len = json_size(n);
     char startType = parentType; // was 127
     
-    int isNullHomogeneous = (TYPEOF(nullValue) == LGLSXP || TYPEOF(nullValue) == REALSXP || TYPEOF(nullValue) == STRSXP || TYPEOF(nullValue) == INTSXP);
+    int isNullHomogeneous = (TYPEOF(nullValue) == LGLSXP || TYPEOF(nullValue) == REALSXP ||
+                                TYPEOF(nullValue) == STRSXP || TYPEOF(nullValue) == INTSXP);
     int numStrings = 0;
     int numLogicals = 0;
     int numNumbers = 0;
@@ -75,7 +102,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 	       break;
    	   case JSON_ARRAY:
   	   case JSON_NODE:
-	       el = processJSONNode(i, type, simplify, nullValue, simplifyWithNames, charEncoding);
+	       el = processJSONNode(i, type, simplify, nullValue, simplifyWithNames, charEncoding, r_stringCall, str_fun_type);
 	       if(Rf_length(el) > 1)
 		   elType = VECSXP;
 	       else
@@ -95,17 +122,68 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
  	   case JSON_STRING:
 	   {
 //XXX Garbage collection
-	       char *tmp = json_as_string(i);
-                   // do we need to strdup here?
-#if 0
-	       el = ScalarString(mkChar(tmp));
+#if 0 //def JSON_UNICODE
+	       wchar_t *wtmp = json_as_string(i);
+	       char *tmp;
+	       int len = wcslen(wtmp);
+	       int size = sizeof(char) * (len * MB_LEN_MAX + 1);
+	       tmp = (char *)malloc(size);
+	       if (tmp == NULL) {
+                   PROBLEM "Cannot allocate memory"
+                   ERROR;
+               }
+	       wcstombs(tmp, wtmp, size);
 #else
-               el = ScalarString(mkCharCE(tmp, charEncoding));
+    char *tmp = json_as_string(i);
+//    tmp = reEnc(tmp, CE_BYTES, CE_UTF8, 1);
 #endif
-	       elType = setType(elType, STRSXP);
+
+
+    if(r_stringCall != NULL && TYPEOF(r_stringCall) == EXTPTRSXP) {
+        if(str_fun_type == SEXP_STR_ROUTINE) {
+	    SEXPStringRoutine fun;
+	    fun = (SEXPStringRoutine) R_ExternalPtrAddr(r_stringCall);	    
+	    el = fun(tmp, charEncoding);
+	} else {
+	    char *tmp1;
+	    StringRoutine fun;
+	    fun = (StringRoutine) R_ExternalPtrAddr(r_stringCall);
+	    tmp1 = fun(tmp);
+	    if(tmp1 != tmp)
+		json_free(tmp);
+	    tmp = tmp1;
+	    el = ScalarString(mkCharCE(tmp, charEncoding));
+	}
+    } else {
+	el = ScalarString(mkCharCE(tmp, charEncoding));
+    	     /* Call the R function if there is one. */
+	if(r_stringCall != NULL) {
+	    SETCAR(CDR(r_stringCall), el);
+	    el = Rf_eval(r_stringCall, R_GlobalEnv);
+	}
+	/* XXX compute with elType. */
+    }
+
 	       json_free(tmp);
-	       numStrings++;
-	   }
+	       
+	       elType = setType(elType, 
+   				     /* If we have a class, not a primitive type */
+                                  Rf_length(getAttrib(el, Rf_install("class"))) ? LISTSXP : TYPEOF(el));
+               if(r_stringCall != NULL && str_fun_type != NATIVE_STR_ROUTINE) {
+		   switch(TYPEOF(el)) {
+			  case REALSXP:
+   			     numNumbers++;
+			  break;
+			  case LGLSXP:
+   			     numLogicals++;
+			  break;
+			  case STRSXP:
+   			     numStrings++;
+			  break;
+		   }
+	       } else if(TYPEOF(el) == STRSXP) 
+		   numStrings++;
+      }
 	       break;
 	default:
 	    PROBLEM "shouldn't be here"
@@ -145,8 +223,8 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
         homogeneous = allSame ||  ( (numNumbers + numStrings + numLogicals + numNulls) == len);
         if(simplify == NONE) {
 	} else if(allSame && 
-                   (numNumbers == len && (simplify & STRICT_NUMERIC)) ||
-	        	  ((numLogicals == len) && (simplify & STRICT_LOGICAL)) ||
+ 		   (numNumbers == len && (simplify & STRICT_NUMERIC)) ||
+  		      ((numLogicals == len) && (simplify & STRICT_LOGICAL)) ||
 		      ( (numStrings == len) && (simplify & STRICT_CHARACTER))) {
    	       ans = makeVector(ans, len, elType, nullValue);
 	} else if((simplify == ALL && homogeneous) || (simplify == STRICT && allSame)) {
@@ -288,13 +366,14 @@ R_isValidJSON(SEXP input)
 
 /******************/
 
-#if 0
+#ifdef R_JSON_STREAM
 
 SEXP
 R_json_new_stream(SEXP fun, SEXP pullFun)
 {
     JSONSTREAM *stream;
     stream = json_new_stream();
+    return(R_MakeExternalPtr(stream, Rf_install("JSON_STREAM"), R_NilValue));
 }
 
 SEXP
@@ -375,3 +454,55 @@ R_json_stream_parse(SEXP str, SEXP fun)
     return(R_NilValue);
 }
 
+
+SEXP
+R_jsonPrettyPrint(SEXP r_content, SEXP r_encoding)
+{
+    const char *str = CHAR(STRING_ELT(r_content, 0));
+    JSONNODE *node;
+    json_char *ans;
+    
+    node = json_parse(str);
+    if(!node) {
+	PROBLEM "couldn't parse the JSON content"
+	    ERROR;
+    }
+
+    ans = json_write_formatted(node);
+    return(ScalarString(mkCharCE(ans, INTEGER(r_encoding)[0])));
+}
+
+
+const char *
+dummyStringOperation(const char *value)
+{
+#ifdef TEST_DUMMY_STRING_OP
+    fprintf(stderr, "[dummyStringOperation] %s\n", value);
+#endif
+    return(value);
+}
+
+SEXP
+R_json_dateStringOp(const char *value, cetype_t encoding)
+{
+    int withNew = 0, noNew = 0;
+
+    if( (noNew = (strncmp(value, "/Date(", 6)  == 0)) ||
+          (withNew = strncmp(value, "/new Date(", 10)) == 0) {
+        double num;
+	if(noNew) 
+   	   sscanf(value + 6, "%lf)/", &num);
+	else
+   	   sscanf(value + 10, "%lf)/", &num);
+
+	SEXP ans, classNames;
+        PROTECT(ans = ScalarReal(num));
+	PROTECT(classNames = NEW_CHARACTER(2));
+	SET_STRING_ELT(classNames, 0, mkChar("POSIXct"));
+	SET_STRING_ELT(classNames, 1, mkChar("POSIXt"));
+	SET_CLASS(ans, classNames);
+        UNPROTECT(2);
+	return(ans);
+    } else
+       return(ScalarString(mkCharCE(value, encoding)));
+}

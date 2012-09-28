@@ -25,16 +25,31 @@ setGeneric("fromJSON",
             function(content, handler = NULL, default.size = 100, depth = 150L,
                       allowComments = TRUE,  asText = isContent(content),
                        data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict,  nullValue = NULL,
-                        simplifyWithNames = TRUE, encoding = NA_character_, ...)
+                        simplifyWithNames = TRUE, encoding = NA_character_, stringFun = NULL, ...)
                   standardGeneric("fromJSON"))
 
 setMethod("fromJSON", c("AsIs", handler = "NULL"),
 function(content,  handler = NULL, default.size = 100, depth = 150L,
 	 allowComments = TRUE,  asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,  encoding = NA_character_, ...)
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,  encoding = NA_character_, stringFun = NULL, ...)
 {
+   stringFunType = c("GARBAGE" = 4L)
    enc = mapEncoding(if(is.na(encoding)) Encoding(content) else encoding)
-  .Call("R_fromJSON", content, as.integer(sum(simplify)), nullValue, as.logical(simplifyWithNames), enc)  
+   if(!is.null(stringFun)) {
+       if(!is.function(stringFun)) {
+           stringFunType = getStringRoutineType(stringFun)
+           if(is.character(stringFun))
+             stringFun = getNativeSymbolInfo(stringFun)
+           if(is(stringFun, "NativeSymbolInfo"))
+             stringFun = stringFun$address
+           else if( typeof(stringFun) != "externalptr")
+             stop("stringFun needs to be a function or identify a native routine")
+       } else 
+          stringFunType = c("R_FUNCTION" = 2L)
+   }
+
+  .Call("R_fromJSON", content, as.integer(sum(simplify)), nullValue, as.logical(simplifyWithNames), enc,
+             stringFun, stringFunType)  
 })
 
 mapEncoding =
@@ -55,10 +70,10 @@ function(encoding)
 setMethod("fromJSON", "AsIs",
 function(content, handler = NULL, default.size = 100,
          depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,  encoding = NA_character_, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,  encoding = NA_character_,  stringFun = NULL, ...)  
 {
    fromJSON(as.character(content), handler, default.size, depth, allowComments, asText = TRUE, data, maxChar,
-             simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding)  
+             simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding, stringFun = stringFun)  
 })
 
 
@@ -67,7 +82,7 @@ setMethod("fromJSON", c("character"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,
-             encoding = NA_character_, ...)  
+             encoding = NA_character_, stringFun = NULL, ...)  
 {
   if(!asText) {
     content = I(suppressWarnings(paste(readLines(content), collapse = "\n")))
@@ -76,16 +91,16 @@ function(content, handler = NULL,
     content = I(content)
 
   fromJSON(content, handler, default.size, depth, allowComments, asText = FALSE, data, maxChar, simplify = simplify, ...,
-             nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding)
+             nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding, stringFun = stringFun)
 })
 
   
 setMethod("fromJSON", c("AsIs", "JSONParserHandler"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
-            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, encoding = NA_character_, ...)  
+            data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, encoding = NA_character_, stringFun = NULL, ...)  
 {
-  fromJSON(content, handler$update, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding)
+  fromJSON(content, handler$update, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding, stringFun = stringFun)
   handler$value()
 })
 
@@ -93,19 +108,19 @@ setMethod("fromJSON", c("AsIs", "function"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,
-             encoding = NA_character_, ...)  
+             encoding = NA_character_, stringFun = NULL, ...)  
 {
-  oldFromJSON(content, handler, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., simplifyWithNames = simplifyWithNames, nullValue = nullValue, encoding = encoding)
+  oldFromJSON(content, handler, depth = depth, allowComments = allowComments, maxChar = maxChar, simplify = simplify, ..., simplifyWithNames = simplifyWithNames, nullValue = nullValue, encoding = encoding, stringFun = stringFun)
 })
 
 setMethod("fromJSON", c("AsIs", "NativeSymbolInfo"),
 function(content, handler = NULL,
           default.size = 100, depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxChar = c(0L, nchar(content)), simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE,
-            encoding = NA_character_, ...)  
+            encoding = NA_character_, stringFun = NULL, ...)  
 {
   oldFromJSON(content, handler$address, depth = depth, allowComments = allowComments, data = data, maxChar = maxChar,
-               simplify = simplify, ..., simplifyWithNames = simplifyWithNames, nullValue = nullValue, encoding = encoding)
+               simplify = simplify, ..., simplifyWithNames = simplifyWithNames, nullValue = nullValue, encoding = encoding, stringFun = stringFun)
 })
 
 oldFromJSON = 
@@ -141,12 +156,13 @@ function(content, handler = NULL, default.size = 100,
          depth = 150L, allowComments = TRUE, asText = isContent(content),
             data = NULL, maxChar = c(0L, nchar(content)), 
              simplify = Strict, nullValue = NULL, simplifyWithNames = TRUE, encoding = NA_character_,
-             maxNumLines = -1L, ...)  
+             stringFun = NULL, maxNumLines = -1L, ...)  
 {
   txt = paste(readLines(content, maxNumLines), collapse = "\n")
-browser()  
+#browser()  
   fromJSON(I(txt), handler, default.size, depth, allowComments, asText = TRUE, data = data, maxNumLines = maxNumLines,
-             simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames, encoding = encoding)
+             simplify = simplify, ..., nullValue = nullValue, simplifyWithNames = simplifyWithNames,
+               encoding = encoding, stringFun = stringFun)
 })
 
 
@@ -332,4 +348,16 @@ function(val, strict = FALSE)
   }
 
   val
+}
+
+getStringRoutineType = 
+function(stringFun)
+{
+  if(is.function(stringFun))
+     return(c("R_FUNCTION" =  3L))
+
+  if(is(stringFun, "AsIs") || is(stringFun, "NativeStringRoutine"))
+      c("NATIVE_STR_ROUTINE" = 0L)
+  else 
+      c("SEXP_STR_ROUTINE" = 1L) 
 }

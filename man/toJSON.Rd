@@ -15,6 +15,8 @@
 \alias{toJSON,NULL-method}
 \alias{toJSON,factor-method}
 \alias{toJSON,AsIs-method}
+\alias{toJSON,environment-method}
+
 
 \alias{emptyNamedList}
 
@@ -37,10 +39,10 @@
   as an array of length 1 in JSON
 }
 \usage{
-toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0, 
+toJSON(x, container = asIs || .level == 1L || length(x) > 1 || length(names(x)) > 0, 
         collapse = "\n", ..., .level = 1L,
          .withNames = length(x) > 0 && length(names(x)) > 0, .na = "null",
-         .escapeEscapes = TRUE )
+         .escapeEscapes = TRUE, pretty = FALSE, asIs = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -74,6 +76,22 @@ toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0,
    new line and tab characters are serialized.  If this is \code{TRUE},
    we preserve them symbolically by escaping the \\.
    Otherwise, we replace them with their literal value.
+ }
+ \item{pretty}{a logical value that controls if extra processing is done
+   on the result to make it indented for easier human-readability.
+   At present, this reparses the generated JSON content and
+   re-formats it (using libjson).  This means that there
+   can be three copies of the data in memory simultaneously -
+   the original data, the JSON text and the pretty-printed
+   version of the JSON text.  For large objects, this can
+   require a lot of memory.
+ }
+ \item{asIs}{a logical value that, if \code{TRUE} causes
+   R vectors of length 1 to be represented as arrays in JSON,
+   but if \code{FALSE} to be represented as scalars, where appropriate
+   (i.e. not the top level of the JSON content).  This avoids having
+   to explicitly mark sub-elements in an R object as being of class
+   \code{AsIs}.
   }
 }
 
@@ -166,6 +184,21 @@ toJSON(x, container = .level == 1L || length(x) > 1 || length(names(x)) > 0,
 
   # if we want to expand the new lines and tab characters
  cat(toJSON(x), .escapeEscapes = FALSE)
+
+
+  # illustration of the asIs argument
+  cat(toJSON(list(a = 1, b = 2L, c = TRUE,
+                  d = c(1, 3),
+                  e = "abc"), asIs = TRUE))
+
+  cat(toJSON(list(a = 1, b = 2L, c = TRUE,
+                  d = c(1, 3),
+                  e = "abc"), asIs = FALSE))
+
+   # extra level
+  cat(toJSON(list(a = c(x = 1), b = 2L, c = TRUE,
+                  d = list(1, 3),
+                  e = "abc"), asIs = FALSE, pretty = TRUE))
 }
 
 \keyword{IO}

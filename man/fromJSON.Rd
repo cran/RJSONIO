@@ -29,7 +29,7 @@ fromJSON(content, handler = NULL,
            asText = isContent(content), data = NULL,
             maxChar = c(0L, nchar(content)), simplify = Strict,
              nullValue = NULL, simplifyWithNames = TRUE,
-              encoding = NA_character_, ...)
+              encoding = NA_character_, stringFun = NULL, ...)
 }
 
 \arguments{
@@ -111,6 +111,25 @@ fromJSON(content, handler = NULL,
   encoding.
   The default for this value is to use the same encoding as the input content.}
    \item{\dots}{additional parameters for methods.}
+  \item{stringFun}{an R function or a compiled routine (by address or name).
+    The purpose of this is to process every string as it is encountered in the 
+   JSON content and to either convert return it as-is, or to convert it to 
+    a suitable R value.  This, for example, might convert strings of the form
+    "/new Date(2313213)/" or "/Date(12312312)/".  
+   The result is placed in the 
+   R object being generated from the JSON content where the original string would appear.
+   So this allows us to handle strings with a special meaning.
+
+   If this is an R function, it is passed a single argument - the value of the string - and it can return that or
+   any other R object, presumably derived from that original string. 
+   If a compiled routine is specified, it can be one of two types. 
+   Both take a simple C string.  
+   The default type returns a \code{SEXP}, i.e. an R object.
+   If the class of \code{stringFun} is either \code{AsIs} or \code{NativeStringRoutine},
+   then that routine must return a C string, i.e. a char *. This will
+   then be converted to an R character vector of length 1, using the
+   default encoding given by \code{encoding}.
+  }
 }
 
 \value{
@@ -143,7 +162,7 @@ fromJSON(content, handler = NULL,
   m = matrix(1:27, 9, 3)
   txt = toJSON(m)
   con = textConnection(txt)
-  identical(m, fromJSON(con))
+  identical(m, fromJSON(con)) # not true! fromJSON() returns just a list.
 
     # Use a connection and move the cursor ahead to skip over some lines.
   f = system.file("sampleData", "obj1.json", package = "RJSONIO")
@@ -235,6 +254,45 @@ if(require(rjson)) {
 
   fromJSON(js, simplifyWithNames = FALSE)
   fromJSON(js, simplifyWithNames = TRUE)
+
+#######
+#  stringFun
+txt = '{ "magnitude": 3.8, 
+         "longitude": -125.012, 
+         "latitude": 40.382,
+         "date":  "new Date(1335515917000)", 
+         "when": "/Date(1335515917000)/", 
+         "country": "USA", 
+         "verified": true
+       }'
+
+convertJSONDate = 
+function(x)
+{
+   if(grepl("/?(new )?Date\\\\(", x)) {
+      val = gsub(".*Date\\\\(([0-9]+)\\\\).*", "\\1", x)
+      structure(as.numeric(val)/1000, class = c("POSIXct", "POSIXt"))
+   } else
+      x
+}
+
+fromJSON(txt, stringFun = convertJSONDate)
+
+ #  A C routine for converting dates
+jtxt = '[ 1, "/new Date(12312313)", "/Date(12312313)"]'
+ans = fromJSON(jtxt)
+ans = fromJSON(jtxt, stringFun = "R_json_dateStringOp")
+
+ # A C routine that returns a char * - leaves strings as is
+c = fromJSON(jtxt, stringFun = I("dummyStringOperation"))
+c = fromJSON(jtxt, stringFun = I(getNativeSymbolInfo("dummyStringOperation")))
+c = fromJSON(jtxt, stringFun =
+                     I(getNativeSymbolInfo("dummyStringOperation")$address))
+
+  # I() or class = "NativeStringRoutine".
+c = fromJSON(jtxt, stringFun =
+                      structure("dummyStringOperation",
+                                class = "NativeStringRoutine"))
 }
 \keyword{IO}
 \keyword{programming}
