@@ -1,13 +1,13 @@
 81366b6fffd601a65643acb6d40e0fab *Changes
 ff902954434999e6eca5e26871ea6a87 *Changes.html
 3320a6139f4c9e5667e06aa8b56cef1f *Changes.xml
-22d5f5953169799cfb44ee171f8d6c7a *DESCRIPTION
+77ddb20333c38efa5d07a5c695b35c27 *DESCRIPTION
 aaa577ba305fa4f57eecf068cb1b5e70 *Dependencies/libbase64++/libbase64++.h
 056f816c7009991e9f6994ac447b126b *Dependencies/mempool++/mempool.h
 99305db81fb8d376e0c907efbf464a4d *NAMESPACE
 c33e558360f7fbd75d93cad7b6126002 *R/asVars.R
 53e1a1c9a8cef993e6d697f8cf1e9630 *R/isValid.R
-4f3be5a9c099c54b47b0f8da4a330565 *R/json.R
+fc43b9911bbf60137f036770202d3743 *R/json.R
 ebbbd3e4cc3be76cc4a3f07f4c8d8408 *R/readJSON.R
 5a73241d2fea72c12833b7929b058bf7 *R/simpleHandler.R
 8880398bb47430312182c5cb76e6ec00 *R/stream.R
@@ -15,7 +15,7 @@ c1104751e4499a720f62a2b6b4862663 *README
 9f5988801bc367a367744734c16e73a4 *README.libjson
 95093dd0d9da19a773bbce8c179b5d8f *Todo.xml
 017e610d0c478f2ec474f02f610c9ca7 *Web/configure
-9927b1f16583ba11f29304806705a2f3 *Web/index.html
+0b4109bf9cc224e6923a243d46074548 *Web/index.html
 7f9e4acb9eeccab9660c3ae409d51015 *Web/index.html.in
 1469c4b773eb77448b514f5eb4d47257 *cleanup
 21b0dfe3dc40fc8d727d647a45c8d5ae *cleanup.in
@@ -68,7 +68,7 @@ a61ed7153e38bd9b226f698bd63dee39 *man/asJSVars.Rd
 881faf9f8c8fec627d2656b04606d7b0 *man/fromJSON.Rd
 aa65801ba3d5134930ca24d82acc0434 *man/isValidJSON.Rd
 7725cd676b1972260c628d39892ee0b1 *man/readJSONStream.Rd
-87732efe160726a050983176ee7c4af2 *man/toJSON.Rd
+a1618284622dfa4eb5fd1e46849fbd16 *man/toJSON.Rd
 c4e167915585752ef123c0362f949de7 *src/ConvertUTF.c
 e39a910ed997b6719b239fb75f8c4363 *src/ConvertUTF.h
 0f3ed1c93043825e83986a5674f381de *src/JSON_parser.c
@@ -129,6 +129,7 @@ fa04c834f6f752f102fbf904c760a9ab *testStream.R
 321652a53609a06ad957f506e2d30dff *tests/bigInt.R
 dcf636487596071765c1ff7b989507a0 *tests/con1.R
 9d3d6a3ec0f0e99964a7fbcf284d0d14 *tests/con2.R
+23ab4ff3f03e392b360f928e0b658d05 *tests/containers.R
 8a9092ceec1f8f453a621628d3844e16 *tests/empty.R
 8176975bafada6df89caad7242f8879f *tests/encoding.R
 2a085af895fa805ea8d46e474564abb7 *tests/exp.R
@@ -139,7 +140,7 @@ dcf636487596071765c1ff7b989507a0 *tests/con1.R
 bca19f2949148380b551c310190debad *tests/performance.R
 511e518d3956e07d0e3d58ceacc289ce *tests/prealloc.R
 c0cf692ffbc7654fa9cf6ee5bcec83d9 *tests/s4.R
-96ecbcc1909574dd9d412847fb251a0f *tests/scalarCollapse.R
+ffa57f714cd9b332657e4ff423f6dc5b *tests/scalarCollapse.R
 e43a30d9c2bb1c528532812b97212173 *tests/serialize.R
 e7bec84bf8c510db67d736c5f4cb8607 *tests/simple.R
 f9feed0ba596a10c31aabe63a5379e91 *tests/simplify.R
