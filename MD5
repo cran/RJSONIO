@@ -1,13 +1,13 @@
-81366b6fffd601a65643acb6d40e0fab *Changes
+60e9d14129329fc31e86c5d9bb3c2fa2 *Changes
 ff902954434999e6eca5e26871ea6a87 *Changes.html
 3320a6139f4c9e5667e06aa8b56cef1f *Changes.xml
-77ddb20333c38efa5d07a5c695b35c27 *DESCRIPTION
+eea614876b6b4abe9694fbf7b5216bff *DESCRIPTION
 aaa577ba305fa4f57eecf068cb1b5e70 *Dependencies/libbase64++/libbase64++.h
 056f816c7009991e9f6994ac447b126b *Dependencies/mempool++/mempool.h
 99305db81fb8d376e0c907efbf464a4d *NAMESPACE
 c33e558360f7fbd75d93cad7b6126002 *R/asVars.R
 53e1a1c9a8cef993e6d697f8cf1e9630 *R/isValid.R
-fc43b9911bbf60137f036770202d3743 *R/json.R
+9fc2a9d31cebdaeb2fe3a393bb1408a3 *R/json.R
 ebbbd3e4cc3be76cc4a3f07f4c8d8408 *R/readJSON.R
 5a73241d2fea72c12833b7929b058bf7 *R/simpleHandler.R
 8880398bb47430312182c5cb76e6ec00 *R/stream.R
@@ -15,8 +15,9 @@ c1104751e4499a720f62a2b6b4862663 *README
 9f5988801bc367a367744734c16e73a4 *README.libjson
 95093dd0d9da19a773bbce8c179b5d8f *Todo.xml
 017e610d0c478f2ec474f02f610c9ca7 *Web/configure
-0b4109bf9cc224e6923a243d46074548 *Web/index.html
+7c27eabedfe647ed4e5b75f64e55bb07 *Web/index.html
 7f9e4acb9eeccab9660c3ae409d51015 *Web/index.html.in
+0dfcd2f92928329aed651b7661b814a7 *bigFile.R
 1469c4b773eb77448b514f5eb4d47257 *cleanup
 21b0dfe3dc40fc8d727d647a45c8d5ae *cleanup.in
 a7a54b1a5bdd4d28259a71b2fc97dbd4 *configure
@@ -112,7 +113,7 @@ f0d98681494a24fe225619fe90372e89 *src/libjson/Source/JSONWorker.cpp
 b02770f956808d325bcc3cd358cd45b2 *src/libjson/Source/JSONWorker.h
 c9a59674c31c420fa289c85c4b3e0ede *src/libjson/Source/JSONWriter.cpp
 69979578e26b48424165de55a2688962 *src/libjson/Source/JSON_Base64.h
-cc15bb5c7d155e7a8a7c341e563e52dd *src/libjson/Source/NumberToString.h
+8a6fee6e24e86f1de7f943043f9bfa69 *src/libjson/Source/NumberToString.h
 b47c37f519f9fac7e116ac26a32d90d2 *src/libjson/Source/internalJSONNode.cpp
 4df5d432d53f5d20719e02980a7f2e7a *src/libjson/Source/internalJSONNode.h
 b754903a951917bbf88ca339a25c2d5d *src/libjson/Source/libjson.cpp
@@ -137,7 +138,7 @@ dcf636487596071765c1ff7b989507a0 *tests/con1.R
 009e978f72f3f83be32436306902d972 *tests/keys.R
 720bcd7fd2b5e15ea4353385c2b4274b *tests/nested.json
 2f2a553f12ba0577a0bb7907bd84782b *tests/newsUTF8.rda
-bca19f2949148380b551c310190debad *tests/performance.R
+5ec9e7cfbb479915926635af1e2a9e93 *tests/performance.R
 511e518d3956e07d0e3d58ceacc289ce *tests/prealloc.R
 c0cf692ffbc7654fa9cf6ee5bcec83d9 *tests/s4.R
 ffa57f714cd9b332657e4ff423f6dc5b *tests/scalarCollapse.R
