@@ -1,7 +1,7 @@
-60e9d14129329fc31e86c5d9bb3c2fa2 *Changes
+dcaba02589a07de47d503389d323abe9 *Changes
 ff902954434999e6eca5e26871ea6a87 *Changes.html
 3320a6139f4c9e5667e06aa8b56cef1f *Changes.xml
-eea614876b6b4abe9694fbf7b5216bff *DESCRIPTION
+f220296ee1db62172f94f4db5336a38f *DESCRIPTION
 aaa577ba305fa4f57eecf068cb1b5e70 *Dependencies/libbase64++/libbase64++.h
 056f816c7009991e9f6994ac447b126b *Dependencies/mempool++/mempool.h
 99305db81fb8d376e0c907efbf464a4d *NAMESPACE
@@ -15,7 +15,7 @@ c1104751e4499a720f62a2b6b4862663 *README
 9f5988801bc367a367744734c16e73a4 *README.libjson
 95093dd0d9da19a773bbce8c179b5d8f *Todo.xml
 017e610d0c478f2ec474f02f610c9ca7 *Web/configure
-7c27eabedfe647ed4e5b75f64e55bb07 *Web/index.html
+7c97224b11b294b74c09645dd67a54bf *Web/index.html
 7f9e4acb9eeccab9660c3ae409d51015 *Web/index.html.in
 0dfcd2f92928329aed651b7661b814a7 *bigFile.R
 1469c4b773eb77448b514f5eb4d47257 *cleanup
@@ -79,7 +79,7 @@ d229e8a53fde6b2e8b4ba2c8a9cc34c9 *src/Makevars.in
 ab657f38b5dfcaec81a4957ec813714a *src/Makevars.win
 78595e1c680df75afcfdf72f4074171d *src/RJSON.c
 e3b2a1612dd63cc1569976b21f098f3b *src/Rlibjson.h
-fbbf59d6cd4ac498c47e6b031d95aedd *src/libjson/JSONOptions.h
+3c049e2a6e6d87e4aa093ae55dc4ff87 *src/libjson/JSONOptions.h
 cebe661e002daaeae68254a3c8b7a7df *src/libjson/License.txt
 82430efeb1a0f9b1e44c665ba75dd708 *src/libjson/README
 a967aca4cf4b0d220235ab54af5be469 *src/libjson/Source/JSONAllocator.cpp
@@ -121,7 +121,7 @@ a99c973379e79b41b1b20db87cf069d2 *src/libjson/bdr
 a4d6ab83026b53855b56b1cd5b323f75 *src/libjson/copy
 cdadb655508ef3b18a4409432afb17ee *src/libjson/libjson.h
 2341070df06c93f7af1890034d00a83a *src/libjson/makefile
-d2fac89ae44f85cc35287b76b75fbc2e *src/rlibjson.c
+35b5a18c31601df82bff76a25d177e3a *src/rlibjson.c
 4328e8571f6236f978645bba6c5a6a5d *src/rparser.c
 f43ff5f2a4c774926704b8bf57db5cdb *stream.R
 cf97468d22f33622875b6951f968554f *streaming.R
