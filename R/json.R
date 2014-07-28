@@ -193,7 +193,7 @@ setMethod("toJSON", "character",
 # Don't do this: !             tmp = gsub("\\\n", "\\\\n", x)
 
 #             if(length(x) == 0)    return("[ ]")
-             
+
              tmp = x
 
              tmp = gsub('(\\\\)', '\\1\\1', tmp)
@@ -217,8 +217,10 @@ setMethod("toJSON", "character",
                          sprintf("%s}", collapse))
                 else               
                    paste("[", paste(tmp, collapse = ", "), "]")
-             } else
-                tmp
+             } else if(length(x) == 0)
+                      "[ ]"
+               else
+                      tmp
            })
 
 
@@ -262,7 +264,7 @@ setMethod("toJSON", "matrix",
 setMethod("toJSON", "list",
            function(x, container = isContainer(x, asIs, .level), collapse = "\n", ..., .level = 1L, .withNames = length(x) > 0 && length(names(x)) > 0, .na = "null", .escapeEscapes = TRUE, pretty = FALSE, asIs = NA, .inf = " Infinity") {
                 # Degenerate case.
-#browser()
+
              if(length(x) == 0) {
                           # x = structure(list(), names = character()) gives {}
                 return(if(is.null(names(x))) "[]" else "{}")
@@ -278,7 +280,9 @@ setMethod("toJSON", "list",
              if(!container)
                return(els)
 
-             els = unlist(els)
+#             els = unlist(els)
+   w = sapply(els, length) == 0
+   els[w] = "[]" # or "" or "null"
              
              if(.withNames)
                 paste(sprintf("{%s", collapse),
