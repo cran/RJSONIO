@@ -46,7 +46,7 @@ R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames, SE
 #if 0
     register_debug_callback(jsonErrorHandler);
 #else
-#pragma message("activate the debug_callback")
+//#pragma message("activate the debug_callback")
 #endif
     node = json_parse(str);
     ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue, LOGICAL(simplifyWithNames)[0],
@@ -57,6 +57,17 @@ R_fromJSON(SEXP r_str, SEXP simplify, SEXP nullValue, SEXP simplifyWithNames, SE
 
     return(ans);
 }
+
+int 
+getElType(int len, int numNumbers, int numStrings, int numLogicals, int numNulls)
+{
+    if(numStrings > 0) 
+	return(STRSXP);
+    if(numNumbers > 0) 
+	return(REALSXP);
+    return(LGLSXP);
+}
+
 
 SEXP 
 processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int simplifyWithNames, cetype_t charEncoding,
@@ -73,7 +84,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
     int nprotect = 0;
     int numNulls = 0;
     len = json_size(n);
-    char startType = parentType; // was 127
+    char startType = (char)parentType; // was 127
     
     int isNullHomogeneous = (TYPEOF(nullValue) == LGLSXP || TYPEOF(nullValue) == REALSXP ||
                                 TYPEOF(nullValue) == STRSXP || TYPEOF(nullValue) == INTSXP);
@@ -233,14 +244,17 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 	    ((TYPEOF(nullValue) == LGLSXP && LOGICAL(nullValue)[0] == NA_INTEGER) && 
 	     ((numNumbers + numNulls) == len || (numStrings + numNulls) == len || (numLogicals + numNulls) == len));
         homogeneous = allSame ||  ( (numNumbers + numStrings + numLogicals + numNulls) == len);
+
         if(simplify == NONE) {
 	} else if(allSame && 
 		  ((numNumbers == len && (simplify & STRICT_NUMERIC)) ||
   		      ((numLogicals == len) && (simplify & STRICT_LOGICAL)) ||
 		   ( (numStrings == len) && (simplify & STRICT_CHARACTER)))) {
+	       elType = getElType(len, numNumbers, numStrings, numLogicals, numNulls);
    	       ans = makeVector(ans, len, elType, nullValue);
 	} else if((simplify == ALL && homogeneous) || (simplify == STRICT && allSame)) {
-   	       ans = makeVector(ans, len, elType, nullValue);
+	    elType = getElType(len, numNumbers, numStrings, numLogicals, numNulls);
+	    ans = makeVector(ans, len, elType, nullValue);
 	}
     }
       

@@ -18,13 +18,13 @@
 #endif
 
 #ifndef JSON_LIBRARY
-class JSONNode; //foreward declaration
+class JSONNode; //forward declaration
 typedef void (*json_stream_callback_t)(JSONNode &, void *);
 #endif
 
 class JSONStream {
 public:
-	LIBJSON_OBJECT(JSONStream);
+    LIBJSON_OBJECT(JSONStream)
     JSONStream(json_stream_callback_t call_p, json_stream_e_callback_t call_e = NULL, void * callbackIdentifier = JSONSTREAM_SELF) json_nothrow;
     JSONStream(const JSONStream & orig) json_nothrow;
     JSONStream & operator =(const JSONStream & orig) json_nothrow;
@@ -70,13 +70,14 @@ JSON_PRIVATE
 	#else
 		static size_t FindNextRelevant(json_char ch, const json_string & value_t, const size_t pos) json_nothrow json_read_priority;
 	#endif
-	
-    void parse(void) json_nothrow;
-    json_string buffer;
+
+
+    bool state BITS(1);
     json_stream_callback_t call;
-	json_stream_e_callback_t err_call;
-	void * callback_identifier;
-	bool state BITS(1);
+    json_stream_e_callback_t err_call;
+    json_string buffer;
+    void * callback_identifier;
+    void parse(void) json_nothrow;
 };
 
 #ifdef JSON_LESS_MEMORY

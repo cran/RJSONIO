@@ -18,11 +18,15 @@ void jsonChildren::reserve2(jsonChildren *& mine, json_index_t amount) json_noth
     }
 }
 
+/*
+ clang objects to testing pointers to be non-null:
+ warning: 'this' pointer cannot be null in well-defined C++ code ...
+*/
 void jsonChildren::inc(void) json_nothrow {
-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc"));
+//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc"));
     if (json_unlikely(mysize == mycapacity)){  //it's full
 	   if (json_unlikely(mycapacity == 0)){  //the array hasn't been created yet
-		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
+//		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
 		  #ifdef JSON_LESS_MEMORY
 			 array = json_malloc<JSONNode*>(1);
 			 mycapacity = 1;
@@ -43,11 +47,11 @@ void jsonChildren::inc(void) json_nothrow {
 
 
 void jsonChildren::inc(json_index_t amount) json_nothrow {
-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc(amount)"));
+//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc(amount)"));
     if (json_unlikely(amount == 0)) return;
     if (json_likely(mysize + amount >= mycapacity)){  //it's full
 	   if (json_unlikely(mycapacity == 0)){  //the array hasn't been created yet
-		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
+//		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
 		  #ifdef JSON_LESS_MEMORY
 			 array = json_malloc<JSONNode*>(amount);
 			 mycapacity = amount;
@@ -70,22 +74,22 @@ void jsonChildren::inc(json_index_t amount) json_nothrow {
 
 //actually deletes everything within the vector, this is safe to do on an empty or even a null array
 void jsonChildren::deleteAll(void) json_nothrow {
-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null deleteAll"));
+//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null deleteAll"));
     json_foreach(this, runner){
-        JSON_ASSERT(*runner != 0, JSON_TEXT("a null pointer within the children"));
+//        JSON_ASSERT(*runner != 0, JSON_TEXT("a null pointer within the children"));
 	   JSONNode::deleteJSONNode(*runner);  //this is why I can't do forward declaration
     }
 }
 
 void jsonChildren::doerase(JSONNode ** position, json_index_t number) json_nothrow {
-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null doerase"));
-    JSON_ASSERT(array != 0, JSON_TEXT("erasing something from a null array 2"));
-    JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array 2"));
-    JSON_ASSERT(position + number <= array + mysize, JSON_TEXT("erasing out of bounds 2"));
+//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null doerase"));
+//    JSON_ASSERT(array != 0, JSON_TEXT("erasing something from a null array 2"));
+//    JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array 2"));
+//    JSON_ASSERT(position + number <= array + mysize, JSON_TEXT("erasing out of bounds 2"));
     if (position + number >= array + mysize){
 	   mysize = (json_index_t)(position - array);
 	   #ifndef JSON_ISO_STRICT
-		  JSON_ASSERT((long long)position - (long long)array >= 0, JSON_TEXT("doing negative allocation"));
+//		  JSON_ASSERT((long long)position - (long long)array >= 0, JSON_TEXT("doing negative allocation"));
 	   #endif
     } else {
 	   std::memmove(position, position + number, (mysize - (position - array) - number) * sizeof(JSONNode *));

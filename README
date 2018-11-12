@@ -31,3 +31,6 @@ If you do use a version of libjson installed into a non-standard place,
 you will probably need to modify your LD_LIBRARY_PATH (or DYLD_LIBRARY_PATH on OS X)
 environment variable.
 
+NB: The authorship of libjson should be credited better, but it is not
+clear -- on SourceForge this is attributed to 'ninja9578', who might
+be 'Jonathan Wallace'.

@@ -1,0 +1,804 @@
+These are the changes from the omegahat.net version 1.3.1 (which does
+not even install) to the CRAN version 1.3.1
+
+Only in RJSONIO: CRAN_changes
+diff -ru RJSONIO.orig/DESCRIPTION RJSONIO/DESCRIPTION
+--- RJSONIO.orig/DESCRIPTION	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/DESCRIPTION	2018-11-11 17:44:42.000000000 +0000
+@@ -1,6 +1,6 @@
+ Package: RJSONIO
+ Version: 1.3-1
+-Title: Serialize R objects to JSON, JavaScript Object Notation
++Title: Serialize R Objects to JSON, JavaScript Object Notation
+ Description: This is a package that allows conversion to and from 
+   data in Javascript object notation (JSON) format.
+   This allows R objects to be inserted into Javascript/ECMAScript/ActionScript code
+@@ -13,15 +13,15 @@
+   options to allow customizing the generation and processing of JSON content.
+   This package uses libjson rather than implementing yet another JSON parser. The aim is to support
+   other general projects by building on their work, providing feedback and benefit from their ongoing development.
+-Note: See http://www.json.org/JSON_checker/test.zip for tests.
+-       We now use code from the libjson project
+-       (http://libjson.sourceforge.net).
++Note: See http://www.json.org/JSON_checker/test.zip for tests. We now
++        use code from the libjson project
++        (http://libjson.sourceforge.net).
+ License: BSD_3_clause + file LICENSE
+ Imports: methods
+-Author: Duncan Temple Lang
+-Maintainer: Duncan Temple Lang <duncan@r-project.org>
+-Collate: readJSON.R asVars.R isValid.R json.R simpleHandler.R
+-       stream.R
++Authors@R: c(person("Duncan", "Temple Lang", role = c("aut", "cre"),
++             email = "duncan@r-project.org",
++	     comment = c(ORCID = "0000-0003-0159-1546")),
++	     person("ninja9578", role = "aut",
++	     comment = "Author of included libjson sources"))
++Collate: readJSON.R asVars.R isValid.R json.R simpleHandler.R stream.R
+ Biarch: true
+-NeedsCompilation: yes
+-Packaged: 2015-10-04 23:23:14 UTC; duncan
+diff -ru RJSONIO.orig/README RJSONIO/README
+--- RJSONIO.orig/README	2014-05-31 14:57:46.000000000 +0100
++++ RJSONIO/README	2018-11-11 16:14:11.000000000 +0000
+@@ -31,3 +31,6 @@
+ you will probably need to modify your LD_LIBRARY_PATH (or DYLD_LIBRARY_PATH on OS X)
+ environment variable.
+ 
++NB: The authorship of libjson should be credited better, but it is not
++clear -- on SourceForge this is attributed to 'ninja9578', who might
++be 'Jonathan Wallace'.
+diff -ru RJSONIO.orig/cleanup RJSONIO/cleanup
+--- RJSONIO.orig/cleanup	2015-10-05 00:16:39.000000000 +0100
++++ RJSONIO/cleanup	2018-11-11 10:54:22.000000000 +0000
+@@ -17,8 +17,10 @@
+ 
+ if test -n "$CPP" ; then 
+   echo "Removing the CPP files copied from libjson into src: $CPP"
+-  (cd src ; rm $CPP)
++  (cd src ; rm -f $CPP)
+   if test -e src/JSONOptions.h ; then 
+       rm src/JSONOptions.h
+   fi
+ fi
++
++rm -f src/Makevars config.log config.status
+diff -ru RJSONIO.orig/cleanup.in RJSONIO/cleanup.in
+--- RJSONIO.orig/cleanup.in	2014-05-31 14:57:46.000000000 +0100
++++ RJSONIO/cleanup.in	2018-11-11 11:07:38.000000000 +0000
+@@ -4,8 +4,10 @@
+ 
+ if test -n "$CPP" ; then 
+   echo "Removing the CPP files copied from libjson into src: $CPP"
+-  (cd src ; rm $CPP)
++  (cd src ; rm -f $CPP)
+   if test -e src/JSONOptions.h ; then 
+       rm src/JSONOptions.h
+   fi
+ fi
++
++rm -f src/Makevars config.log config.status
+diff -ru RJSONIO.orig/configure RJSONIO/configure
+--- RJSONIO.orig/configure	2014-05-31 14:57:46.000000000 +0100
++++ RJSONIO/configure	2018-11-11 12:08:43.000000000 +0000
+@@ -1802,6 +1802,14 @@
+ 
+ if test -z "$USE_LOCAL" || test "$USE_LOCAL" = "no" ; then
+   echo "Trying to find libjson.h header file"
++  : ${R_HOME=`R RHOME`}
++  if test -z "${R_HOME}"; then
++    echo "could not determine R_HOME"
++    exit 1
++  fi
++  CC=`"${R_HOME}/bin/R" CMD config CC`
++  CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
++  CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+   CPPFLAGS="$CPPFLAGS -I$LIBJSON_PREFIX/include"
+   ac_ext=c
+ ac_cpp='$CPP $CPPFLAGS'
+diff -ru RJSONIO.orig/configure.in RJSONIO/configure.in
+--- RJSONIO.orig/configure.in	2014-05-31 14:57:46.000000000 +0100
++++ RJSONIO/configure.in	2018-11-11 11:58:49.000000000 +0000
+@@ -13,7 +13,16 @@
+ 
+ if test -z "$USE_LOCAL" || test "$USE_LOCAL" = "no" ; then
+   echo "Trying to find libjson.h header file"
++  : ${R_HOME=`R RHOME`}
++  if test -z "${R_HOME}"; then
++    echo "could not determine R_HOME"
++    exit 1
++  fi
++  CC=`"${R_HOME}/bin/R" CMD config CC`
++  CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
++  CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+   CPPFLAGS="$CPPFLAGS -I$LIBJSON_PREFIX/include"
++  AC_PROG_CC
+   AC_TRY_COMPILE(
+     [#include <libjson/libjson.h>],
+     [JSONNODE *ptr = json_parse("[1, 3]");],
+diff -ru RJSONIO.orig/src/JSON_parser.c RJSONIO/src/JSON_parser.c
+--- RJSONIO.orig/src/JSON_parser.c	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/JSON_parser.c	2018-11-11 18:48:02.000000000 +0000
+@@ -316,7 +316,7 @@
+         }
+     }
+     
+-    jc->stack[jc->top] = mode;
++    jc->stack[jc->top] = (signed char)mode;
+     return true;
+ }
+ 
+@@ -456,7 +456,6 @@
+ 
+ static int parse_parse_buffer(JSON_parser jc)
+ {
+-int ok;
+     if (jc->callback) {
+         JSON_value value, *arg = NULL;
+         
+@@ -482,12 +481,13 @@
+                 case JSON_T_INTEGER: {
+                     double tmp;
+                     arg = &value;
+-                    ok = sscanf(jc->parse_buffer, "%lf", &tmp);
++		    // value unused
++                    int ok = sscanf(jc->parse_buffer, "%lf", &tmp);
+ 	            if(tmp > MAX_INT || tmp < - MAX_INT) {
+                        jc->type = JSON_T_FLOAT;
+ 	               value.vu.float_value = tmp;
+ 	            } else
+-	               value.vu.integer_value = tmp;
++			value.vu.integer_value = (JSON_int_t)tmp;
+                     break;
+                 }
+                 case JSON_T_STRING:
+@@ -655,7 +655,7 @@
+ /*
+     Change the state.
+ */
+-        jc->state = next_state;
++        jc->state = (signed char) next_state;
+     } else {
+ /*
+     Or perform one of the actions.
+diff -ru RJSONIO.orig/src/Makevars.in RJSONIO/src/Makevars.in
+--- RJSONIO.orig/src/Makevars.in	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/Makevars.in	2018-11-11 15:38:12.000000000 +0000
+@@ -1,4 +1,4 @@
+-PKG_CPPFLAGS=@LIBJSON_CFLAGS@ -DNDEBUG=1  -DJSON_VALIDATE  -DJSON_STREAM=1 -DJSON_READ_PRIORITY=1 -DJSON_LIBRARY=1  -DJSON_ISO_STRICT -DJSON_STREAM -DJSON_DEBUG
++PKG_CPPFLAGS=@LIBJSON_CFLAGS@ -DNDEBUG=1  -DJSON_VALIDATE  -DJSON_STREAM=1 -DJSON_READ_PRIORITY=1 -DJSON_LIBRARY=1  -DJSON_ISO_STRICT -DJSON_STREAM
+ # -DJSON_STREAM=1   already defined in JSONOPtions.h
+ # -DJSON_NO_EXCEPTIONS=1 
+ # -DJSON_READ_PRIORITY
+diff -ru RJSONIO.orig/src/Makevars.win RJSONIO/src/Makevars.win
+--- RJSONIO.orig/src/Makevars.win	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/Makevars.win	2018-11-11 15:47:05.000000000 +0000
+@@ -1,5 +1,5 @@
+-PKG_CPPFLAGS=-I. -Ilibjson -Ilibjson/Source -DNDEBUG=1  -DJSON_VALIDATE  -DJSON_LIBRARY=1  -DJSON_ISO_STRICT -DJSON_READ_PRIORITY=1 
+-# -DJSON_STREAM=1   already defined in JSONOPtions.h
++PKG_CPPFLAGS=-I. -Ilibjson -Ilibjson/Source -DNEW_JSON_NEW_STREAM -DNDEBUG=1 -DJSON_STREAM=1 -DJSON_VALIDATE  -DJSON_LIBRARY=1  -DJSON_ISO_STRICT -DJSON_READ_PRIORITY=1 
++# -DJSON_STREAM=1   already defined in JSONOptions.h
+ # -DJSON_READ_PRIORITY=1 
+ # -DJSON_NO_EXCEPTIONS=1 
+ 
+diff -ru RJSONIO.orig/src/RJSON.c RJSONIO/src/RJSON.c
+--- RJSONIO.orig/src/RJSON.c	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/RJSON.c	2018-11-11 18:44:04.000000000 +0000
+@@ -114,7 +114,7 @@
+ void
+ R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *parser)
+ {
+-    const char *input;
++    const char *input = NULL;
+     int *ivals = NULL;
+     unsigned int count = 0, len;
+ 
+@@ -125,7 +125,7 @@
+     len = INTEGER(maxChar)[1];
+ 
+     if(TYPEOF(r_input) == RAWSXP)
+-	input = RAW(r_input);
++	input = (char *) RAW(r_input);
+     else if(TYPEOF(r_input) == INTSXP) {
+ 	ivals = INTEGER(r_input);
+     } else
+@@ -144,8 +144,11 @@
+ 	/* fprintf(stderr, "%d) %c %u\n", count, next_char, (unsigned int) next_char);fflush(stderr); */
+         if (!JSON_parser_char(parser, next_char)) {
+             delete_JSON_parser(parser);
+-            PROBLEM "JSON parser error: syntax error, byte %d (%c)\n", count, input[count]
+-	    ERROR;
++	    if(ivals) {
++		PROBLEM "JSON parser error: syntax error, int %d (%d)\n", count, ivals[count] ERROR;
++	    } else {
++		PROBLEM "JSON parser error: syntax error, byte %d (%c)\n", count, input[count] ERROR;
++	    }
+         }
+     }
+     if (!JSON_parser_done(parser)) {
+@@ -184,7 +187,7 @@
+ 
+       for(i = 0 ; i < n ; i++) {
+ 	input = CHAR(STRING_ELT(ans, i));
+-	len = strlen(input);
++	len = (int)strlen(input);
+ 	for (count = 0; count < len ; ++count, ++totalCount) {
+ 	    int next_char = input[count];
+ 	    if (next_char <= 0) {
+@@ -249,7 +252,7 @@
+ 	else if(isInteger(result))
+ 	    return(INTEGER(result)[0]);
+ 	else if(isNumeric(result))
+-	    return(REAL(result)[0]);
++	    return((int)REAL(result)[0]);
+         else
+ 	    return(1);
+     }
+@@ -271,7 +274,7 @@
+           ans = ScalarInteger((int) ((long) value->vu.integer_value));
+ 	break;
+       case JSON_T_FLOAT:
+-          ans = ScalarReal(value->vu.float_value);
++          ans = ScalarReal((double)value->vu.float_value);
+ 	break;
+       case JSON_T_NULL:
+           ans = R_NilValue;
+@@ -284,7 +287,8 @@
+ 	break;
+       case JSON_T_STRING:
+       case JSON_T_KEY:
+-	  ans = ScalarString(mkCharLenCE(value->vu.str.value, value->vu.str.length, encoding));
++	  ans = ScalarString(mkCharLenCE(value->vu.str.value,
++					 (int)value->vu.str.length, encoding));
+ 	break;
+     }
+ 
+@@ -320,7 +324,7 @@
+     if(type == JSON_T_ARRAY_BEGIN)
+ 	int_cb_counter = 0;
+     else if(type == JSON_T_INTEGER)
+-      p[int_cb_counter++] = value->vu.integer_value;
++	p[int_cb_counter++] = (int)value->vu.integer_value;
+ 
+     return(1);
+ }
+@@ -337,7 +341,7 @@
+     if(type == JSON_T_ARRAY_BEGIN)
+ 	real_cb_counter = 0;
+     else if(type == JSON_T_FLOAT)
+-        p[real_cb_counter++] = value->vu.float_value;
++        p[real_cb_counter++] = (double)value->vu.float_value;
+ 
+     return(1);
+ }
+Only in RJSONIO/src: init.c
+diff -ru RJSONIO.orig/src/libjson/Source/JSONChildren.cpp RJSONIO/src/libjson/Source/JSONChildren.cpp
+--- RJSONIO.orig/src/libjson/Source/JSONChildren.cpp	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONChildren.cpp	2018-11-11 11:41:08.000000000 +0000
+@@ -18,11 +18,15 @@
+     }
+ }
+ 
++/*
++ clang objects to testing pointers to be non-null:
++ warning: 'this' pointer cannot be null in well-defined C++ code ...
++*/
+ void jsonChildren::inc(void) json_nothrow {
+-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc"));
++//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc"));
+     if (json_unlikely(mysize == mycapacity)){  //it's full
+ 	   if (json_unlikely(mycapacity == 0)){  //the array hasn't been created yet
+-		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
++//		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
+ 		  #ifdef JSON_LESS_MEMORY
+ 			 array = json_malloc<JSONNode*>(1);
+ 			 mycapacity = 1;
+@@ -43,11 +47,11 @@
+ 
+ 
+ void jsonChildren::inc(json_index_t amount) json_nothrow {
+-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc(amount)"));
++//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null inc(amount)"));
+     if (json_unlikely(amount == 0)) return;
+     if (json_likely(mysize + amount >= mycapacity)){  //it's full
+ 	   if (json_unlikely(mycapacity == 0)){  //the array hasn't been created yet
+-		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
++//		  JSON_ASSERT(!array, JSON_TEXT("Expanding a 0 capacity array, but not null"));
+ 		  #ifdef JSON_LESS_MEMORY
+ 			 array = json_malloc<JSONNode*>(amount);
+ 			 mycapacity = amount;
+@@ -70,22 +74,22 @@
+ 
+ //actually deletes everything within the vector, this is safe to do on an empty or even a null array
+ void jsonChildren::deleteAll(void) json_nothrow {
+-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null deleteAll"));
++//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null deleteAll"));
+     json_foreach(this, runner){
+-        JSON_ASSERT(*runner != JSON_TEXT('\0'), JSON_TEXT("a null pointer within the children"));
++//        JSON_ASSERT(*runner != 0, JSON_TEXT("a null pointer within the children"));
+ 	   JSONNode::deleteJSONNode(*runner);  //this is why I can't do forward declaration
+     }
+ }
+ 
+ void jsonChildren::doerase(JSONNode ** position, json_index_t number) json_nothrow {
+-    JSON_ASSERT(this != 0, JSON_TEXT("Children is null doerase"));
+-    JSON_ASSERT(array != 0, JSON_TEXT("erasing something from a null array 2"));
+-    JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array 2"));
+-    JSON_ASSERT(position + number <= array + mysize, JSON_TEXT("erasing out of bounds 2"));
++//    JSON_ASSERT(this != 0, JSON_TEXT("Children is null doerase"));
++//    JSON_ASSERT(array != 0, JSON_TEXT("erasing something from a null array 2"));
++//    JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array 2"));
++//    JSON_ASSERT(position + number <= array + mysize, JSON_TEXT("erasing out of bounds 2"));
+     if (position + number >= array + mysize){
+ 	   mysize = (json_index_t)(position - array);
+ 	   #ifndef JSON_ISO_STRICT
+-		  JSON_ASSERT((long long)position - (long long)array >= 0, JSON_TEXT("doing negative allocation"));
++//		  JSON_ASSERT((long long)position - (long long)array >= 0, JSON_TEXT("doing negative allocation"));
+ 	   #endif
+     } else {
+ 	   std::memmove(position, position + number, (mysize - (position - array) - number) * sizeof(JSONNode *));
+diff -ru RJSONIO.orig/src/libjson/Source/JSONChildren.h RJSONIO/src/libjson/Source/JSONChildren.h
+--- RJSONIO.orig/src/libjson/Source/JSONChildren.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONChildren.h	2018-11-11 11:45:17.000000000 +0000
+@@ -1,10 +1,11 @@
+ #ifndef JSONCHILDREN_H
+ #define JSONCHILDREN_H
+ 
++#include <cstdlib> // needed for next line
+ using namespace std;
+ 
+ #include "JSONMemory.h"
+-#include "JSONDebug.h"  //for JSON_ASSERT macro
++//#include "JSONDebug.h"  //for JSON_ASSERT macro
+ 
+ #ifdef JSON_LESS_MEMORY
+     #ifdef __GNUC__
+@@ -38,7 +39,7 @@
+ 
+ class jsonChildren {
+ public:
+-	LIBJSON_OBJECT(jsonChildren);
++	LIBJSON_OBJECT(jsonChildren)
+     //starts completely empty and the array is not allocated
+     jsonChildren(void) json_nothrow : array(0), mysize(0), mycapacity(0) {
+ 	   LIBJSON_CTOR;
+@@ -65,14 +66,14 @@
+ 
+     //Adds something to the vector, doubling the array if necessary
+     void push_back(JSONNode * item) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null push_back"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null push_back"));
+ 	   inc();
+ 	   array[mysize++] = item;
+     }
+ 
+     //Adds something to the front of the vector, doubling the array if necessary
+     void push_front(JSONNode * item) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null push_front"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null push_front"));
+ 	   inc();
+ 	   std::memmove(array + 1, array, mysize++ * sizeof(JSONNode *));
+ 	   array[0] = item;
+@@ -80,51 +81,51 @@
+ 
+     //gets an item out of the vector by it's position
+     inline JSONNode * operator[] (json_index_t position) const json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null []"));
+-	   JSON_ASSERT(position < mysize, JSON_TEXT("Using [] out of bounds"));
+-	   JSON_ASSERT(position < mycapacity, JSON_TEXT("Using [] out of bounds"));
+-	   JSON_ASSERT(array != 0, JSON_TEXT("Array is null"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null []"));
++//	   JSON_ASSERT(position < mysize, JSON_TEXT("Using [] out of bounds"));
++//	   JSON_ASSERT(position < mycapacity, JSON_TEXT("Using [] out of bounds"));
++//	   JSON_ASSERT(array != 0, JSON_TEXT("Array is null"));
+ 	   return array[position];
+     }
+ 
+     //returns the allocated capacity, but keep in mind that some might not be valid
+     inline json_index_t capacity() const json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null capacity"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null capacity"));
+ 	   return mycapacity;
+     }
+ 
+     //returns the number of valid objects within the vector
+     inline json_index_t size() const json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null size"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null size"));
+ 	   return mysize;
+     }
+ 
+     //tests whether or not the vector is empty
+     inline bool empty() const json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null empty"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null empty"));
+ 	   return mysize == 0;
+     }
+ 
+     //clears (and deletes) everything from the vector and sets it's size to 0
+     inline void clear() json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null clear"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null clear"));
+ 	   if (json_likely(array != 0)){  //don't bother clearing anything if there is nothing in it
+-		  JSON_ASSERT(mycapacity != 0, JSON_TEXT("mycapacity is not zero, but array is null"));
++//		  JSON_ASSERT(mycapacity != 0, JSON_TEXT("mycapacity is not zero, but array is null"));
+ 		  deleteAll();
+ 		  mysize = 0;
+ 	   }
+-	   JSON_ASSERT(mysize == 0, JSON_TEXT("mysize is not zero after clear"));
++//	   JSON_ASSERT(mysize == 0, JSON_TEXT("mysize is not zero after clear"));
+     }
+ 
+     //returns the beginning of the array
+     inline JSONNode ** begin(void) const json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null begin"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null begin"));
+ 	   return array;
+     }
+ 
+     //returns the end of the array
+     inline JSONNode ** end(void) const json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null end"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null end"));
+ 	   return array + mysize;
+     }
+ 
+@@ -132,7 +133,7 @@
+ 	template <bool reverse>
+     struct iteratorKeeper {
+     public:
+-		LIBJSON_OBJECT(jsonChildren::iteratorKeeper);
++		LIBJSON_OBJECT(jsonChildren::iteratorKeeper)
+ 	  iteratorKeeper(jsonChildren * pthis, JSONNode ** & position) json_nothrow :
+ 		 myRelativeOffset(reverse ? (json_index_t)(pthis -> array + (size_t)pthis -> mysize - position) : (json_index_t)(position - pthis -> array)),
+ 		 myChildren(pthis),
+@@ -159,10 +160,10 @@
+ 
+     //This function DOES NOT delete the item it points to
+     inline void erase(JSONNode ** & position) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null erase"));
+-	   JSON_ASSERT(array != 0, JSON_TEXT("erasing something from a null array 1"));
+-	   JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array 1"));
+-	   JSON_ASSERT(position <= array + mysize, JSON_TEXT("erasing out of bounds 1"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null erase"));
++//	   JSON_ASSERT(array != 0, JSON_TEXT("erasing something from a null array 1"));
++//	   JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array 1"));
++//	   JSON_ASSERT(position <= array + mysize, JSON_TEXT("erasing out of bounds 1"));
+ 	   std::memmove(position, position + 1, (mysize-- - (position - array) - 1) * sizeof(JSONNode *));
+ 	   iteratorKeeper<false> ik(this, position);
+ 	   shrink();
+@@ -170,7 +171,7 @@
+ 
+     //This function DOES NOT delete the item it points to
+     inline void erase(JSONNode ** & position, json_index_t number) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null erase 2"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null erase 2"));
+ 	   doerase(position, number);
+ 	   iteratorKeeper<false> ik(this, position);
+ 	   shrink();
+@@ -179,7 +180,7 @@
+ 
+     //This function DOES NOT delete the item it points to
+     inline void erase(JSONNode ** position, json_index_t number, JSONNode ** & starter) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null erase 3"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null erase 3"));
+ 	   doerase(position, number);
+ 	   iteratorKeeper<false> ik(this, starter);
+ 	   shrink();
+@@ -190,10 +191,10 @@
+     #else
+ 	   void insert(JSONNode ** & position, JSONNode * item, bool reverse = false) json_nothrow {
+     #endif
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null insert"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null insert"));
+ 	   //position isnt relative to array because of realloc
+-	   JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array insert 1"));
+-	   JSON_ASSERT(position <= array + mysize, JSON_TEXT("position is above the end of the array insert 1"));
++//	   JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array insert 1"));
++//	   JSON_ASSERT(position <= array + mysize, JSON_TEXT("position is above the end of the array insert 1"));
+ 		#ifndef JSON_LIBRARY
+ 		if (reverse){
+ 			iteratorKeeper<true> ik(this, position);
+@@ -210,9 +211,9 @@
+     }
+ 
+     void insert(JSONNode ** & position, JSONNode ** items, json_index_t num) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null insert 2"));
+-	   JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array insert 2"));
+-	   JSON_ASSERT(position <= array + mysize, JSON_TEXT("position is above the end of the array insert 2"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null insert 2"));
++//	   JSON_ASSERT(position >= array, JSON_TEXT("position is beneath the start of the array insert 2"));
++//	   JSON_ASSERT(position <= array + mysize, JSON_TEXT("position is above the end of the array insert 2"));
+ 	   {
+ 		  iteratorKeeper<false> ik(this, position);
+ 		  inc(num);
+@@ -224,10 +225,10 @@
+     }
+ 
+     inline void reserve(json_index_t amount) json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null reserve"));
+-	   JSON_ASSERT(array == 0, JSON_TEXT("reserve is not meant to expand a preexisting array"));
+-	   JSON_ASSERT(mycapacity == 0, JSON_TEXT("reservec is not meant to expand a preexisting array"));
+-	   JSON_ASSERT(mysize == 0, JSON_TEXT("reserves is not meant to expand a preexisting array"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null reserve"));
++//	   JSON_ASSERT(array == 0, JSON_TEXT("reserve is not meant to expand a preexisting array"));
++//	   JSON_ASSERT(mycapacity == 0, JSON_TEXT("reservec is not meant to expand a preexisting array"));
++//	   JSON_ASSERT(mysize == 0, JSON_TEXT("reserves is not meant to expand a preexisting array"));
+ 	   array = json_malloc<JSONNode*>(mycapacity = amount);
+     }
+ 
+@@ -236,13 +237,13 @@
+ 
+     //shrinks the array to only as large as it needs to be to hold everything within it
+     inline childrenVirtual void shrink() json_nothrow {
+-	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null shrink"));
++//	   JSON_ASSERT(this != 0, JSON_TEXT("Children is null shrink"));
+ 	   if (json_unlikely(mysize == 0)){  //size is zero, we should completely free the array
+ 		  libjson_free<JSONNode*>(array);  //free does checks for a null pointer, so don't bother checking
+ 		  array = 0;
+ 	   #ifdef JSON_LESS_MEMORY
+ 		  } else {  //need to shrink it, using realloc
+-			 JSON_ASSERT(array != 0, JSON_TEXT("shrinking a null array that is not size 0"));
++//			 JSON_ASSERT(array != 0, JSON_TEXT("shrinking a null array that is not size 0"));
+ 			 array = json_realloc<JSONNode*>(array, mysize);
+ 	   #endif
+ 	   }
+@@ -296,12 +297,12 @@
+ 		  LIBJSON_DTOR;
+ 	   };
+ 	   inline virtual void shrink() json_nothrow {
+-		  JSON_ASSERT(this != 0, JSON_TEXT("Children is null shrink reserved"));
++//		  JSON_ASSERT(this != 0, JSON_TEXT("Children is null shrink reserved"));
+ 		  if (json_unlikely(mysize == 0)){  //size is zero, we should completely free the array
+ 			 libjson_free<JSONNode*>(array);  //free does checks for a null pointer, so don't bother checking
+ 			 array = 0;
+ 		  } else if (mysize > myreserved){
+-			 JSON_ASSERT(array != 0, JSON_TEXT("shrinking a null array that is not size 0"));
++//			 JSON_ASSERT(array != 0, JSON_TEXT("shrinking a null array that is not size 0"));
+ 			 array = json_realloc<JSONNode*>(array, mysize);
+ 		  }
+ 	   }
+diff -ru RJSONIO.orig/src/libjson/Source/JSONDefs/GNU_C.h RJSONIO/src/libjson/Source/JSONDefs/GNU_C.h
+--- RJSONIO.orig/src/libjson/Source/JSONDefs/GNU_C.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONDefs/GNU_C.h	2018-11-11 17:41:42.000000000 +0000
+@@ -55,7 +55,9 @@
+     #endif
+ 
+     #define json_nothrow throw()
+-    #define json_throws(x) throw(x)
++// deprecated in C++11
++//  #define json_throws(x) throw(x)
++    #define json_throws(x)
+ 
+     #ifdef JSON_LESS_MEMORY
+ 	   #define PACKED(x) :x __attribute__ ((packed))
+diff -ru RJSONIO.orig/src/libjson/Source/JSONMemory.h RJSONIO/src/libjson/Source/JSONMemory.h
+--- RJSONIO.orig/src/libjson/Source/JSONMemory.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONMemory.h	2018-11-11 08:43:25.000000000 +0000
+@@ -139,7 +139,7 @@
+ template <typename T>
+ class json_auto {
+     public:
+-		LIBJSON_OBJECT(json_auto);
++            LIBJSON_OBJECT(json_auto)
+ 	   json_auto(void) json_nothrow : ptr(0){ LIBJSON_CTOR; }
+ 	   json_auto(size_t count) json_nothrow : ptr(json_malloc<T>(count)){ LIBJSON_CTOR; }
+ 	   json_auto(T * arg) json_nothrow : ptr(arg){ LIBJSON_CTOR; }
+diff -ru RJSONIO.orig/src/libjson/Source/JSONNode.h RJSONIO/src/libjson/Source/JSONNode.h
+--- RJSONIO.orig/src/libjson/Source/JSONNode.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONNode.h	2018-11-11 08:45:20.000000000 +0000
+@@ -131,7 +131,7 @@
+ 
+ class JSONNode {
+ public:
+-	LIBJSON_OBJECT(JSONNode);
++	LIBJSON_OBJECT(JSONNode)
+     explicit JSONNode(char mytype = JSON_NODE) json_nothrow json_hot;
+     #define DECLARE_CTOR(type) explicit JSONNode(const json_string & name_t, type value_t)
+     DECLARE_FOR_ALL_TYPES(DECLARE_CTOR)
+diff -ru RJSONIO.orig/src/libjson/Source/JSONSharedString.h RJSONIO/src/libjson/Source/JSONSharedString.h
+--- RJSONIO.orig/src/libjson/Source/JSONSharedString.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONSharedString.h	2018-11-11 18:39:10.000000000 +0000
+@@ -181,15 +181,15 @@
+ 	
+ 	inline json_shared_string(const json_string & str) : offset(0), len(str.length()), _str(new(json_malloc<json_shared_string_internal>(1)) json_shared_string_internal(str)) {}
+ 	
+-	inline json_shared_string(const json_shared_string & str, size_t _offset, size_t _len) : _str(str._str), offset(str.offset + _offset), len(_len) {
++	inline json_shared_string(const json_shared_string & str, size_t _offset, size_t _len) : offset(str.offset + _offset), len(_len), _str(str._str) {
+ 		++_str -> refCount;
+ 	}
+ 	
+-	inline json_shared_string(const json_shared_string & str, size_t _offset) : _str(str._str), offset(str.offset + _offset), len(str.len - _offset) {
++	inline json_shared_string(const json_shared_string & str, size_t _offset) : offset(str.offset + _offset), len(str.len - _offset), _str(str._str) {
+ 		++_str -> refCount;
+ 	}
+ 	
+-	inline json_shared_string(const iterator & s, const iterator & e) : _str(s.parent -> _str), offset(s.it - s.parent -> _str -> mystring.data()), len(e.it - s.it){
++	inline json_shared_string(const iterator & s, const iterator & e) :  offset(s.it - s.parent -> _str -> mystring.data()), len(e.it - s.it), _str(s.parent -> _str){
+ 		++_str -> refCount;
+ 	}
+ 	
+@@ -258,7 +258,7 @@
+ 		len = _len;
+ 	}
+ 	
+-	json_shared_string(const json_shared_string & other) : _str(other._str), offset(other.offset), len(other.len){
++json_shared_string(const json_shared_string & other) :  offset(other.offset), len(other.len), _str(other._str){
+ 		++_str -> refCount;
+ 	}
+ 	
+@@ -292,9 +292,9 @@
+ 			libjson_free<json_shared_string_internal>(_str);
+ 		}
+ 	}
+-	mutable json_shared_string_internal * _str;
+ 	mutable size_t offset PACKED(20);
+ 	mutable size_t len PACKED(20);
++	mutable json_shared_string_internal * _str;
+ };
+ 
+ #ifdef JSON_LESS_MEMORY
+diff -ru RJSONIO.orig/src/libjson/Source/JSONStream.h RJSONIO/src/libjson/Source/JSONStream.h
+--- RJSONIO.orig/src/libjson/Source/JSONStream.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/JSONStream.h	2018-11-11 18:22:35.000000000 +0000
+@@ -18,13 +18,13 @@
+ #endif
+ 
+ #ifndef JSON_LIBRARY
+-class JSONNode; //foreward declaration
++class JSONNode; //forward declaration
+ typedef void (*json_stream_callback_t)(JSONNode &, void *);
+ #endif
+ 
+ class JSONStream {
+ public:
+-	LIBJSON_OBJECT(JSONStream);
++    LIBJSON_OBJECT(JSONStream)
+     JSONStream(json_stream_callback_t call_p, json_stream_e_callback_t call_e = NULL, void * callbackIdentifier = JSONSTREAM_SELF) json_nothrow;
+     JSONStream(const JSONStream & orig) json_nothrow;
+     JSONStream & operator =(const JSONStream & orig) json_nothrow;
+@@ -70,13 +70,14 @@
+ 	#else
+ 		static size_t FindNextRelevant(json_char ch, const json_string & value_t, const size_t pos) json_nothrow json_read_priority;
+ 	#endif
+-	
+-    void parse(void) json_nothrow;
+-    json_string buffer;
++
++
++    bool state BITS(1);
+     json_stream_callback_t call;
+-	json_stream_e_callback_t err_call;
+-	void * callback_identifier;
+-	bool state BITS(1);
++    json_stream_e_callback_t err_call;
++    json_string buffer;
++    void * callback_identifier;
++    void parse(void) json_nothrow;
+ };
+ 
+ #ifdef JSON_LESS_MEMORY
+diff -ru RJSONIO.orig/src/libjson/Source/internalJSONNode.cpp RJSONIO/src/libjson/Source/internalJSONNode.cpp
+--- RJSONIO.orig/src/libjson/Source/internalJSONNode.cpp	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/internalJSONNode.cpp	2018-11-11 18:36:52.000000000 +0000
+@@ -75,7 +75,7 @@
+ 	   case JSON_TEXT(x)
+ #endif
+ 
+-internalJSONNode::internalJSONNode(const json_string & name_t, const json_string & value_t) json_nothrow : _type(), _name_encoded(), _name(JSONWorker::FixString(name_t, NAME_ENCODED)), _string(), _string_encoded(), _value()
++internalJSONNode::internalJSONNode(const json_string & name_t, const json_string & value_t) json_nothrow : _type(), _name(JSONWorker::FixString(name_t, NAME_ENCODED)), _name_encoded(), _string(), _string_encoded(), _value()
+     initializeMutex(0)
+     initializeRefCount(1)
+     initializeFetch(false)
+diff -ru RJSONIO.orig/src/libjson/Source/internalJSONNode.h RJSONIO/src/libjson/Source/internalJSONNode.h
+--- RJSONIO.orig/src/libjson/Source/internalJSONNode.h	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/internalJSONNode.h	2018-11-11 19:40:15.000000000 +0000
+@@ -80,7 +80,7 @@
+ 
+ class internalJSONNode {
+ public:
+-	LIBJSON_OBJECT(internalJSONNode);
++	LIBJSON_OBJECT(internalJSONNode)
+     internalJSONNode(char mytype = JSON_NULL) json_nothrow json_hot;
+     #ifdef JSON_READ_PRIORITY
+ 	   internalJSONNode(const json_string & unparsed) json_nothrow json_hot;
+@@ -254,7 +254,7 @@
+     mutable unsigned char _type BITS(3);
+ 
+     json_string _name;
+-    mutable bool _name_encoded BITS(1);  //must be above name due to initialization list order
++    mutable bool _name_encoded BITS(1);
+ 
+     mutable json_string _string;   //these are both mutable because the string can change when it's fetched
+     mutable bool _string_encoded BITS(1);
+diff -ru RJSONIO.orig/src/libjson/Source/libjson.cpp RJSONIO/src/libjson/Source/libjson.cpp
+--- RJSONIO.orig/src/libjson/Source/libjson.cpp	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/libjson/Source/libjson.cpp	2018-11-11 09:34:35.000000000 +0000
+@@ -81,7 +81,7 @@
+ 		  json_try {
+ 			 //use this constructor to simply copy reference instead of copying the temp
+ 			 return MANAGER_INSERT(JSONNode::newJSONNode_Shallow(JSONWorker::parse(TOCONST_CSTR(json))));
+-		  } json_catch (std::invalid_argument, (void)0; )
++		  } json_catch (const std::invalid_argument&, (void)0; )
+ 		  #ifndef JSON_NO_EXCEPTIONS
+ 			 return 0;
+ 		  #endif
+@@ -92,7 +92,7 @@
+ 		  json_try {
+ 			 //use this constructor to simply copy reference instead of copying the temp
+ 			 return MANAGER_INSERT(JSONNode::newJSONNode_Shallow(JSONWorker::parse_unformatted(TOCONST_CSTR(json))));
+-		  } json_catch(std::invalid_argument, (void)0; )
++		  } json_catch(const std::invalid_argument&, (void)0; )
+ 		  #ifndef JSON_NO_EXCEPTIONS
+ 			 return 0;
+ 		  #endif
+@@ -498,7 +498,7 @@
+ 	   JSON_ASSERT_SAFE(node, JSON_TEXT("null node to json_at"), return 0;);
+ 	   json_try {
+ 		  return &((JSONNode*)node) -> at(pos);
+-	   } json_catch (std::out_of_range, (void)0; )
++	   } json_catch (const std::out_of_range&, (void)0; )
+ 	   #ifndef JSON_NO_EXCEPTIONS
+ 		  return 0;
+ 	   #endif
+@@ -509,7 +509,7 @@
+ 	   JSON_ASSERT_SAFE(name, JSON_TEXT("null node to json_get.  Did you mean to use json_at?"), return 0;);
+ 	   json_try {
+ 		  return &((JSONNode*)node) -> at(TOCONST_CSTR(name));
+-	   } json_catch (std::out_of_range, (void)0; )
++	   } json_catch (const std::out_of_range&, (void)0; )
+ 	   #ifndef JSON_NO_EXCEPTIONS
+ 		  return 0;
+ 	   #endif
+@@ -522,7 +522,7 @@
+ 		  JSON_ASSERT_SAFE(name, JSON_TEXT("null name to json_at_nocase"), return 0;);
+ 		  json_try {
+ 			 return &((JSONNode*)node) -> at_nocase(TOCONST_CSTR(name));
+-		  } json_catch (std::out_of_range, (void)0; )
++		  } json_catch (const std::out_of_range&, (void)0; )
+ 		  #ifndef JSON_NO_EXCEPTIONS
+ 			 return 0;
+ 		  #endif
+diff -ru RJSONIO.orig/src/rlibjson.c RJSONIO/src/rlibjson.c
+--- RJSONIO.orig/src/rlibjson.c	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/rlibjson.c	2018-11-11 11:35:36.000000000 +0000
+@@ -46,7 +46,7 @@
+ #if 0
+     register_debug_callback(jsonErrorHandler);
+ #else
+-#pragma message("activate the debug_callback")
++//#pragma message("activate the debug_callback")
+ #endif
+     node = json_parse(str);
+     ans = processJSONNode(node, json_type(node), INTEGER(simplify)[0], nullValue, LOGICAL(simplifyWithNames)[0],
+@@ -84,7 +84,7 @@
+     int nprotect = 0;
+     int numNulls = 0;
+     len = json_size(n);
+-    char startType = parentType; // was 127
++    char startType = (char)parentType; // was 127
+     
+     int isNullHomogeneous = (TYPEOF(nullValue) == LGLSXP || TYPEOF(nullValue) == REALSXP ||
+                                 TYPEOF(nullValue) == STRSXP || TYPEOF(nullValue) == INTSXP);
+diff -ru RJSONIO.orig/src/rparser.c RJSONIO/src/rparser.c
+--- RJSONIO.orig/src/rparser.c	2015-10-05 00:23:14.000000000 +0100
++++ RJSONIO/src/rparser.c	2018-11-11 08:36:42.000000000 +0000
+@@ -88,7 +88,7 @@
+     PROTECT(r_str = Rf_eval(call, R_GlobalEnv));
+     if( (num = Rf_length(r_str)) ) {
+ 	const char *ptr = CHAR(STRING_ELT(r_str, 0));
+-	int len = strlen(ptr);
++	int len = (int)strlen(ptr);
+ 
+ 	*numBytes += len;
+         ptr = strdup(ptr); //xxx
+@@ -300,8 +300,7 @@
+ 	    ERROR;
+     }
+     
+-    int len = strlen(str), cur = 0, blocksize = 100;
+-    int count = 0;
++    int len = (int)strlen(str), cur = 0, blocksize = 100;
+     char tmp[blocksize + 1];
+     tmp[blocksize] = '\0';
+     while(cur < len) {

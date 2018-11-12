@@ -114,7 +114,7 @@ R_readFromJSON(SEXP r_input, SEXP depth, SEXP allowComments, SEXP func, SEXP dat
 void
 R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *parser)
 {
-    const char *input;
+    const char *input = NULL;
     int *ivals = NULL;
     unsigned int count = 0, len;
 
@@ -125,7 +125,7 @@ R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *pa
     len = INTEGER(maxChar)[1];
 
     if(TYPEOF(r_input) == RAWSXP)
-	input = RAW(r_input);
+	input = (char *) RAW(r_input);
     else if(TYPEOF(r_input) == INTSXP) {
 	ivals = INTEGER(r_input);
     } else
@@ -144,8 +144,11 @@ R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *pa
 	/* fprintf(stderr, "%d) %c %u\n", count, next_char, (unsigned int) next_char);fflush(stderr); */
         if (!JSON_parser_char(parser, next_char)) {
             delete_JSON_parser(parser);
-            PROBLEM "JSON parser error: syntax error, byte %d (%c)\n", count, input[count]
-	    ERROR;
+	    if(ivals) {
+		PROBLEM "JSON parser error: syntax error, int %d (%d)\n", count, ivals[count] ERROR;
+	    } else {
+		PROBLEM "JSON parser error: syntax error, byte %d (%c)\n", count, input[count] ERROR;
+	    }
         }
     }
     if (!JSON_parser_done(parser)) {
@@ -184,7 +187,7 @@ R_json_parse_connection(SEXP r_input, SEXP numLines, struct JSON_parser_struct *
 
       for(i = 0 ; i < n ; i++) {
 	input = CHAR(STRING_ELT(ans, i));
-	len = strlen(input);
+	len = (int)strlen(input);
 	for (count = 0; count < len ; ++count, ++totalCount) {
 	    int next_char = input[count];
 	    if (next_char <= 0) {
@@ -249,7 +252,7 @@ R_json_basicCallback(void* ctx, int type, const struct JSON_value_struct* value)
 	else if(isInteger(result))
 	    return(INTEGER(result)[0]);
 	else if(isNumeric(result))
-	    return(REAL(result)[0]);
+	    return((int)REAL(result)[0]);
         else
 	    return(1);
     }
@@ -271,7 +274,7 @@ convertJSONValueToR(int type, const struct JSON_value_struct *value, cetype_t en
           ans = ScalarInteger((int) ((long) value->vu.integer_value));
 	break;
       case JSON_T_FLOAT:
-          ans = ScalarReal(value->vu.float_value);
+          ans = ScalarReal((double)value->vu.float_value);
 	break;
       case JSON_T_NULL:
           ans = R_NilValue;
@@ -284,7 +287,8 @@ convertJSONValueToR(int type, const struct JSON_value_struct *value, cetype_t en
 	break;
       case JSON_T_STRING:
       case JSON_T_KEY:
-	  ans = ScalarString(mkCharLenCE(value->vu.str.value, value->vu.str.length, encoding));
+	  ans = ScalarString(mkCharLenCE(value->vu.str.value,
+					 (int)value->vu.str.length, encoding));
 	break;
     }
 
@@ -320,7 +324,7 @@ R_json_IntegerArrayCallback(void* ctx, int type, const struct JSON_value_struct*
     if(type == JSON_T_ARRAY_BEGIN)
 	int_cb_counter = 0;
     else if(type == JSON_T_INTEGER)
-      p[int_cb_counter++] = value->vu.integer_value;
+	p[int_cb_counter++] = (int)value->vu.integer_value;
 
     return(1);
 }
@@ -337,7 +341,7 @@ R_json_RealArrayCallback(void* ctx, int type, const struct JSON_value_struct* va
     if(type == JSON_T_ARRAY_BEGIN)
 	real_cb_counter = 0;
     else if(type == JSON_T_FLOAT)
-        p[real_cb_counter++] = value->vu.float_value;
+        p[real_cb_counter++] = (double)value->vu.float_value;
 
     return(1);
 }

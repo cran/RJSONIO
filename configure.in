@@ -13,7 +13,16 @@ ORIG_USE_LOCAL="$USE_LOCAL"
 
 if test -z "$USE_LOCAL" || test "$USE_LOCAL" = "no" ; then
   echo "Trying to find libjson.h header file"
+  : ${R_HOME=`R RHOME`}
+  if test -z "${R_HOME}"; then
+    echo "could not determine R_HOME"
+    exit 1
+  fi
+  CC=`"${R_HOME}/bin/R" CMD config CC`
+  CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+  CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
   CPPFLAGS="$CPPFLAGS -I$LIBJSON_PREFIX/include"
+  AC_PROG_CC
   AC_TRY_COMPILE(
     [#include <libjson/libjson.h>],
     [JSONNODE *ptr = json_parse("[1, 3]");],

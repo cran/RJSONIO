@@ -88,7 +88,7 @@ getData(SEXP call, JSONSTREAM *stream, int *numBytes)
     PROTECT(r_str = Rf_eval(call, R_GlobalEnv));
     if( (num = Rf_length(r_str)) ) {
 	const char *ptr = CHAR(STRING_ELT(r_str, 0));
-	int len = strlen(ptr);
+	int len = (int)strlen(ptr);
 
 	*numBytes += len;
         ptr = strdup(ptr); //xxx
@@ -300,8 +300,7 @@ R_json_parser_test_stream_chunk(SEXP r_filename)
 	    ERROR;
     }
     
-    int len = strlen(str), cur = 0, blocksize = 100;
-    int count = 0;
+    int len = (int)strlen(str), cur = 0, blocksize = 100;
     char tmp[blocksize + 1];
     tmp[blocksize] = '\0';
     while(cur < len) {

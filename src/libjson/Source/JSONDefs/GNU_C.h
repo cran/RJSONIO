@@ -55,7 +55,9 @@
     #endif
 
     #define json_nothrow throw()
-    #define json_throws(x) throw(x)
+// deprecated in C++11
+//  #define json_throws(x) throw(x)
+    #define json_throws(x)
 
     #ifdef JSON_LESS_MEMORY
 	   #define PACKED(x) :x __attribute__ ((packed))

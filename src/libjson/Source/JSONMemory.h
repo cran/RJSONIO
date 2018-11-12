@@ -139,7 +139,7 @@
 template <typename T>
 class json_auto {
     public:
-		LIBJSON_OBJECT(json_auto);
+            LIBJSON_OBJECT(json_auto)
 	   json_auto(void) json_nothrow : ptr(0){ LIBJSON_CTOR; }
 	   json_auto(size_t count) json_nothrow : ptr(json_malloc<T>(count)){ LIBJSON_CTOR; }
 	   json_auto(T * arg) json_nothrow : ptr(arg){ LIBJSON_CTOR; }

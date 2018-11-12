@@ -80,7 +80,7 @@ class JSONNode;  //forward declaration
 
 class internalJSONNode {
 public:
-	LIBJSON_OBJECT(internalJSONNode);
+	LIBJSON_OBJECT(internalJSONNode)
     internalJSONNode(char mytype = JSON_NULL) json_nothrow json_hot;
     #ifdef JSON_READ_PRIORITY
 	   internalJSONNode(const json_string & unparsed) json_nothrow json_hot;
@@ -254,7 +254,7 @@ public:
     mutable unsigned char _type BITS(3);
 
     json_string _name;
-    mutable bool _name_encoded BITS(1);  //must be above name due to initialization list order
+    mutable bool _name_encoded BITS(1);
 
     mutable json_string _string;   //these are both mutable because the string can change when it's fetched
     mutable bool _string_encoded BITS(1);

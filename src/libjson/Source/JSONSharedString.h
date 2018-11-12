@@ -181,15 +181,15 @@ public:
 	
 	inline json_shared_string(const json_string & str) : offset(0), len(str.length()), _str(new(json_malloc<json_shared_string_internal>(1)) json_shared_string_internal(str)) {}
 	
-	inline json_shared_string(const json_shared_string & str, size_t _offset, size_t _len) : _str(str._str), offset(str.offset + _offset), len(_len) {
+	inline json_shared_string(const json_shared_string & str, size_t _offset, size_t _len) : offset(str.offset + _offset), len(_len), _str(str._str) {
 		++_str -> refCount;
 	}
 	
-	inline json_shared_string(const json_shared_string & str, size_t _offset) : _str(str._str), offset(str.offset + _offset), len(str.len - _offset) {
+	inline json_shared_string(const json_shared_string & str, size_t _offset) : offset(str.offset + _offset), len(str.len - _offset), _str(str._str) {
 		++_str -> refCount;
 	}
 	
-	inline json_shared_string(const iterator & s, const iterator & e) : _str(s.parent -> _str), offset(s.it - s.parent -> _str -> mystring.data()), len(e.it - s.it){
+	inline json_shared_string(const iterator & s, const iterator & e) :  offset(s.it - s.parent -> _str -> mystring.data()), len(e.it - s.it), _str(s.parent -> _str){
 		++_str -> refCount;
 	}
 	
@@ -258,7 +258,7 @@ public:
 		len = _len;
 	}
 	
-	json_shared_string(const json_shared_string & other) : _str(other._str), offset(other.offset), len(other.len){
+json_shared_string(const json_shared_string & other) :  offset(other.offset), len(other.len), _str(other._str){
 		++_str -> refCount;
 	}
 	
@@ -292,9 +292,9 @@ JSON_PRIVATE
 			libjson_free<json_shared_string_internal>(_str);
 		}
 	}
-	mutable json_shared_string_internal * _str;
 	mutable size_t offset PACKED(20);
 	mutable size_t len PACKED(20);
+	mutable json_shared_string_internal * _str;
 };
 
 #ifdef JSON_LESS_MEMORY

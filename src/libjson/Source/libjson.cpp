@@ -81,7 +81,7 @@
 		  json_try {
 			 //use this constructor to simply copy reference instead of copying the temp
 			 return MANAGER_INSERT(JSONNode::newJSONNode_Shallow(JSONWorker::parse(TOCONST_CSTR(json))));
-		  } json_catch (std::invalid_argument, (void)0; )
+		  } json_catch (const std::invalid_argument&, (void)0; )
 		  #ifndef JSON_NO_EXCEPTIONS
 			 return 0;
 		  #endif
@@ -92,7 +92,7 @@
 		  json_try {
 			 //use this constructor to simply copy reference instead of copying the temp
 			 return MANAGER_INSERT(JSONNode::newJSONNode_Shallow(JSONWorker::parse_unformatted(TOCONST_CSTR(json))));
-		  } json_catch(std::invalid_argument, (void)0; )
+		  } json_catch(const std::invalid_argument&, (void)0; )
 		  #ifndef JSON_NO_EXCEPTIONS
 			 return 0;
 		  #endif
@@ -498,7 +498,7 @@
 	   JSON_ASSERT_SAFE(node, JSON_TEXT("null node to json_at"), return 0;);
 	   json_try {
 		  return &((JSONNode*)node) -> at(pos);
-	   } json_catch (std::out_of_range, (void)0; )
+	   } json_catch (const std::out_of_range&, (void)0; )
 	   #ifndef JSON_NO_EXCEPTIONS
 		  return 0;
 	   #endif
@@ -509,7 +509,7 @@
 	   JSON_ASSERT_SAFE(name, JSON_TEXT("null node to json_get.  Did you mean to use json_at?"), return 0;);
 	   json_try {
 		  return &((JSONNode*)node) -> at(TOCONST_CSTR(name));
-	   } json_catch (std::out_of_range, (void)0; )
+	   } json_catch (const std::out_of_range&, (void)0; )
 	   #ifndef JSON_NO_EXCEPTIONS
 		  return 0;
 	   #endif
@@ -522,7 +522,7 @@
 		  JSON_ASSERT_SAFE(name, JSON_TEXT("null name to json_at_nocase"), return 0;);
 		  json_try {
 			 return &((JSONNode*)node) -> at_nocase(TOCONST_CSTR(name));
-		  } json_catch (std::out_of_range, (void)0; )
+		  } json_catch (const std::out_of_range&, (void)0; )
 		  #ifndef JSON_NO_EXCEPTIONS
 			 return 0;
 		  #endif

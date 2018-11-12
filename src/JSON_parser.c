@@ -316,7 +316,7 @@ push(JSON_parser jc, int mode)
         }
     }
     
-    jc->stack[jc->top] = mode;
+    jc->stack[jc->top] = (signed char)mode;
     return true;
 }
 
@@ -456,7 +456,6 @@ static void grow_parse_buffer(JSON_parser jc)
 
 static int parse_parse_buffer(JSON_parser jc)
 {
-int ok;
     if (jc->callback) {
         JSON_value value, *arg = NULL;
         
@@ -482,12 +481,13 @@ int ok;
                 case JSON_T_INTEGER: {
                     double tmp;
                     arg = &value;
-                    ok = sscanf(jc->parse_buffer, "%lf", &tmp);
+		    // value unused
+                    int ok = sscanf(jc->parse_buffer, "%lf", &tmp);
 	            if(tmp > MAX_INT || tmp < - MAX_INT) {
                        jc->type = JSON_T_FLOAT;
 	               value.vu.float_value = tmp;
 	            } else
-	               value.vu.integer_value = tmp;
+			value.vu.integer_value = (JSON_int_t)tmp;
                     break;
                 }
                 case JSON_T_STRING:
@@ -655,7 +655,7 @@ JSON_parser_char(JSON_parser jc, int next_char)
 /*
     Change the state.
 */
-        jc->state = next_state;
+        jc->state = (signed char) next_state;
     } else {
 /*
     Or perform one of the actions.
