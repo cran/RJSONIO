@@ -82,5 +82,6 @@ AC_SUBST(CPP_FILES)
 AC_SUBST(LIBJSON_CFLAGS)
 AC_SUBST(LIBJSON_LIBS)
 
-AC_OUTPUT(src/Makevars cleanup)
+AC_OUTPUT(src/Makevars tools/cleanup)
+mv tools/cleanup .
 chmod +x cleanup

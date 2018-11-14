@@ -1,8 +1,10 @@
-This RJSONIO package uses the libjson C library from
-libjson.sourceforge.net.  A version of that C++ code is included in
-this package and can be used.  Alternatively, one can use a different
-version of libjson, e.g. a more recent version.  To do this,
-you install that version of libjson with
+This RJSONIO package uses the libjson C++ library from
+libjson.sourceforge.net (there are other projects called libjson).  A
+version of that code is included in this package and can be used.
+Alternatively, one can use a different version of libjson, e.g. a more
+recent version (but that site has not been updated since 2012, version
+7.6.1, a corrected version of which is included here).  To do this, you
+can build and install that version of libjson with
 
      make SHARED=1 install
 
@@ -27,10 +29,6 @@ you can use
    R CMD INSTALL --configure-args="--with-local-libjson=yes" RJSONIO
 
 
-If you do use a version of libjson installed into a non-standard place,
-you will probably need to modify your LD_LIBRARY_PATH (or DYLD_LIBRARY_PATH on OS X)
-environment variable.
-
-NB: The authorship of libjson should be credited better, but it is not
-clear -- on SourceForge this is attributed to 'ninja9578', who might
-be 'Jonathan Wallace'.
+If you do use a version of libjson installed into a non-standard
+place, you will probably need to modify your LD_LIBRARY_PATH (or
+DYLD_LIBRARY_PATH on macOS) environment variable.

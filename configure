@@ -2683,7 +2683,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files src/Makevars cleanup"
+ac_config_files="$ac_config_files src/Makevars tools/cleanup"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -3391,7 +3391,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "src/Makevars") CONFIG_FILES="$CONFIG_FILES src/Makevars" ;;
-    "cleanup") CONFIG_FILES="$CONFIG_FILES cleanup" ;;
+    "tools/cleanup") CONFIG_FILES="$CONFIG_FILES tools/cleanup" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -3841,4 +3841,5 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+mv tools/cleanup .
 chmod +x cleanup

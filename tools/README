@@ -1,0 +1,5 @@
+Include various scripts included by DTL in the package to copy over
+libjson sources.
+
+Further corrections were needed, and top-level files/dirs have been moved.
+

@@ -22,6 +22,19 @@ protected:														\
 	TYPE val;													\
 }
 
+// Empty arguments are not allowed in C++98
+#define json_global_decl0(TYPE, NAME)						\
+class jsonSingleton ## NAME {									\
+public:															\
+	inline static TYPE & getValue() json_nothrow {				\
+		static jsonSingleton ## NAME single;					\
+		return single.val;										\
+	}															\
+protected:														\
+	inline jsonSingleton ## NAME() json_nothrow {}	\
+	TYPE val;													\
+}
+
 #define json_global_decl_strconfig(TYPE, NAME, VALUE)			\
 class jsonSingleton ## NAME {									\
 public:															\
@@ -40,8 +53,8 @@ protected:														\
 #define json_global(NAME) jsonSingleton ## NAME::getValue()
 
 #include <string>
-json_global_decl(json_string, EMPTY_JSON_STRING, );
-json_global_decl(std::string, EMPTY_STD_STRING, );
+json_global_decl0(json_string, EMPTY_JSON_STRING);
+json_global_decl0(std::string, EMPTY_STD_STRING);
 
 json_global_decl(json_string, CONST_TRUE, JSON_TEXT("true"));
 json_global_decl(json_string, CONST_FALSE, JSON_TEXT("false"));
