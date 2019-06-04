@@ -1,10 +1,10 @@
-e8aedcdcc7495d6c93a07324bf08565f *DESCRIPTION
+73d9c898d09b760ceba7ec44674e3558 *DESCRIPTION
 b62b1f585c709efc28d95f1a4d1e679d *INSTALL
 a1fa14f88468d10a369839693b6a487a *LICENSE
 aead78533ed1ae09a7335c8e4ca153f9 *NAMESPACE
 c33e558360f7fbd75d93cad7b6126002 *R/asVars.R
 53e1a1c9a8cef993e6d697f8cf1e9630 *R/isValid.R
-c5e2586058c121f3ff5a59b98843d316 *R/json.R
+91a5c93d6e41192940bf607555f07d09 *R/json.R
 ebbbd3e4cc3be76cc4a3f07f4c8d8408 *R/readJSON.R
 5a73241d2fea72c12833b7929b058bf7 *R/simpleHandler.R
 8880398bb47430312182c5cb76e6ec00 *R/stream.R
@@ -60,7 +60,7 @@ e1446a79ce7b6db8a5d9a4d138975c8d *src/Makevars.in
 a2b6fe43b257a85f99451cafa3579578 *src/Makevars.win
 9cc3edc8c0e69e052ea2cad8e81ce481 *src/RJSON.c
 e3b2a1612dd63cc1569976b21f098f3b *src/Rlibjson.h
-546fc7e41ae51d798d10b8655b3c8285 *src/init.c
+44f845ef222c7347bb011c8148ba381d *src/init.c
 aaa577ba305fa4f57eecf068cb1b5e70 *src/libjson/Dependencies/libbase64++/libbase64++.h
 056f816c7009991e9f6994ac447b126b *src/libjson/Dependencies/mempool++/mempool.h
 b74bcd7046be393b4b62f5a6a3c86d8c *src/libjson/JSONOptions.h
