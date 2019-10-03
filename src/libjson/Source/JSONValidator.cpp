@@ -79,9 +79,9 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 				    while(isHex(*++ptr)){};
 				    return true;
 				#ifdef JSON_OCTAL
-				    #ifdef __GNUC__
-				    case JSON_TEXT('0') ... JSON_TEXT('7'):  //octal
-				    #else
+				    //#ifdef __GNUC__
+				    //case JSON_TEXT('0') ... JSON_TEXT('7'):  //octal
+				    //#else
 				    case JSON_TEXT('0'):
 				    case JSON_TEXT('1'):
 				    case JSON_TEXT('2'):
@@ -90,16 +90,16 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 				    case JSON_TEXT('5'):
 				    case JSON_TEXT('6'):
 				    case JSON_TEXT('7'):
-				    #endif
+				    //#endif
 					   while((*++ptr >= JSON_TEXT('0')) && (*ptr <= JSON_TEXT('7'))){};
 					   return ((*ptr != JSON_TEXT('8')) && (*ptr != JSON_TEXT('9')));
 				    case JSON_TEXT('8'):
 				    case JSON_TEXT('9'):
 					   break;
 				#else
-				    #ifdef __GNUC__
-					   case JSON_TEXT('0') ... JSON_TEXT('9'):
-				    #else
+				    //#ifdef __GNUC__
+				//	   case JSON_TEXT('0') ... JSON_TEXT('9'):
+				    //#else
 					   case JSON_TEXT('0'):
 					   case JSON_TEXT('1'):
 					   case JSON_TEXT('2'):
@@ -110,13 +110,13 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 					   case JSON_TEXT('7'):
 					   case JSON_TEXT('8'):
 					   case JSON_TEXT('9'):
-				    #endif
+				    //#endif
 				    break;
 				#endif
 			 #else
-				#ifdef __GNUC__
-				    case JSON_TEXT('0') ... JSON_TEXT('9'):
-				#else
+				//#ifdef __GNUC__
+				//    case JSON_TEXT('0') ... JSON_TEXT('9'):
+				//#else
 				    case JSON_TEXT('0'):
 				    case JSON_TEXT('1'):
 				    case JSON_TEXT('2'):
@@ -127,7 +127,7 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 				    case JSON_TEXT('7'):
 				    case JSON_TEXT('8'):
 				    case JSON_TEXT('9'):
-				#endif
+				//#endif
 				    break;
 			 #endif
 			 default:  //just a 0
@@ -155,9 +155,9 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 			 switch(*ptr){
 				case JSON_TEXT('-'):
 				case JSON_TEXT('+'):
-				#ifdef __GNUC__
-				    case JSON_TEXT('0') ... JSON_TEXT('9'):
-				#else
+				//#ifdef __GNUC__
+				//    case JSON_TEXT('0') ... JSON_TEXT('9'):
+				//#else
 				    case JSON_TEXT('0'):
 				    case JSON_TEXT('1'):
 				    case JSON_TEXT('2'):
@@ -168,15 +168,15 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 				    case JSON_TEXT('7'):
 				    case JSON_TEXT('8'):
 				    case JSON_TEXT('9'):
-				#endif
+				//#endif
 				    break;
 				default:
 				    return false;
 			 }
 			 break;
-		  #ifdef __GNUC__
-			 case JSON_TEXT('0') ... JSON_TEXT('9'):
-		  #else
+		  //#ifdef __GNUC__
+			 //case JSON_TEXT('0') ... JSON_TEXT('9'):
+		  //#else
 			 case JSON_TEXT('0'):
 			 case JSON_TEXT('1'):
 			 case JSON_TEXT('2'):
@@ -187,7 +187,7 @@ bool JSONValidator::isValidNumber(const json_char * & ptr) json_nothrow {
 			 case JSON_TEXT('7'):
 			 case JSON_TEXT('8'):
 			 case JSON_TEXT('9'):
-		  #endif
+		  //#endif
 			 break;
 		  default:
 			 return true;

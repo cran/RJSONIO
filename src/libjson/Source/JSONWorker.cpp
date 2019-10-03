@@ -390,9 +390,9 @@ void JSONWorker::SpecialChar(const json_char * & pos, const json_char * const en
 			 res += Hex(++pos);
 			 break;
 
-		  #ifdef __GNUC__
-			 case JSON_TEXT('0') ... JSON_TEXT('7'):
-		  #else
+		  //#ifdef __GNUC__
+		//	 case JSON_TEXT('0') ... JSON_TEXT('7'):
+		  //#else
 			 //octal encoding
 			 case JSON_TEXT('0'):
 			 case JSON_TEXT('1'):
@@ -402,7 +402,7 @@ void JSONWorker::SpecialChar(const json_char * & pos, const json_char * const en
 			 case JSON_TEXT('5'):
 			 case JSON_TEXT('6'):
 			 case JSON_TEXT('7'):
-		  #endif
+		  //#endif
 			 res += FromOctal(pos, end);
 			 break;
 		  default:
