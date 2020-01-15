@@ -57,8 +57,8 @@ Inf in R mapped to Infinity in JSON. This is customizable.
 </li></dt>
 <dd></dd>
 <dt><li>
-Fixed <a href="http://www.omegahat.net/RJSONIO/docs/html/dQuote.html"><code class="rfunc">dQuote()</code></a> to handle empty vectors and not create a vector
-of length 1. This allows <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> to work correctly.
+Fixed <code class="rfunc">dQuote()</code> to handle empty vectors and not create a vector
+of length 1. This allows <code class="rfunc">toJSON()</code> to work correctly.
 Thanks to Murat Tasan for identifying the  larger problem.
 </li></dt>
 <dd></dd>
@@ -186,7 +186,7 @@ Configuration determines version of libjson and adapts compilation flags accordi
 <h2>Version 0.97-0</h2>
 <dl>
 <dt><li>
-Add <a href="http://www.omegahat.net/RJSONIO/docs/html/isValidJSON.html"><code class="rfunc">isValidJSON()</code></a> to test whether the JSON content is
+Add <code class="rfunc">isValidJSON()</code> to test whether the JSON content is
 valid.  Suggested by Jeroen Ooms.
 </li></dt>
 <dd></dd>
@@ -196,7 +196,7 @@ valid.  Suggested by Jeroen Ooms.
 <h2>Version 0.96-0</h2>
 <dl>
 <dt><li>
-Added encoding argument for <a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a> and that encoding is preserved on
+Added encoding argument for <code class="rfunc">fromJSON()</code> and that encoding is preserved on
 the resulting strings. Thanks to Tony Breyal for pointing out the issue.
 </li></dt>
 <dd></dd>
@@ -206,7 +206,7 @@ the resulting strings. Thanks to Tony Breyal for pointing out the issue.
 <h2>Version 0.95-0</h2>
 <dl>
 <dt><li>
-In <a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a>, when <i>nullValue</i> is <b xmlns:c="http://www.C.org"><a href="library/base/html/NA.html">NA</a></b> (the logical NA)
+In <code class="rfunc">fromJSON()</code>, when <i>nullValue</i> is <b xmlns:c="http://www.C.org"><a href="library/base/html/NA.html">NA</a></b> (the logical NA)
 we attempt to simplify vectors with JSON null values.
 </li></dt>
 <dd></dd>
@@ -216,7 +216,7 @@ we attempt to simplify vectors with JSON null values.
 <h2>Version 0.94-0</h2>
 <dl>
 <dt><li>
-Added <i>simplifyWithNames</i> to <a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a> for controlling whether we attempt to collapse
+Added <i>simplifyWithNames</i> to ><code class="rfunc">fromJSON()</code> for controlling whether we attempt to collapse
 collections of values read from JSON if they have names.  This can be used to collapse unnamed
 vectors, but leave named lists that would otherwise be collapsed to vectors.
 </li></dt>
@@ -227,7 +227,7 @@ vectors, but leave named lists that would otherwise be collapsed to vectors.
 <h2>Version 0.93-0</h2>
 <dl>
 <dt><li>
-Added support in fromJSON<a href="http://www.omegahat.net/RJSONIO/docs/html/.html"><code class="rfunc">()</code></a> for collapsing particular types of elements,
+Added support in<<code class="rfunc">fromJSON()</code> for collapsing particular types of elements,
 i.e. logicals, numbers or characters via 
  StrictLogical, StrictNumeric and StrictCharacter.
 This allows "strict" collapsing, but for different types, while leaving others as lists.
@@ -249,7 +249,7 @@ Added to the ability to control whether we simplify the content using simplify =
 <h2>Version 0.91-0</h2>
 <dl>
 <dt><li>
-Added <i>.escapeEscapes</i> to <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> to allow the caller
+Added <i>.escapeEscapes</i> to <code class="rfunc">toJSON()</code> to allow the caller
 to preserve new lines and tabs symbolically or not. Thanks to Antonio Piccolboni for the report about the issue.
 </li></dt>
 <dd></dd>
@@ -259,7 +259,7 @@ to preserve new lines and tabs symbolically or not. Thanks to Antonio Piccolboni
 <h2>Version 0.9-0</h2>
 <dl>
 <dt><li>
-Added <i>.na</i> parameter to the <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> function and methods
+Added <i>.na</i> parameter to the <code class="rfunc">toJSON()</code> function and methods
 so that the caller can control how <b xmlns:c="http://www.C.org"><a href="library/base/html/NA.html">NA</a></b> values are mapped to JSON.
 This defaults to "null" so that the resulting JSON is well-formed.
 However, users should explicitly think  about how <b xmlns:c="http://www.C.org"><a href="library/base/html/NA.html">NA</a></b> values 
@@ -268,7 +268,7 @@ faithfully serialize their data in a meaningful manner.
 </li></dt>
 <dd></dd>
 <dt><li>
-Added a <i>nullValue</i> parameter to <a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a>
+Added a <i>nullValue</i> parameter to <code class="rfunc">fromJSON()</code>
 to allow the caller to provide an R object that will be used
 when we encounter a JSON null value. 
 This can be used for example to map null to <b xmlns:c="http://www.C.org"><a href="library/base/html/NA.html">NA</a></b> in R.
@@ -307,14 +307,14 @@ Corrections to the libjson C/C++ code from Brian Ripley.
 <h2>Version 0.8-0</h2>
 <dl>
 <dt><li>
-Added a <i>.withNames</i> parameter to <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a>
+Added a <i>.withNames</i> parameter to <code class="rfunc">toJSON()</code>
 so that the caller can explicitly control whether an R object with names
 is written as an associative array or as a simple array.
 </li></dt>
 <dd></dd>
 
 <dt><li>
-Added a <i>simplify</i> parameter to <a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a> 
+Added a <i>simplify</i> parameter to <code class="rfunc">fromJSON()</code> 
 that controls whether we collapse lists of homogeneous element types
 to an R vector.
 </li></dt>
@@ -325,7 +325,7 @@ to an R vector.
 <h2>Version 0.7-3</h2>
 <dl>
 <dt><li>
-Added .withNames parameter for <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> which allows the
+Added .withNames parameter for <code class="rfunc">toJSON()</code> which allows the
 caller to control whether we ignore or use any names. Defaults to 
 use the names if they are present.
 </li></dt>
@@ -371,8 +371,8 @@ Next, we will add functionality to customize serialization of <b xmlns:c="http:/
 </li></dt>
 <dd></dd>
 <dt><li>
-Change to the default value of <i>container</i> of <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> so that 
-this is  <i><code>TRUE</code></i> when at the top-level or initial call to <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a>.
+Change to the default value of <i>container</i> of <code class="rfunc">toJSON()</code> so that 
+this is  <i><code>TRUE</code></i> when at the top-level or initial call to <code class="rfunc">toJSON()</code>.
 </li></dt>
 <dd></dd>
 <dt><li>
@@ -441,13 +441,13 @@ preserves the same structure.
 <h2>Version 0.4-0</h2>
 <dl>
 <dt><li>
-<a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a> now uses libjson for the native parsing
+<code class="rfunc">fromJSON()</code> now uses libjson for the native parsing
 and a C routine to transform the resulting tree into R.
 This leads to a considerable speedup in parsing documents,
 approximately a factor of 200 over the customizable, event
 driven mechanism in earlier versions and still available 
-in this package via the <a href="http://www.omegahat.net/RJSONIO/docs/html/basicJSONHandler.html"><code class="rfunc">basicJSONHandler()</code></a>
-function and <a href="http://www.omegahat.net/RJSONIO/docs/html/fromJSON.html"><code class="rfunc">fromJSON()</code></a>.
+in this package via the <code class="rfunc">basicJSONHandler()</code>
+function and <code class="rfunc">fromJSON()</code>.
 </li></dt>
 <dd></dd>
 </dl>
@@ -471,7 +471,7 @@ Tested on Windows.
 
 <h2>Version 0.3-1</h2>
 <dl>
-<dt><li>Convert factors to character vectors in <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a> and then serialize.</li></dt>
+<dt><li>Convert factors to character vectors in <code class="rfunc">toJSON()</code> and then serialize.</li></dt>
 <dd></dd>
 </dl>
 <hr width="50%">
@@ -516,7 +516,7 @@ names on R objects from associative arrays from JSON were in reverse order.
 <dt><li>
 Scalar, by default, values are represented in JSON as scalars and not
 arrays of length 1.  One can control this via the
-<i>container</i> parameter in <a href="http://www.omegahat.net/RJSONIO/docs/html/toJSON.html"><code class="rfunc">toJSON()</code></a>.
+<i>container</i> parameter in <code class="rfunc">toJSON()</code>.
 </li></dt>
 <dd></dd>
 </dl>
