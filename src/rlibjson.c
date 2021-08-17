@@ -17,8 +17,7 @@ R_json_parse(SEXP str)
 void
 jsonErrorHandler(const json_char *foo)
 {
-    PROBLEM  "json error handler: %s", foo
-      ERROR;
+    Rf_error( "json error handler: %s", foo);
 }
 
 SEXP
@@ -75,8 +74,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 {
     
     if (n == NULL){
-        PROBLEM "invalid JSON input"
-	    ERROR;
+        Rf_error("invalid JSON input");
     }
  
     JSONNODE *i;
@@ -102,8 +100,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 	i = json_at(n, ctr);
 
         if (i == NULL){
-            PROBLEM "Invalid JSON Node"
-		ERROR;
+            Rf_error("Invalid JSON Node");
         }
 
 	json_char *node_name = json_name(i);
@@ -152,8 +149,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
 	       int size = sizeof(char) * (len * MB_LEN_MAX + 1);
 	       tmp = (char *)malloc(size);
 	       if (tmp == NULL) {
-                   PROBLEM "Cannot allocate memory"
-                   ERROR;
+                   Rf_error("Cannot allocate memory");
                }
 	       wcstombs(tmp, wtmp, size);
 #else
@@ -209,8 +205,7 @@ processJSONNode(JSONNODE *n, int parentType, int simplify, SEXP nullValue, int s
       }
 	       break;
 	default:
-	    PROBLEM "shouldn't be here"
-		WARN;
+	    Rf_warning("shouldn't be here");
 	    el = R_NilValue;
 	    break;
 	}
@@ -492,8 +487,7 @@ R_jsonPrettyPrint(SEXP r_content, SEXP r_encoding)
     
     node = json_parse(str);
     if(!node) {
-	PROBLEM "couldn't parse the JSON content"
-	    ERROR;
+	Rf_error("couldn't parse the JSON content");
     }
 
     ans = json_write_formatted(node);

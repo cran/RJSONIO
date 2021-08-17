@@ -38,8 +38,7 @@ errorCB(void *ptr)
     }
 #endif
 
-    PROBLEM "failed to parse json at %d",  num
-	ERROR;
+    Rf_error("failed to parse json at %d",  num);
 }
 
 
@@ -156,8 +155,7 @@ R_json_parser_init_from_con(SEXP conCall, SEXP cbCall,
 
     stream = json_new_stream(callback, errorCB, &cb);
     if(!stream) {
-	PROBLEM "Couldn't create json stream"
-	    ERROR;
+	Rf_error("Couldn't create json stream");
     }
 
     cb.stream = stream;
@@ -180,8 +178,7 @@ R_json_parser_init_from_con(SEXP conCall, SEXP cbCall,
 	f = fopen(CHAR(STRING_ELT(conCall, 0)), "r");
 	if(!f) {
 	    json_delete_stream(stream);
-	    PROBLEM "cannot open JSON file %s", CHAR(STRING_ELT(conCall, 0))
-		ERROR;
+	    Rf_error("cannot open JSON file %s", CHAR(STRING_ELT(conCall, 0)));
 	}
 	cb.file = f;
 	    
@@ -246,14 +243,12 @@ R_json_parser_test_stream(SEXP r_filename)
 
     fileptr = fopen(CHAR(STRING_ELT(r_filename, 0)), "r");
     if(!fileptr) {
-	PROBLEM "cannot open file"
-	    ERROR;
+	Rf_error("cannot open file");
     }
 
     stream = json_new_stream(R_json_cb_test_stream, errorCB, NULL);
     if(!stream) {
-	PROBLEM "Couldn't create json stream"
-	    ERROR;
+	Rf_error("Couldn't create json stream");
     }
 
     json_stream_push(stream, "{ \"a\": [1, 2, 3]}[true, false]");
@@ -276,8 +271,7 @@ R_json_parser_test_stream_str(SEXP r_filename)
 
     stream = json_new_stream(R_json_cb_test_stream, errorCB, NULL);
     if(!stream) {
-	PROBLEM "Couldn't create json stream"
-	    ERROR;
+	Rf_error("Couldn't create json stream");
     }
 
     json_stream_push(stream, str);
@@ -296,8 +290,7 @@ R_json_parser_test_stream_chunk(SEXP r_filename)
 
     stream = json_new_stream(R_json_cb_test_stream, errorCB, NULL);
     if(!stream) {
-	PROBLEM "Couldn't create json stream"
-	    ERROR;
+	Rf_error("Couldn't create json stream");
     }
     
     int len = (int)strlen(str), cur = 0, blocksize = 100;
@@ -327,8 +320,7 @@ R_json_parser_test_stream_chunk_con(SEXP r_getData)
 
     stream = json_new_stream(R_json_cb_test_stream, errorCB, NULL);
     if(!stream) {
-	PROBLEM "Couldn't create json stream"
-	    ERROR;
+	Rf_error("Couldn't create json stream");
     }
     
     int n = 0;

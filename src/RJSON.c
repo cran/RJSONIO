@@ -93,8 +93,7 @@ R_readFromJSON(SEXP r_input, SEXP depth, SEXP allowComments, SEXP func, SEXP dat
     } else if(func == R_NilValue)
 	PROTECT(ans = NEW_LIST(1));
     else { /* You what? */
-	PROBLEM "unhandled type of R object as handler function %d", TYPEOF(func)
-	    ERROR;
+	Rf_error("unhandled type of R object as handler function %d", TYPEOF(func));
     }
 
 
@@ -145,16 +144,15 @@ R_json_parse_character(SEXP r_input, SEXP maxChar, struct JSON_parser_struct *pa
         if (!JSON_parser_char(parser, next_char)) {
             delete_JSON_parser(parser);
 	    if(ivals) {
-		PROBLEM "JSON parser error: syntax error, int %d (%d)\n", count, ivals[count] ERROR;
+		Rf_error("JSON parser error: syntax error, int %d (%d)\n", count, ivals[count]);
 	    } else {
-		PROBLEM "JSON parser error: syntax error, byte %d (%c)\n", count, input[count] ERROR;
+		Rf_error("JSON parser error: syntax error, byte %d (%c)\n", count, input[count]);
 	    }
         }
     }
     if (!JSON_parser_done(parser)) {
         delete_JSON_parser(parser);
-	PROBLEM "JSON parser error: syntax error, byte %d\n", count
-	ERROR;
+	Rf_error("JSON parser error: syntax error, byte %d\n", count);
     }
 }
 
@@ -195,8 +193,8 @@ R_json_parse_connection(SEXP r_input, SEXP numLines, struct JSON_parser_struct *
 	    }
 	    if (!JSON_parser_char(parser, next_char)) {
 		delete_JSON_parser(parser);
-		PROBLEM "JSON parser error: syntax error, byte %d (%c)", totalCount, input[count]
-		    ERROR;
+		Rf_error("JSON parser error: syntax error, byte %d (%c)", totalCount, input[count]
+		   );
 	    }
 	}
       }
@@ -209,8 +207,7 @@ R_json_parse_connection(SEXP r_input, SEXP numLines, struct JSON_parser_struct *
     UNPROTECT(1);
     if (!JSON_parser_done(parser)) {
 	delete_JSON_parser(parser);
-	PROBLEM "JSON parser error: syntax error, incomplete content" 
-	    ERROR;
+	Rf_error("JSON parser error: syntax error, incomplete content");
     }
 }
 

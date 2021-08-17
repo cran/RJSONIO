@@ -1,4 +1,4 @@
-b89e00c3a2a58ce606e8cdccf48c91d9 *DESCRIPTION
+0e0f0e93c0d45eca5d4cdac479802c78 *DESCRIPTION
 b62b1f585c709efc28d95f1a4d1e679d *INSTALL
 a1fa14f88468d10a369839693b6a487a *LICENSE
 aead78533ed1ae09a7335c8e4ca153f9 *NAMESPACE
@@ -58,7 +58,7 @@ e51ff172ec45e845a012ae783ea2373d *src/JSON_parser.c
 d925c515d81f1a8b6d14f64648f17078 *src/JSON_parser.h
 e1446a79ce7b6db8a5d9a4d138975c8d *src/Makevars.in
 a2b6fe43b257a85f99451cafa3579578 *src/Makevars.win
-9cc3edc8c0e69e052ea2cad8e81ce481 *src/RJSON.c
+301d89e07fba5d0b751f08bd68e1a0cf *src/RJSON.c
 e3b2a1612dd63cc1569976b21f098f3b *src/Rlibjson.h
 44f845ef222c7347bb011c8148ba381d *src/init.c
 aaa577ba305fa4f57eecf068cb1b5e70 *src/libjson/Dependencies/libbase64++/libbase64++.h
@@ -104,8 +104,8 @@ ac0b7d6b1d16209fa94f0892fb0131fa *src/libjson/Source/internalJSONNode.h
 fd074e2da40ed888fde353fac04e4335 *src/libjson/Source/libjson.cpp
 a99c973379e79b41b1b20db87cf069d2 *src/libjson/bdr
 cdadb655508ef3b18a4409432afb17ee *src/libjson/libjson.h
-8df39f32a91c2046883746604bd2eb14 *src/rlibjson.c
-e03efb26c9219bb5d4abeadd16b8c7b0 *src/rparser.c
+bc2344e292b8e637be5e3aed18e4ecec *src/rlibjson.c
+1eca50ffa7af5c1e2c88cfde957d0fb3 *src/rparser.c
 3af71ca68b848953fc6d24545ce8468e *tests/array.R
 321652a53609a06ad957f506e2d30dff *tests/bigInt.R
 c82f56b6c2340adf3677eb128b15e715 *tests/charNULL.R
