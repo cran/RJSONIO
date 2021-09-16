@@ -23,7 +23,7 @@ var toggleCodeIds = [
 ];
 --></script><p xmlns=""></p>
 <div class="article" title="JavaScript Object Notation (JSON) and R The RJSONIO package"><div class="titlepage"><div><div><h2 class="title"><a id="id36046792"></a>JavaScript Object Notation (JSON) and R
-<br xmlns:xd="http://www.xsldoc.org" xmlns="">The <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> package</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Duncan</span> <span class="surname">Temple Lang</span></h3><div class="affiliation"><span class="orgname">University of California at Davis<br></br></span></div><code class="email">&lt;<a class="email" href="mailto:duncan@r-project.org">duncan@r-project.org</a>&gt;</code></div></div></div><div><div class="abstract" title="Abstract"><p class="title"><strong>Abstract</strong></p><p>
+<br xmlns:xd="http://www.xsldoc.org" xmlns="">The <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> package</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Duncan</span> <span class="surname">Temple Lang</span></h3><div class="affiliation"><span class="orgname">University of California at Davis<br></br></span></div><code class="email">&lt;<a class="email" href="mailto:duncan@r-project.org">duncan@r-project.org</a>&gt;</code></div></div></div><div><div class="abstract" title="Abstract"><p class="title"><strong>Abstract</strong></p><p>
 The JavaScript Object Notation (JSON) format is becoming widely used
 as a means of exchanging data.  It is used in Web Services, client
 server applications and to some extent as a means of serializing data
@@ -44,7 +44,7 @@ Comparison with XML.
 Not a competition, just different purposes and strengths.
 </p><p>
 <em><span class="comment">Basics of the package: <i xmlns="" class="rfunc"><a href="Help//fromJSON.html" title="">fromJSON()</a></i> and
-<i xmlns="" class="rfunc"><a href="Help//toJSON.html" title="">toJSON()</a></i>.</span></em> The <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a>
+<i xmlns="" class="rfunc"><a href="Help//toJSON.html" title="">toJSON()</a></i>.</span></em> The <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a>
 package offers two primary operations - transforming JSON content into
 R objects and serializing R objects to JSON format.  This allows us to
 import and export JSON from R.  The two functions that do this are
@@ -57,21 +57,21 @@ is already in memory.
 </p><p>
 Character encoding
 </p><p>
-Before developing the <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> package, we used <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i>
+Before developing the <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> package, we used <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i>
 [<span class="citation"><a class="biblioref" href="#bib:rjson">rjson</a></span>] when
 serializing R objects into JavaScript code within HTML pages.  This
 worked very well for small objects but was too slow for large objects.
-<a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> solves some of the speed issues, primarily
+<a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> solves some of the speed issues, primarily
 by vectorizing the code that generates the content.  We developed the
-<a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> package to be a direct substitute for
+<a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> package to be a direct substitute for
 <i xmlns=""><a href="https://cran.r-project.org//package=rjson">rjson</a></i> so code that used the latter would not need to be
-changed to use <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a>. So we can think of
-<a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> as a second-generation of
+changed to use <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a>. So we can think of
+<a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> as a second-generation of
 <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> with a focus on efficiency which was not
 warranted when <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> was being developed as means to
 effect entirely new facilities for R.
 </p><p>
-<a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> also changes the approach used to parse
+<a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> also changes the approach used to parse
 JSON content into R. Firstly, it uses a C library -
 <span style="color: red">&lt;proj&gt;libjson&lt;/proj&gt;</span> [<span class="citation"><a class="biblioref" href="#bib:libjson">libjson</a></span>].  This should yield two
 benefits. Firstly, it should be faster than pure interepreted R
@@ -93,7 +93,7 @@ machine to which we are installing the source package.  This means
 that R users can elect to use newer versions of <span style="color: red">&lt;dso&gt;libjson&lt;/dso&gt;</span> but
 do not have to.
 </p><p>
-While <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> acts as a direct replacement
+While <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> acts as a direct replacement
 for <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i>, it also offers additional features and controls.
 </p><p>
 The remainder of this paper is organized as follows.
@@ -130,7 +130,7 @@ Associative arrays are enclosed within <code xmlns="" class="jsVar">{ }</code>.
 Each element is given in the form <code xmlns="" class="jsVar">name: value</code>.
 The <code xmlns="" class="jsVar">name</code> term should be enclosed within quotes.
 Not all JSON parsers insist on this (including <span style="color: red">&lt;dso&gt;libjson&lt;/dso&gt;</span>
-and hence <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a>), but it is good practice
+and hence <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a>), but it is good practice
 to ensure these names are quoted.
 </p><p>
 Each element in an associative or regular  array can be an arbitrary 
@@ -162,7 +162,7 @@ binary content and convert it to text using base-64 encoding
 commonly used to include binary content in email messages.
 There are several implementation of functions 
 that convert to and from base64 encoding in various R packages
-include <i xmlns=""><a href="https://cran.r-project.org/package=caTools">caTools</a></i>, <a xmlns="" href="http://www.omegahat.net/RCurl">RCurl</a>
+include <i xmlns=""><a href="https://cran.r-project.org/package=caTools">caTools</a></i>, <a xmlns="" href="http://www.omegahat.net/RCurl/">RCurl</a>
 and <i xmlns=""><a href="https://cran.r-project.org/package=readMzXmlData">readMzXmlData</a></i>. 
 </p><p>
 While we can easily include binary content in JSON using
@@ -204,7 +204,7 @@ available both via a Web Service API and also
 via serializing their database. The provide this serialization
 in both XML and JSON formats. 
 The data can be downloaded from
-<a class="ulink" href="http://build.kiva.org/" target="_top">http://build.kiva.org/</a>,
+<a class="ulink" href="https://www.kiva.org/build" target="_top">http://build.kiva.org/</a>,
 specifically <a class="ulink" href="http://s3.kiva.org/snapshots/kiva_ds_json.zip" target="_top">http://s3.kiva.org/snapshots/kiva_ds_json.zip</a>.
 We download and extract the files and this produces
 two directories, one for lenders and another for loans.
@@ -526,10 +526,10 @@ We have developed a bi-directional interface between the JavaScript
 interpreter SpiderMonkey used in the Mozilla/Firefox browser.  This
 allows us to pass R objects to JavaScript and vice verse using C-level
 references. However, we can also transfer objects by value between the
-two languages using <a xmlns="" href="http://www.omegahat.net/RJSONIO">RJSONIO</a> with very little
+two languages using <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a> with very little
 infrastructure.
-</p></div><div class="bibliography" title="Bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="id36294317"></a>Bibliography</h2></div></div></div><div class="biblioentry" title="libjson"><a id="bib:libjson"></a><p>[1] <span class="title"><em>libjson</em>. </span><span class="author"><span class="firstname">Johnathan</span> <span class="surname">Wallace</span>. </span><a class="ulink" href="http://libjson.sourceforge.net" target="_top">http://libjson.sourceforge.net</a></p></div><div class="biblioentry" title="The rjson package"><a id="bib:rjson"></a><p>[2] <span class="title"><em>The <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> package</em>. </span><span class="author"><span class="firstname">Alex</span> <span class="surname">Couture-Beil</span>. </span><span class="pubdate">2011-6-26. </span></p></div></div><div class="footnotes"><br></br><hr width="100" align="left"></hr><div class="footnote"><p><sup>[<a id="ftn.id36294174" href="#id36294174" class="para">1</a>] </sup>
-In older versions of <a xmlns="" href="http://www.omegahat.net/RCurl">RCurl</a>, this was returned
-as a binary object. Now, <a xmlns="" href="http://www.omegahat.net/RCurl">RCurl</a> recognizes 
+</p></div><div class="bibliography" title="Bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="id36294317"></a>Bibliography</h2></div></div></div><div class="biblioentry" title="libjson"><a id="bib:libjson"></a><p>[1] <span class="title"><em>libjson</em>. </span><span class="author"><span class="firstname">Johnathan</span> <span class="surname">Wallace</span>. </span><a class="ulink" href="https://libjson.sourceforge.io" target="_top">https://libjson.sourceforge.io</a></p></div><div class="biblioentry" title="The rjson package"><a id="bib:rjson"></a><p>[2] <span class="title"><em>The <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> package</em>. </span><span class="author"><span class="firstname">Alex</span> <span class="surname">Couture-Beil</span>. </span><span class="pubdate">2011-6-26. </span></p></div></div><div class="footnotes"><br></br><hr width="100" align="left"></hr><div class="footnote"><p><sup>[<a id="ftn.id36294174" href="#id36294174" class="para">1</a>] </sup>
+In older versions of <a xmlns="" href="http://www.omegahat.net/RCurl/">RCurl</a>, this was returned
+as a binary object. Now, <a xmlns="" href="http://www.omegahat.net/RCurl/">RCurl</a> recognizes 
 the content type "application/json" as text.
 </p></div></div></div></body></html>

@@ -1,4 +1,5 @@
-AC_INIT(src/rlibjson.c)
+AC_INIT
+AC_CONFIG_SRCDIR([src/rlibjson.c])
 
 AC_ARG_WITH(local-libjson, [use the libjson code that comes with this package rather than 
               looking for an installed version on the system],
@@ -23,22 +24,15 @@ if test -z "$USE_LOCAL" || test "$USE_LOCAL" = "no" ; then
   CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
   CPPFLAGS="$CPPFLAGS -I$LIBJSON_PREFIX/include"
   AC_PROG_CC
-  AC_TRY_COMPILE(
-    [#include <libjson/libjson.h>],
-    [JSONNODE *ptr = json_parse("[1, 3]");],
-    [USE_LOCAL=1; echo "Found system libjson header file libjson.h"], []
-  )
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <libjson/libjson.h>]], [[JSONNODE *ptr = json_parse("[1, 3]");]])],[USE_LOCAL=1; echo "Found system libjson header file libjson.h"],[
+  ])
 
 
  if test -n "$USE_LOCAL" &&  ! test "$USE_LOCAL" = "no"; then
   echo "Trying to link against libjson"
   LIBS="$LIBS -L$LIBJSON_PREFIX/lib -ljson"
-  AC_TRY_LINK(
-     [#include <libjson/libjson.h>],
-     [JSONNODE *ptr = json_parse("[1, 3]");],
-     [USE_LOCAL=1; echo "linked against libjson"],
-     [USE_LOCAL=""; echo "Failed to link against system libjson"]
-  )
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libjson/libjson.h>]], [[JSONNODE *ptr = json_parse("[1, 3]");]])],[USE_LOCAL=1; echo "linked against libjson"],[USE_LOCAL=""; echo "Failed to link against system libjson"
+  ])
  fi
 
 fi
@@ -82,6 +76,7 @@ AC_SUBST(CPP_FILES)
 AC_SUBST(LIBJSON_CFLAGS)
 AC_SUBST(LIBJSON_LIBS)
 
-AC_OUTPUT(src/Makevars tools/cleanup)
+AC_CONFIG_FILES([src/Makevars tools/cleanup])
+AC_OUTPUT
 mv tools/cleanup .
 chmod +x cleanup
