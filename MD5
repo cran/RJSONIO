@@ -1,4 +1,4 @@
-dbf0c5522380e89df4620485ba73b43c *DESCRIPTION
+99f3a41db45f036b48ad2a5af4a89ba0 *DESCRIPTION
 b62b1f585c709efc28d95f1a4d1e679d *INSTALL
 a1fa14f88468d10a369839693b6a487a *LICENSE
 aead78533ed1ae09a7335c8e4ca153f9 *NAMESPACE
@@ -13,14 +13,14 @@ c5033023e19952cfb808728d5c64ca55 *cleanup
 073facf56161bec1993196f1ea00d4aa *configure.ac
 59d73cc5044fb09edd1dcc3c293903a3 *configure.win
 cb4f95ed924d21f56a2997464fbe6666 *inst/doc/Changes
-164ae909e4585052b5f8ee0570b16d5a *inst/doc/Changes.html
+d875379835e7a83d40ef4eb16cf80e4f *inst/doc/Changes.html
 c25900e1e25e7f9a07b4d08be2b8361a *inst/doc/biblio.xml
 a93c327490b3b8bc5e0d62ad0b00495f *inst/doc/fromJSONTimes.rda
 562c3487143d9bd1a2822d91777583d1 *inst/doc/missingValues.Rdb
 301d1cd5ce22eba88ea50cf78dc13c43 *inst/doc/missingValues.html
 ed912b3af684945f6f8ee3bda699b340 *inst/doc/overview.Rdb
 db1aec86ae74a48cd175a36b63c8db9f *inst/doc/overview.bib
-668747fc632131c1660a9e1034ee81fa *inst/doc/overview.html
+6cbb98ecf2c377059427c5c4a921b8ad *inst/doc/overview.html
 90c312cdd98d52f8114700aee7a55062 *inst/doc/overview.pdf
 4f6a68fb2becc7b9789afed8de66caa7 *inst/doc/overview.tex
 c327a752db7b92d14d3f47cb983f7ec5 *inst/doc/performance.R
@@ -104,7 +104,7 @@ ac0b7d6b1d16209fa94f0892fb0131fa *src/libjson/Source/internalJSONNode.h
 fd074e2da40ed888fde353fac04e4335 *src/libjson/Source/libjson.cpp
 a99c973379e79b41b1b20db87cf069d2 *src/libjson/bdr
 cdadb655508ef3b18a4409432afb17ee *src/libjson/libjson.h
-bc2344e292b8e637be5e3aed18e4ecec *src/rlibjson.c
+609914da3db0e13d37cbf13181e1eef5 *src/rlibjson.c
 1eca50ffa7af5c1e2c88cfde957d0fb3 *src/rparser.c
 3af71ca68b848953fc6d24545ce8468e *tests/array.R
 321652a53609a06ad957f506e2d30dff *tests/bigInt.R

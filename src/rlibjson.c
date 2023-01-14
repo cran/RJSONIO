@@ -291,7 +291,7 @@ makeVector(SEXP ans, int len, int type, SEXP nullValue)
 		SET_STRING_ELT(tmp, ctr, LOGICAL(el)[0] == NA_INTEGER ? NA_STRING : mkChar(LOGICAL(el)[0] ? "TRUE" : "FALSE"));
 	    } else if(TYPEOF(el) == REALSXP) {
 		char buf[70];
-		sprintf(buf, "%lf", REAL(el)[0]);
+		snprintf(buf, sizeof(buf), "%lf", REAL(el)[0]);
 		SET_STRING_ELT(tmp, ctr, mkChar(buf));
 	    }
 	}
@@ -361,12 +361,13 @@ int setType(int cur, int newType)
 
 
 SEXP
-R_libjson_version()
+R_libjson_version(void)
 {
     char buf[20];
-    sprintf(buf, "%d.%d-%d", (int) __LIBJSON_MAJOR__,
-    	                     (int) __LIBJSON_MINOR__,
-	                     (int) __LIBJSON_PATCH__);
+    snprintf(buf, sizeof(buf),
+	     "%d.%d-%d", (int) __LIBJSON_MAJOR__,
+	     (int) __LIBJSON_MINOR__,
+	     (int) __LIBJSON_PATCH__);
 
     return(ScalarString(mkChar(buf)));
 }
