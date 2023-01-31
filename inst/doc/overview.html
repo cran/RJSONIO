@@ -65,7 +65,7 @@ worked very well for small objects but was too slow for large objects.
 by vectorizing the code that generates the content.  We developed the
 <a xmlns="" href="https://www.omegahat.net/RJSONIO/">RJSONIO</a> package to be a direct substitute for
 <i xmlns=""><a href="https://cran.r-project.org//package=rjson">rjson</a></i> so code that used the latter would not need to be
-changed to use <a xmlns="" href="http://www.omegahat.net/RJSONIO/">RJSONIO</a>. So we can think of
+changed to use <a xmlns="" href="https://www.omegahat.net/RJSONIO/">RJSONIO</a>. So we can think of
 <a xmlns="" href="https://www.omegahat.net/RJSONIO/">RJSONIO</a> as a second-generation of
 <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> with a focus on efficiency which was not
 warranted when <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> was being developed as means to
@@ -145,7 +145,7 @@ However, it might also map to an empty vector.
 </p><p>
 The format is very simple Note that it does not have support for 
 mathematical terms such as infinity, pi, e.
-Nor does it have the notion of a <b xmlns:r="http://www.r-project.org" xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.net" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org" xmlns=""><a href="library/base/html/NA.html">NA</a></b>, the missing value in R.
+Nor does it have the notion of a <b xmlns:r="https://www.r-project.org" xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="https://www.omegahat.net" xmlns:bioc="https://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org" xmlns=""><a href="library/base/html/NA.html">NA</a></b>, the missing value in R.
 </p><p>
 Valid JSON requires that the top-level content be either
 an array or an object. This means that simple literal values
@@ -162,7 +162,7 @@ binary content and convert it to text using base-64 encoding
 commonly used to include binary content in email messages.
 There are several implementation of functions 
 that convert to and from base64 encoding in various R packages
-include <i xmlns=""><a href="https://cran.r-project.org/package=caTools">caTools</a></i>, <a xmlns="" href="http://www.omegahat.net/RCurl/">RCurl</a>
+include <i xmlns=""><a href="https://cran.r-project.org/package=caTools">caTools</a></i>, <a xmlns="" href="https://www.omegahat.net/RCurl/">RCurl</a>
 and <i xmlns=""><a href="https://cran.r-project.org/package=readMzXmlData">readMzXmlData</a></i>. 
 </p><p>
 While we can easily include binary content in JSON using
@@ -280,7 +280,7 @@ The lenders data can be read in the same manner. It has a simpler
 structure with all but one variable for each lender
 being a simple scalar. Not all lenders have all variables so
 we have a ragged array again. However, we could easily put this
-data into rectangular form by having <b xmlns:r="http://www.r-project.org" xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.net" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org" xmlns=""><a href="library/base/html/NA.html">NA</a></b> values.
+data into rectangular form by having <b xmlns:r="https://www.r-project.org" xmlns:s="http://cm.bell-labs.com/stat/S4" xmlns:py="http://www.python.org" xmlns:perl="http://www.perl.org" xmlns:c="http://www.C.org" xmlns:vb="http://www.visualbasic.com" xmlns:omegahat="http://www.omegahat.net" xmlns:bioc="http://www.bioconductor.org" xmlns:java="http://www.java.com" xmlns:sql="http://www.sql.org" xmlns=""><a href="library/base/html/NA.html">NA</a></b> values.
 </p><p>
 Comparison with XML and speed for overall processing
 or XPath to get sub-elements.
@@ -529,7 +529,7 @@ references. However, we can also transfer objects by value between the
 two languages using <a xmlns="" href="https://www.omegahat.net/RJSONIO/">RJSONIO</a> with very little
 infrastructure.
 </p></div><div class="bibliography" title="Bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="id36294317"></a>Bibliography</h2></div></div></div><div class="biblioentry" title="libjson"><a id="bib:libjson"></a><p>[1] <span class="title"><em>libjson</em>. </span><span class="author"><span class="firstname">Johnathan</span> <span class="surname">Wallace</span>. </span><a class="ulink" href="https://libjson.sourceforge.io" target="_top">https://libjson.sourceforge.io</a></p></div><div class="biblioentry" title="The rjson package"><a id="bib:rjson"></a><p>[2] <span class="title"><em>The <i xmlns=""><a href="https://cran.r-project.org/package=rjson">rjson</a></i> package</em>. </span><span class="author"><span class="firstname">Alex</span> <span class="surname">Couture-Beil</span>. </span><span class="pubdate">2011-6-26. </span></p></div></div><div class="footnotes"><br></br><hr width="100" align="left"></hr><div class="footnote"><p><sup>[<a id="ftn.id36294174" href="#id36294174" class="para">1</a>] </sup>
-In older versions of <a xmlns="" href="http://www.omegahat.net/RCurl/">RCurl</a>, this was returned
-as a binary object. Now, <a xmlns="" href="http://www.omegahat.net/RCurl/">RCurl</a> recognizes 
+In older versions of <a xmlns="" href="https://www.omegahat.net/RCurl/">RCurl</a>, this was returned
+as a binary object. Now, <a xmlns="" href="https://www.omegahat.net/RCurl/">RCurl</a> recognizes 
 the content type "application/json" as text.
 </p></div></div></div></body></html>

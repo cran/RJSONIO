@@ -1,4 +1,4 @@
-99f3a41db45f036b48ad2a5af4a89ba0 *DESCRIPTION
+e6905a81f650bd21dd7dbcd412ea0599 *DESCRIPTION
 b62b1f585c709efc28d95f1a4d1e679d *INSTALL
 a1fa14f88468d10a369839693b6a487a *LICENSE
 aead78533ed1ae09a7335c8e4ca153f9 *NAMESPACE
@@ -20,7 +20,7 @@ a93c327490b3b8bc5e0d62ad0b00495f *inst/doc/fromJSONTimes.rda
 301d1cd5ce22eba88ea50cf78dc13c43 *inst/doc/missingValues.html
 ed912b3af684945f6f8ee3bda699b340 *inst/doc/overview.Rdb
 db1aec86ae74a48cd175a36b63c8db9f *inst/doc/overview.bib
-6cbb98ecf2c377059427c5c4a921b8ad *inst/doc/overview.html
+ace023d10afd0a24433d6680b0704fdd *inst/doc/overview.html
 90c312cdd98d52f8114700aee7a55062 *inst/doc/overview.pdf
 4f6a68fb2becc7b9789afed8de66caa7 *inst/doc/overview.tex
 c327a752db7b92d14d3f47cb983f7ec5 *inst/doc/performance.R
@@ -61,7 +61,7 @@ a2b6fe43b257a85f99451cafa3579578 *src/Makevars.win
 301d89e07fba5d0b751f08bd68e1a0cf *src/RJSON.c
 e3b2a1612dd63cc1569976b21f098f3b *src/Rlibjson.h
 44f845ef222c7347bb011c8148ba381d *src/init.c
-aaa577ba305fa4f57eecf068cb1b5e70 *src/libjson/Dependencies/libbase64++/libbase64++.h
+1574aebf302ed6756a392f9026e65949 *src/libjson/Dependencies/libbase64++/libbase64++.h
 056f816c7009991e9f6994ac447b126b *src/libjson/Dependencies/mempool++/mempool.h
 b74bcd7046be393b4b62f5a6a3c86d8c *src/libjson/JSONOptions.h
 cebe661e002daaeae68254a3c8b7a7df *src/libjson/License.txt

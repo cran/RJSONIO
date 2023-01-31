@@ -67,11 +67,11 @@ namespace libbase64 {
 		}
 	#endif
 	
-	//characters used in convertions
+	//characters used in conversions
 	namespace libbase64_characters {
 		template<typename T>
 		inline static const T * getChar64(void){
-			static const T char64s[64] = {
+			static const T char64s[65] = {
 				(T)'A', (T)'B', (T)'C', (T)'D', (T)'E', (T)'F', (T)'G', (T)'H', (T)'I', (T)'J', (T)'K', (T)'L', (T)'M',
 				(T)'N', (T)'O', (T)'P', (T)'Q', (T)'R', (T)'S', (T)'T', (T)'U', (T)'V', (T)'W', (T)'X', (T)'Y', (T)'Z',
 				(T)'a', (T)'b', (T)'c', (T)'d', (T)'e', (T)'f', (T)'g', (T)'h', (T)'i', (T)'j', (T)'k', (T)'l', (T)'m',
