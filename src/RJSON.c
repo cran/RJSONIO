@@ -299,7 +299,7 @@ convertJSONValueToR(int type, const struct JSON_value_struct *value, cetype_t en
 int
 R_json_testNativeCallback(void* ctx, int type, const struct JSON_value_struct* value)
 {
-    REprintf("%d (ctx = %p, value = %p)\n", type, ctx, value);
+    REprintf("%d (ctx = %p, value = %p)\n", type, ctx, (void *)value);
     return(1);
 }
 

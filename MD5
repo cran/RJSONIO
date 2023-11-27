@@ -1,4 +1,4 @@
-e6905a81f650bd21dd7dbcd412ea0599 *DESCRIPTION
+960bb36f20029e23d411e1104f78127f *DESCRIPTION
 b62b1f585c709efc28d95f1a4d1e679d *INSTALL
 a1fa14f88468d10a369839693b6a487a *LICENSE
 aead78533ed1ae09a7335c8e4ca153f9 *NAMESPACE
@@ -21,7 +21,7 @@ a93c327490b3b8bc5e0d62ad0b00495f *inst/doc/fromJSONTimes.rda
 ed912b3af684945f6f8ee3bda699b340 *inst/doc/overview.Rdb
 db1aec86ae74a48cd175a36b63c8db9f *inst/doc/overview.bib
 ace023d10afd0a24433d6680b0704fdd *inst/doc/overview.html
-90c312cdd98d52f8114700aee7a55062 *inst/doc/overview.pdf
+6b9bcc9a6e156470ea993c40da9c4992 *inst/doc/overview.pdf
 4f6a68fb2becc7b9789afed8de66caa7 *inst/doc/overview.tex
 c327a752db7b92d14d3f47cb983f7ec5 *inst/doc/performance.R
 bf3505d3a31e5c3b6e3d445e9672ab3b *inst/doc/timings.docx
@@ -58,7 +58,7 @@ e51ff172ec45e845a012ae783ea2373d *src/JSON_parser.c
 d925c515d81f1a8b6d14f64648f17078 *src/JSON_parser.h
 e1446a79ce7b6db8a5d9a4d138975c8d *src/Makevars.in
 a2b6fe43b257a85f99451cafa3579578 *src/Makevars.win
-301d89e07fba5d0b751f08bd68e1a0cf *src/RJSON.c
+dc8c21363c53e1f232721f9782394335 *src/RJSON.c
 e3b2a1612dd63cc1569976b21f098f3b *src/Rlibjson.h
 44f845ef222c7347bb011c8148ba381d *src/init.c
 1574aebf302ed6756a392f9026e65949 *src/libjson/Dependencies/libbase64++/libbase64++.h
