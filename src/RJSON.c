@@ -70,7 +70,7 @@ R_readFromJSON(SEXP r_input, SEXP depth, SEXP allowComments, SEXP func, SEXP dat
 	    ptr = REAL(tmp);
 	    break;
 	case VECSXP:
-	    ptr = VECTOR_PTR(tmp);
+	    ptr = (void *) VECTOR_PTR_RO(tmp);
 	    break;
 	default:
 	    ptr = NULL;

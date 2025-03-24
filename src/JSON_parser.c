@@ -58,6 +58,7 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "JSON_parser.h"
 #include "ConvertUTF.h"
@@ -67,9 +68,10 @@ SOFTWARE.
 #	pragma warning(disable:4996) // unsecure sscanf
 #endif
 
-
+/*
 #define true  1
 #define false 0
+*/
 #define __   -1     /* the universal error code */
 
 /* values chosen so that the object size is approx equal to one page (4K) */
