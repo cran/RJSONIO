@@ -2,6 +2,7 @@
 
 #include <Rinternals.h>
 #include <Rdefines.h>
+#include <Rversion.h>
 
 #include "ConvertUTF.h"
 
@@ -70,7 +71,11 @@ R_readFromJSON(SEXP r_input, SEXP depth, SEXP allowComments, SEXP func, SEXP dat
 	    ptr = REAL(tmp);
 	    break;
 	case VECSXP:
-	    ptr = (void *) VECTOR_PTR_RO(tmp);
+#if R_VERSION >= R_Version(4,5,0)
+ 	    ptr = (void *) VECTOR_PTR_RO(tmp);
+#else
+	    ptr = (void *) VECTOR_PTR(tmp);
+#endif
 	    break;
 	default:
 	    ptr = NULL;

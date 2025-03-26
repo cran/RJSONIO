@@ -1,4 +1,4 @@
-30ff83f2765389e37b4ad6a13e932a55 *DESCRIPTION
+f9fa574ddf2c643e7955dfcfb709cc5a *DESCRIPTION
 b62b1f585c709efc28d95f1a4d1e679d *INSTALL
 a1fa14f88468d10a369839693b6a487a *LICENSE
 aead78533ed1ae09a7335c8e4ca153f9 *NAMESPACE
@@ -44,7 +44,7 @@ e39a910ed997b6719b239fb75f8c4363 *src/ConvertUTF.h
 d925c515d81f1a8b6d14f64648f17078 *src/JSON_parser.h
 e1446a79ce7b6db8a5d9a4d138975c8d *src/Makevars.in
 a2b6fe43b257a85f99451cafa3579578 *src/Makevars.win
-75bf7758f4601db07e0d8060a8687aed *src/RJSON.c
+5e112809a3dfde5213acbb0f06d7f8a6 *src/RJSON.c
 e3b2a1612dd63cc1569976b21f098f3b *src/Rlibjson.h
 44f845ef222c7347bb011c8148ba381d *src/init.c
 1574aebf302ed6756a392f9026e65949 *src/libjson/Dependencies/libbase64++/libbase64++.h
