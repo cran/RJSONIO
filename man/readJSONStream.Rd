@@ -45,8 +45,10 @@ readJSONStream(con, cb = NULL, simplify = Strict, nullValue = NULL,
 \references{
   libjson and the \code{JSONSTREAM} facilities.
 }
-\author{Duncan Temple Lang}
-
+\author{
+  Duncan Temple Lang \email{duncan@wald.ucdavis.edu} \\
+  Yaoxiang Li \email{liyaoxiang@outlook.com}
+}
 \seealso{
   \code{\link{fromJSON}} and its methods,
   specifically the method for a connection.

@@ -139,8 +139,10 @@ fromJSON(content, handler = NULL,
 \references{
   \url{http://www.json.org}
 }
-\author{Duncan Temple Lang <duncan@wald.ucdavis.edu}
-
+\author{
+  Duncan Temple Lang \email{duncan@wald.ucdavis.edu} \\
+  Yaoxiang Li \email{liyaoxiang@outlook.com}
+}
 \seealso{
   \code{\link{toJSON}}
   the non-exported collector function

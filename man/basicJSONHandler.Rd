@@ -25,9 +25,9 @@ basicJSONHandler(default.size = 100, simplify = FALSE)
 }
 %\references{}
 \author{
-Duncan Temple Lang
+  Duncan Temple Lang \email{duncan@wald.ucdavis.edu} \\
+  Yaoxiang Li \email{liyaoxiang@outlook.com}
 }
-
 \seealso{
  \code{\link{fromJSON}} and the handler argument.
 }

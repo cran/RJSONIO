@@ -32,7 +32,10 @@ asJSVars(..., .vars = list(...), qualifier = character(), types = character())
   A character vector of length 1 giving the variable declarations and
   initializations.
 }
-\author{Duncan Temple Lang <duncan@wald.ucdavis.edu>}
+\author{
+  Duncan Temple Lang \email{duncan@wald.ucdavis.edu} \\
+  Yaoxiang Li \email{liyaoxiang@outlook.com}
+}
 
 \seealso{
  \code{\link{toJSON}}  

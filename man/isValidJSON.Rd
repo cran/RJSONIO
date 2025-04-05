@@ -31,8 +31,8 @@ isValidJSON(content, asText = inherits(content, "AsIs"), ...)
  libjson
 }
 \author{
-  Duncan Temple Lang.
-  Functionality suggested by Jeroen Ooms.
+  Duncan Temple Lang \email{duncan@wald.ucdavis.edu} \\
+  Yaoxiang Li \email{liyaoxiang@outlook.com}
 }
 
 \seealso{
